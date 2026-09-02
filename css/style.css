@@ -247,19 +247,27 @@ body {
   /* 左栏输入面板更紧凑 */
   .input-panel .row { margin: 6px 0; }
 
-  /* 盘面右栏主区：允许比竖版更大 */
-  .chart-wrap { justify-content: center; padding: 6px 2px 14px; }
-  .grid { width: min(860px, 100%); }
+  /* 盘面右栏主区：宽度随视口高度自适应，保证 盘面+时间轴 一屏放下 */
+  .chart-wrap { justify-content: center; padding: 4px 2px 8px; }
+  .grid { width: min(600px, calc(100vh - 205px)); }
 
-  /* 大格盘面字号微调（横版格子 ~210px，星曜更大更清晰） */
-  .cell { padding: 7px 8px; }
-  .cell .p-name { font-size: 16px; }
-  .cell .p-gz { font-size: 12px; }
-  .star.major { font-size: 18px; }
-  .star.minor { font-size: 11.5px; }
-  .center-area .c-ju { font-size: 26px; }
-  .center-area .c-sub { font-size: 12.5px; }
-  .center-area .c-mz { font-size: 14px; }
+  /* 盘格字号（横版盘 ~135-210px/格，随视口自适应） */
+  .cell { padding: 6px 7px; }
+  .cell .p-name { font-size: 15px; }
+  .cell .p-gz { font-size: 11.5px; }
+  .star.major { font-size: 16.5px; }
+  .star.minor { font-size: 11px; }
+  .center-area .c-ju { font-size: 24px; }
+  .center-area .c-sub { font-size: 12px; }
+  .center-area .c-mz { font-size: 13px; }
+
+  /* 右栏时间轴/详情更紧凑，配合一屏 */
+  .timeline-panel { padding: 8px 14px; margin: 4px 0 10px; }
+  .timeline-title { margin-bottom: 5px; }
+  .dx-item { padding: 4px 6px; }
+  .dx-item .dx-gz { font-size: 14px; }
+  .detail-panel { padding: 10px 14px; min-height: 0; }
+  .detail-title { margin-bottom: 4px; }
 
   /* 左栏四柱头：纵向更舒展 */
   #resultHead { flex-direction: column; align-items: flex-start; }
