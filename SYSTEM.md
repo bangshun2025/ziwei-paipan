@@ -14,7 +14,7 @@
 |------|-----|
 | 当前版本 | **v0.1.0**（已实现，未发布） |
 | 版本号位置 | index.html 头部 `<!-- vX.Y.Z -->` |
-| 发布状态 | **未发布**（无 tag、无 GitHub Pages；发布脚本已就位，待授权执行） |
+| 发布状态 | **Git 化完成**（df05d97 @ main，已 push origin）：远程 ziwei-paipan + Pages（bangshun2025.github.io/ziwei-paipan）已上线；正式 tag 与公测发布待授权 |
 | 口径裁决 | D-1~D-7 已由邦顺裁决采纳默认（2026-09-02），见 ALGORITHM.md §16 |
 | 质量状态 | ✅ v0.1.0 通过验收：锚点 1242 + cases 45 + 自检 88 = 1375 断言全过（test/report.md） |
 
@@ -22,7 +22,7 @@
 
 | 版本 | 日期 | 内容 | 状态 |
 |------|------|------|------|
-| v0.1.0 | 2026-09-02 | 首版：核心链路（十二宫/十四主星/六吉六煞/四化/命身宫/五行局/大限）+ UI 渲染 + 锚点验收（1375 断言全过，修复 P1 辅星常量等 4 缺陷）+ 发布脚手架 | 已实现（未发布） |
+| v0.1.0 | 2026-09-02 | 首版：核心链路（十二宫/十四主星/六吉六煞/四化/命身宫/五行局/大限）+ UI 渲染 + 锚点验收（1375 断言全过，修复 P1 辅星常量等 4 缺陷）+ 发布脚手架 + Git 化 | 已实现（git 已 push，正式 tag 待授权） |
 
 ## 四、模块地图
 
@@ -36,9 +36,9 @@
 | 测试 | test/ | anchors/（12 盘 iztro 锚点 JSON）+ run_anchor_tests.js（1242）+ run_case_tests.js（45）+ cases.md + report.md | ✅ 已实现 |
 | 测评手册 | docs/TEST_全量测评手册.md | L1 锚点 1242 / L2 cases 45 / L3 自检 88 / L4 人工冒烟 分层手册（v1.0） | ✅ 已就位 |
 | 发布 | scripts/ | check-release.sh（一致性校验）、publish-online.sh（tag→push→部署验证，--exec 前自动 .bak 备份） | ✅ 已就位（未执行） |
-| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1242 + cases 45 + Puppeteer 自检 88（git init 后生效） | ✅ 已就位（待 git init） |
+| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1242 + cases 45 + Puppeteer 自检 88 | ✅ 已生效（push 触发 #1 通过） |
 | 复盘 | docs/RETRO_v0.1.0_复盘.md | v0.1.0 全周期复盘 + 改进项 L1-L8（供下版本 PRD 承接） | ✅ 已就位 |
-| Git 基线 | docs/GIT_v0.1.0_baseline.md | git 未初始化现状 + §3.1 初始化步骤 + 回滚方法 | ✅ 已就位 |
+| Git 基线 | docs/GIT_v0.1.0_baseline.md | git 化现状（df05d97 已 push）+ 初始化步骤留档 + 回滚方法 | ✅ 已 git 化（2026-09-02） |
 
 > 实现约束见 `docs/ADR_v0.1.0_紫微斗数架构.md`
 > （AD-01~AD-08：多文件模块化、历法复用八字经验、全书派口径、争议默认值、iztro 双轨验证、按版本归档、core/ui 分离、v1 边界）。
