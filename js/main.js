@@ -484,6 +484,7 @@
       state.lastChart = chart;
       window.__CHART__ = chart;
       els.resultPanel.classList.remove('hidden');
+      if (els.resultHead) els.resultHead.classList.remove('hidden');
       window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, null);
       // 滚到结果
       if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });

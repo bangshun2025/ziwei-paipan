@@ -222,3 +222,52 @@ body {
   .result-head .pillars { font-size: 16px; }
   .btn-main { width: 100%; }
 }
+
+/* ============================================================
+ * 横版布局（≥1000px，参照奇门两栏范式）
+ * 左栏：输入面板 + 结果头（四柱/农历）；右栏：盘面 + 大限 + 详情
+ * ============================================================ */
+@media (min-width: 1000px) {
+  .wrap {
+    max-width: 1360px;
+    display: grid;
+    grid-template-columns: 400px minmax(0, 1fr);
+    grid-template-areas:
+      "input  result"
+      "head   result";
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 18px;
+    row-gap: 14px;
+    align-items: start;
+  }
+  .input-panel { grid-area: input; margin-bottom: 0; }
+  #resultHead  { grid-area: head; margin-bottom: 0; }
+  #resultPanel { grid-area: result; min-width: 0; }
+
+  /* 左栏输入面板更紧凑 */
+  .input-panel .row { margin: 6px 0; }
+
+  /* 盘面右栏主区：允许比竖版更大 */
+  .chart-wrap { justify-content: center; padding: 6px 2px 14px; }
+  .grid { width: min(860px, 100%); }
+
+  /* 大格盘面字号微调（横版格子 ~210px，星曜更大更清晰） */
+  .cell { padding: 7px 8px; }
+  .cell .p-name { font-size: 16px; }
+  .cell .p-gz { font-size: 12px; }
+  .star.major { font-size: 18px; }
+  .star.minor { font-size: 11.5px; }
+  .center-area .c-ju { font-size: 26px; }
+  .center-area .c-sub { font-size: 12.5px; }
+  .center-area .c-mz { font-size: 14px; }
+
+  /* 左栏四柱头：纵向更舒展 */
+  #resultHead { flex-direction: column; align-items: flex-start; }
+  #resultHead .pillars { font-size: 22px; letter-spacing: 3px; }
+  #resultHead .lunar-line { font-size: 14px; }
+  #resultHead .note-line { font-size: 11.5px; line-height: 1.6; }
+
+  /* 底部口径说明与两栏容器对齐 */
+  .foot-note { max-width: 1360px; }
+}
+
