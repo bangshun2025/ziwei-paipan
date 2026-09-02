@@ -1,0 +1,68 @@
+# 紫微斗数排盘 · 回归测试 CI
+# 每次 push 到 main 时自动运行；参照八字 .github/workflows/test.yml，
+# 但紫微锚点/cases 为 node CLI 测试（无需浏览器），仅 ?test=1 浏览器自检用 Puppeteer。
+# 就绪说明：运行目录完成 git init 并推送 ziwei-paipan 仓库后自动生效（发布链路方案 §3.1）。
+
+name: 回归测试
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 1. 发布前一致性校验（版本一致性 / JS 语法 / 结构 id / 引用完整性）
+      - name: check-release 一致性校验
+        run: bash scripts/check-release.sh
+
+      # 2. L1 锚点全字段回归（1242 断言，iztro 基准）
+      - name: L1 锚点回归（run_anchor_tests.js）
+        run: node test/run_anchor_tests.js
+
+      # 3. L2 cases 定向（45 断言）
+      - name: L2 cases 定向（run_case_tests.js）
+        run: node test/run_case_tests.js
+
+      # 4. L3 内嵌自检（?test=1 共 88 条；node CLI 无法覆盖，用 Puppeteer 加载页面）
+      - name: 安装 Puppeteer
+        run: npm install puppeteer
+
+      - name: 启动本地服务器
+        run: |
+          python3 -m http.server 8765 &
+          sleep 2
+        shell: bash
+
+      - name: L3 浏览器自检（index.html?test=1 → 88 条 ALL PASS）
+        run: |
+          node -e "
+          const puppeteer = require('puppeteer');
+          (async () => {
+            const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+            const page = await browser.newPage();
+            await page.goto('http://localhost:8765/index.html?test=1', { waitUntil: 'networkidle0' });
+            // 等待自检完成（window.__TEST_RESULT__ 出现）
+            await page.waitForFunction(() => window.__TEST_RESULT__ !== undefined, { timeout: 60000 });
+            const r = await page.evaluate(() => window.__TEST_RESULT__);
+            console.log('?test=1 自检: total=' + r.total + ' passed=' + r.passed + ' failed=' + r.failed);
+            if (r.failed > 0) console.log(r.fails.join('\n'));
+            await browser.close();
+            if (r.total === 88 && r.passed === 88 && r.failed === 0) {
+              console.log('✅ 全部回归测试通过（check-release + 1242 + 45 + 88）');
+              process.exit(0);
+            } else {
+              console.error('❌ 回归测试失败');
+              process.exit(1);
+            }
+          })();
+          "

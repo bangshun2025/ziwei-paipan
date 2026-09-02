@@ -1,0 +1,132 @@
+<!-- 紫微斗数排盘 v0.1.0 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫微斗数排盘 v0.1.0</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="testOut" class="hidden"></div>
+
+<div id="app" class="hidden">
+  <header class="app-top">
+    <h1>紫微斗数排盘<span class="ver">v0.1.0</span></h1>
+    <span class="spacer"></span>
+    <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
+  </header>
+
+  <main class="wrap">
+    <!-- ===== 输入面板 ===== -->
+    <section class="panel input-panel">
+      <div class="row">
+        <span class="lbl">历法</span>
+        <span class="seg" id="segType">
+          <button type="button" data-type="solar" class="active">公历</button>
+          <button type="button" data-type="lunar">农历</button>
+        </span>
+        <select id="fYear"></select><span>年</span>
+        <select id="fMonth"></select><span>月</span>
+        <span class="leap-box" id="leapWrap"><input type="checkbox" id="fLeap"><label for="fLeap" id="fLeapLbl">闰月</label></span>
+        <select id="fDay"></select><span>日</span>
+        <span class="err hidden" id="dateErr"></span>
+      </div>
+
+      <div class="row">
+        <span class="lbl">出生时辰</span>
+        <span class="shichen-chips" id="chipShichen"></span>
+        <span class="seg" id="segAmPm" style="display:none"></span>
+      </div>
+
+      <div class="row">
+        <span class="lbl">性别</span>
+        <span class="radio-group">
+          <label><input type="radio" name="gender" value="M" checked> 男</label>
+          <label><input type="radio" name="gender" value="F"> 女</label>
+        </span>
+        <span class="lbl">出生地</span>
+        <select id="fCity">
+          <option value="">— 未选择（按北京时间）—</option>
+          <option value="116.4">北京（东经116.4°）</option>
+          <option value="121.5">上海（东经121.5°）</option>
+          <option value="113.3">广州（东经113.3°）</option>
+          <option value="114.1">深圳（东经114.1°）</option>
+          <option value="104.1">成都（东经104.1°）</option>
+          <option value="106.5">重庆（东经106.5°）</option>
+          <option value="108.9">西安（东经108.9°）</option>
+          <option value="118.8">南京（东经118.8°）</option>
+          <option value="120.2">杭州（东经120.2°）</option>
+          <option value="114.3">武汉（东经114.3°）</option>
+          <option value="123.4">沈阳（东经123.4°）</option>
+          <option value="126.6">哈尔滨（东经126.6°）</option>
+          <option value="87.6">乌鲁木齐（东经87.6°）</option>
+          <option value="91.1">拉萨（东经91.1°）</option>
+          <option value="CUSTOM">自定义经度…</option>
+        </select>
+        <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" style="width:110px">
+        <label class="lbl" style="margin-left:6px"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</label>
+      </div>
+
+      <div class="row">
+        <button type="button" class="adv-toggle" id="btnAdv">口径开关（默认=宪法）</button>
+      </div>
+      <div class="adv-box" id="advBox">
+        <div class="adv-row">
+          <label class="lbl">晚子时</label>
+          <select id="advLateZi">
+            <option value="forward">归次日（默认）</option>
+            <option value="current">归当日</option>
+          </select>
+          <label class="lbl">闰月</label>
+          <select id="advFixLeap">
+            <option value="1">十五分界（默认：下半月按下月安星）</option>
+            <option value="0">不折叠（闰月一律按本月安星）</option>
+          </select>
+          <label class="lbl">年界</label>
+          <select id="advYearDivide">
+            <option value="normal">正月初一（默认）</option>
+            <option value="exact" disabled title="立春年界 v1 未实现">立春（暂不可用）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-main" id="btnCalc">开始排盘</button>
+        <span class="err hidden" id="calcErr"></span>
+      </div>
+    </section>
+
+    <!-- ===== 结果区 ===== -->
+    <section id="resultPanel" class="hidden">
+      <div class="panel result-head" id="resultHead"></div>
+
+      <div class="chart-wrap" id="chartWrap"></div>
+
+      <div class="panel timeline-panel">
+        <div class="timeline-title">大限时间轴（点击高亮宫位）</div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="panel detail-panel" id="detailPanel">
+        <div class="detail-title">宫位详情</div>
+        <div id="detailBody" class="detail-body">点击盘面宫位或大限分段查看详情。</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot-note">
+    口径（ALGORITHM v0.1.0 宪法默认）：① 年界=正月初一（立春年界 v1 未实现）；② 晚子时=归次日；③ 闰月十五分界（下半月按下月安星）；
+    ④ 月柱仅按「农历月×五虎遁」展示（节气月柱 v1 再决策）；⑤ 未输入出生地时按北京时间（120°E）排盘，不做真太阳时校正；
+    ⑥ 大限：阳男阴女顺行、阴男阳女逆行，命宫起运，岁数=局数起（虚岁）。本页仅供命理研究参考。
+  </footer>
+</div>
+
+<!-- 模块加载顺序：constants -> algorithm -> render -> main（零构建 IIFE + window 命名空间）-->
+<script src="js/constants.js"></script>
+<script src="js/algorithm.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

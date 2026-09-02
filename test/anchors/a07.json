@@ -1,0 +1,338 @@
+{
+  "case": "a07",
+  "title": "闰月下半月(>15按下月)：2023 闰二月二十 卯时 女",
+  "source": "iztro@2.6.0 bySolar",
+  "confidence": "high",
+  "input": {
+    "solarDate": "2023-4-10",
+    "timeIndex": 3,
+    "timeText": "卯时",
+    "gender": "female",
+    "config": {}
+  },
+  "assert": {
+    "gender": "女",
+    "solarDate": "2023-4-10",
+    "lunarDate": "二〇二三年闰二月二十",
+    "chineseDate": "癸卯 丙辰 戊戌 乙卯",
+    "time": "卯时",
+    "timeRange": "05:00~07:00",
+    "fiveElementsClass": "金四局",
+    "soulEarth": "丑",
+    "bodyEarth": "未",
+    "soulStar": "巨门",
+    "bodyStar": "天同",
+    "palaces": {
+      "寅": {
+        "stem": "甲",
+        "name": "父母",
+        "major": [
+          {
+            "name": "武曲",
+            "mutagen": ""
+          },
+          {
+            "name": "天相",
+            "mutagen": ""
+          }
+        ],
+        "minor": [
+          {
+            "name": "地劫"
+          }
+        ],
+        "decadal": {
+          "range": [
+            14,
+            23
+          ],
+          "stem": "甲",
+          "earth": "寅"
+        }
+      },
+      "卯": {
+        "stem": "乙",
+        "name": "福德",
+        "major": [
+          {
+            "name": "太阳",
+            "mutagen": ""
+          },
+          {
+            "name": "天梁",
+            "mutagen": ""
+          }
+        ],
+        "minor": [
+          {
+            "name": "天魁"
+          }
+        ],
+        "decadal": {
+          "range": [
+            24,
+            33
+          ],
+          "stem": "乙",
+          "earth": "卯"
+        }
+      },
+      "辰": {
+        "stem": "丙",
+        "name": "田宅",
+        "major": [
+          {
+            "name": "七杀",
+            "mutagen": ""
+          }
+        ],
+        "minor": [],
+        "decadal": {
+          "range": [
+            34,
+            43
+          ],
+          "stem": "丙",
+          "earth": "辰"
+        }
+      },
+      "巳": {
+        "stem": "丁",
+        "name": "官禄",
+        "major": [
+          {
+            "name": "天机",
+            "mutagen": ""
+          }
+        ],
+        "minor": [
+          {
+            "name": "天钺"
+          },
+          {
+            "name": "天马"
+          }
+        ],
+        "decadal": {
+          "range": [
+            44,
+            53
+          ],
+          "stem": "丁",
+          "earth": "巳"
+        }
+      },
+      "午": {
+        "stem": "戊",
+        "name": "仆役",
+        "major": [
+          {
+            "name": "紫微",
+            "mutagen": ""
+          }
+        ],
+        "minor": [
+          {
+            "name": "左辅"
+          }
+        ],
+        "decadal": {
+          "range": [
+            54,
+            63
+          ],
+          "stem": "戊",
+          "earth": "午"
+        }
+      },
+      "未": {
+        "stem": "己",
+        "name": "迁移",
+        "major": [],
+        "minor": [
+          {
+            "name": "文昌"
+          },
+          {
+            "name": "文曲"
+          }
+        ],
+        "decadal": {
+          "range": [
+            64,
+            73
+          ],
+          "stem": "己",
+          "earth": "未"
+        }
+      },
+      "申": {
+        "stem": "庚",
+        "name": "疾厄",
+        "major": [
+          {
+            "name": "破军",
+            "mutagen": "禄"
+          }
+        ],
+        "minor": [
+          {
+            "name": "右弼"
+          },
+          {
+            "name": "地空"
+          }
+        ],
+        "decadal": {
+          "range": [
+            74,
+            83
+          ],
+          "stem": "庚",
+          "earth": "申"
+        }
+      },
+      "酉": {
+        "stem": "辛",
+        "name": "财帛",
+        "major": [],
+        "minor": [],
+        "decadal": {
+          "range": [
+            84,
+            93
+          ],
+          "stem": "辛",
+          "earth": "酉"
+        }
+      },
+      "戌": {
+        "stem": "壬",
+        "name": "子女",
+        "major": [
+          {
+            "name": "廉贞",
+            "mutagen": ""
+          },
+          {
+            "name": "天府",
+            "mutagen": ""
+          }
+        ],
+        "minor": [],
+        "decadal": {
+          "range": [
+            94,
+            103
+          ],
+          "stem": "壬",
+          "earth": "戌"
+        }
+      },
+      "亥": {
+        "stem": "癸",
+        "name": "夫妻",
+        "major": [
+          {
+            "name": "太阴",
+            "mutagen": "科"
+          }
+        ],
+        "minor": [
+          {
+            "name": "陀罗"
+          }
+        ],
+        "decadal": {
+          "range": [
+            104,
+            113
+          ],
+          "stem": "癸",
+          "earth": "亥"
+        }
+      },
+      "子": {
+        "stem": "甲",
+        "name": "兄弟",
+        "major": [
+          {
+            "name": "贪狼",
+            "mutagen": "忌"
+          }
+        ],
+        "minor": [
+          {
+            "name": "禄存"
+          },
+          {
+            "name": "火星"
+          }
+        ],
+        "decadal": {
+          "range": [
+            114,
+            123
+          ],
+          "stem": "甲",
+          "earth": "子"
+        }
+      },
+      "丑": {
+        "stem": "乙",
+        "name": "命宫",
+        "major": [
+          {
+            "name": "天同",
+            "mutagen": ""
+          },
+          {
+            "name": "巨门",
+            "mutagen": "权"
+          }
+        ],
+        "minor": [
+          {
+            "name": "铃星"
+          },
+          {
+            "name": "擎羊"
+          }
+        ],
+        "decadal": {
+          "range": [
+            4,
+            13
+          ],
+          "stem": "乙",
+          "earth": "丑"
+        }
+      }
+    },
+    "ziweiEarth": "午",
+    "mutagenMap": {
+      "破军": {
+        "earth": "申",
+        "mutagen": "禄"
+      },
+      "太阴": {
+        "earth": "亥",
+        "mutagen": "科"
+      },
+      "贪狼": {
+        "earth": "子",
+        "mutagen": "忌"
+      },
+      "巨门": {
+        "earth": "丑",
+        "mutagen": "权"
+      }
+    }
+  },
+  "meta": {
+    "engine": "iztro",
+    "version": "2.6.0",
+    "checkedAt": "2026-09-02",
+    "method": "bySolar"
+  }
+}
