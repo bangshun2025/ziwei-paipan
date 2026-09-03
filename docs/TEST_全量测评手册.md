@@ -6,7 +6,7 @@
 > **被测文件**：`/Users/feng/人生资产/10-开发项目/软件-紫微斗数/紫微斗数·运行/`（index.html + js/constants.js + js/algorithm.js + js/render.js + js/main.js + css/style.css）
 > **算法宪法**：`运行/ALGORITHM.md`
 > **架构裁决**：`运行/docs/ADR_v0.1.0_紫微斗数架构.md`（AD-01~AD-08）
-> **验证基准**：iztro@2.6.0（npm 实测输出，node v22.22.3），锚点 JSON 见 `运行/test/anchors/a01-a12.json`，用例见 `运行/test/cases.md`
+> **验证基准**：iztro@2.6.0（npm 实测输出，node v22.22.3），锚点 JSON 见 `运行/tests/anchors/a01-a12.json`，用例见 `运行/tests/cases.md`
 > **质量红线**：锚点回归 1242 + cases 定向 45 + 浏览器自检 88 = **1375 断言全过**（v0.1.0 验收结论）
 > **v1.0 首建（2026-09-02）**：承接 v0.1.0 验收成果，将三组自动化断言分层固化；参照八字 TEST_全量测评手册体例，紫微因 node CLI 自动化，手工分层更薄。
 
@@ -34,8 +34,8 @@
 
 | 组 | 命令 | 断言数 | 基准 | 何时必跑 |
 |----|------|:------:|------|----------|
-| L1 锚点回归 | `node test/run_anchor_tests.js` | 1242 | iztro 12 盘全字段快照 | 任何算法/常量改动 |
-| L2 cases 定向 | `node test/run_case_tests.js` | 45 | 口径差异 + 定向断言 | 历法/边界/展示层改动 |
+| L1 锚点回归 | `node tests/run_anchor_tests.js` | 1242 | iztro 12 盘全字段快照 | 任何算法/常量改动 |
+| L2 cases 定向 | `node tests/run_case_tests.js` | 45 | 口径差异 + 定向断言 | 历法/边界/展示层改动 |
 | L3 内嵌自检 | 浏览器 `index.html?test=1` | 88 | 常量/历法/安星/端到端 | 每轮发布前人工红线 |
 
 > **82 vs 88 口径说明**：v0.1.0 验收期 QA 报告、check-release.sh 注释曾记「82 条」（修复前静态计数）；验收定稿按**运行时实际执行 = 88 条**（L3 自检含循环展开，浏览器实测 88/88 ALL PASS）。本手册以 88 为权威口径，check-release.sh 注释同步修订。
@@ -78,9 +78,9 @@ L4 人工冒烟项（发布师/用户）       ← UI 点击流 + 文墨天机�
 
 ## 四、L1 算法验证层 — 锚点全字段回归（1242）
 
-**命令**：`cd 运行目录 && node test/run_anchor_tests.js`（支持 `[a01|a02|...|all]`）
-**脚本**：`test/run_anchor_tests.js`（模拟 window 加载 constants/algorithm/render，IIFE 剥离等价法）
-**锚点**：`test/anchors/a01-a12.json`（12 盘全字段快照，iztro@2.6.0 实测）
+**命令**：`cd 运行目录 && node tests/run_anchor_tests.js`（支持 `[a01|a02|...|all]`）
+**脚本**：`tests/run_anchor_tests.js`（模拟 window 加载 constants/algorithm/render，IIFE 剥离等价法）
+**锚点**：`tests/anchors/a01-a12.json`（12 盘全字段快照，iztro@2.6.0 实测）
 
 ### 4.1 锚点覆盖矩阵（12 盘）
 
@@ -119,9 +119,9 @@ L4 人工冒烟项（发布师/用户）       ← UI 点击流 + 文墨天机�
 
 ## 五、L2 定向差异层 — cases 用例（45）
 
-**命令**：`cd 运行目录 && node test/run_case_tests.js`
-**脚本**：`test/run_case_tests.js`（DIF 差异项 + 输入校验 + 展示层检查）
-**用例文档**：`test/cases.md`
+**命令**：`cd 运行目录 && node tests/run_case_tests.js`
+**脚本**：`tests/run_case_tests.js`（DIF 差异项 + 输入校验 + 展示层检查）
+**用例文档**：`tests/cases.md`
 
 | 组 | 主题 | 覆盖 |
 |----|------|------|
@@ -172,10 +172,10 @@ L4 人工冒烟项（发布师/用户）       ← UI 点击流 + 文墨天机�
 bash scripts/check-release.sh
 
 # 2. L1 锚点全字段回归（1242 断言）
-node test/run_anchor_tests.js          # 期望 ALL PASS ✅ / 退出码 0
+node tests/run_anchor_tests.js          # 期望 ALL PASS ✅ / 退出码 0
 
 # 3. L2 cases 定向（45 断言）
-node test/run_case_tests.js            # 期望 ALL PASS ✅ / 退出码 0
+node tests/run_case_tests.js            # 期望 ALL PASS ✅ / 退出码 0
 
 # 4. L3 内嵌自检（88 断言）
 # 浏览器打开 index.html?test=1 → ALL PASS ✅（人工红线，发布师必查）

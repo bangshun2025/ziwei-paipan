@@ -27,11 +27,11 @@ jobs:
 
       # 2. L1 锚点全字段回归（1242 断言，iztro 基准）
       - name: L1 锚点回归（run_anchor_tests.js）
-        run: node test/run_anchor_tests.js
+        run: node tests/run_anchor_tests.js
 
       # 3. L2 cases 定向（45 断言）
       - name: L2 cases 定向（run_case_tests.js）
-        run: node test/run_case_tests.js
+        run: node tests/run_case_tests.js
 
       # 4. L3 内嵌自检（?test=1 共 88 条；node CLI 无法覆盖，用 Puppeteer 加载页面）
       - name: 安装 Puppeteer

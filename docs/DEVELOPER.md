@@ -8,7 +8,7 @@
 - **技术栈**：原生 JS + CSS（零构建步骤），IIFE + `window.*` 命名空间
 - **入口文件**：`index.html`（主产物，多文件模式加载 js/ 下 4 模块）
 - **启动方式**：浏览器直接打开 `index.html`（纯本地，零依赖）
-- **测试方式**：`index.html?test=1` → 88 条内嵌自检；`node test/run_anchor_tests.js` → 1242 条锚点回归；`node test/run_case_tests.js` → 45 条定向用例
+- **测试方式**：`index.html?test=1` → 88 条内嵌自检；`node tests/run_anchor_tests.js` → 1242 条锚点回归；`node tests/run_case_tests.js` → 45 条定向用例
 - **部署**：GitHub Pages（`bangshun2025.github.io/ziwei-paipan/` 规划中，未发布），`scripts/publish-online.sh`
 
 ## 文件地图
@@ -21,8 +21,8 @@
 | `js/render.js` | RENDER：盘面渲染（十二宫方盘/中宫/农历文本） | 展示口径必须复用核心层输出（mUse/lunarDisplay），勿自行重复实现（v0.1.0 P2-1/P2-2 教训） |
 | `js/main.js` | APP：输入/事件/初始化/`?test=1` 断言 | 新增断言必须校验**落宫**而非仅数量（v0.1.0 P1 覆盖盲区教训） |
 | `css/style.css` | 样式 | — |
-| `test/anchors/*.json` | 12 盘 iztro 权威锚点快照 | 锚点是验收基准，勿随意改动；新增盘面字段需重生成锚点 |
-| `test/cases.md` | 定向用例清单（含 DIF 差异登记） | — |
+| `tests/anchors/*.json` | 12 盘 iztro 权威锚点快照 | 锚点是验收基准，勿随意改动；新增盘面字段需重生成锚点 |
+| `tests/cases.md` | 定向用例清单（含 DIF 差异登记） | — |
 
 ## Bug 墓地（v0.1.0）
 

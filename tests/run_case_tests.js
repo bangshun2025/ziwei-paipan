@@ -2,7 +2,7 @@
 /* 紫微斗数排盘 v0.1.0 — cases.md 定向用例 + DIF 差异项 + 输入校验 + 展示层检查
  * 覆盖：DIF-1 早子时不进位 / DIF-2 闰月下半月 mUse / DIF-3 真太阳时输入侧预处理 /
  *       DIF-4 大限 index 语义 / a11 农历往返等价 / render 层 monthPillarOf·cnLunar / 输入校验
- * 用法：node test/run_case_tests.js
+ * 用法：node tests/run_case_tests.js
  * 退出码：0=全部通过；1=有失败（展示层失败单列但计入退出码，报告时归类）
  */
 'use strict';

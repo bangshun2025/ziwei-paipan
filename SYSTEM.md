@@ -16,7 +16,7 @@
 | 版本号位置 | index.html 头部 `<!-- vX.Y.Z -->` |
 | 发布状态 | **Git 化完成**（df05d97 @ main，已 push origin）：远程 ziwei-paipan + Pages（bangshun2025.github.io/ziwei-paipan）已上线；正式 tag 与公测发布待授权 |
 | 口径裁决 | D-1~D-7 已由邦顺裁决采纳默认（2026-09-02），见 ALGORITHM.md §16 |
-| 质量状态 | ✅ v0.1.0 通过验收：锚点 1242 + cases 45 + 自检 88 = 1375 断言全过（test/report.md） |
+| 质量状态 | ✅ v0.1.0 通过验收：锚点 1242 + cases 45 + 自检 88 = 1375 断言全过（tests/report.md） |
 
 ## 三、版本历史
 
@@ -33,7 +33,7 @@
 | 安星核心 | js/algorithm.js | ALGO：命身宫/五行局/紫微/主星/辅星/四化/大限（纯函数，无 DOM） | ✅ 已实现 |
 | 渲染 | js/render.js | RENDER：十二宫方盘/中宫/大限时间轴 | ✅ 已实现 |
 | 交互 | js/main.js | APP：输入/事件/初始化/`?test=1` 断言 | ✅ 已实现 |
-| 测试 | test/ | anchors/（12 盘 iztro 锚点 JSON）+ run_anchor_tests.js（1242）+ run_case_tests.js（45）+ cases.md + report.md | ✅ 已实现 |
+| 测试 | tests/ | anchors/（12 盘 iztro 锚点 JSON）+ run_anchor_tests.js（1242）+ run_case_tests.js（45）+ cases.md + report.md | ✅ 已实现 |
 | 测评手册 | docs/TEST_全量测评手册.md | L1 锚点 1242 / L2 cases 45 / L3 自检 88 / L4 人工冒烟 分层手册（v1.0） | ✅ 已就位 |
 | 发布 | scripts/ | check-release.sh（一致性校验）、publish-online.sh（tag→push→部署验证，--exec 前自动 .bak 备份） | ✅ 已就位（未执行） |
 | CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1242 + cases 45 + Puppeteer 自检 88 | ✅ 已生效（push 触发 #1 通过） |

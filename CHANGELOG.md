@@ -6,7 +6,7 @@
 
 ### 里程碑：首版核心实现完成并通过验收（未发布）
 
-- 建立运行目录骨架：js/ css/ scripts/ docs/_TEMPLATE/ test/anchors/（docs/archive 已于整理时平铺至 docs/，全量归档移至 `../紫微斗数·档案/`）
+- 建立运行目录骨架：js/ css/ scripts/ docs/_TEMPLATE/ tests/anchors/（docs/archive 已于整理时平铺至 docs/，全量归档移至 `../紫微斗数·档案/`）
 - 初始化真相源三件套：README.md / SYSTEM.md / CHANGELOG.md
 - docs/_TEMPLATE 就位：PRD/ADR/TEST/QA/RELEASE/RETRO 模板 + 索引 README
 - **口径裁决**：D-1~D-7 经邦顺裁决全部采纳「建议默认值」（与主流排盘软件对齐），ALGORITHM.md §16 定稿

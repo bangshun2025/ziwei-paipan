@@ -40,7 +40,7 @@ git init -b main
 git remote add origin git@github.com:bangshun2025/ziwei-paipan.git
 
 # 4. 首次提交（选择性 add，禁用 git add -A）
-git add index.html css/ js/ ALGORITHM.md CHANGELOG.md README.md SYSTEM.md docs/ scripts/ test/ .gitignore .github/
+git add index.html css/ js/ ALGORITHM.md CHANGELOG.md README.md SYSTEM.md docs/ scripts/ tests/ .gitignore .github/
 git commit -m "v0.1.0: 紫微斗数排盘首个公测版（1375 断言验收通过）"
 
 # 5. 推送到 GitHub（触发 Pages 部署 + CI 回归）
@@ -64,7 +64,7 @@ ALGORITHM.md                     # 算法宪法（口径/公式/锚点）
 SYSTEM.md                        # 项目真相源（版本/模块/质量状态）
 CHANGELOG.md                     # 变更记录
 docs/                            # PRD/ADR/QA/RETRO/发布链路方案/TEST_全量测评手册/DEVELOPER
-test/                            # anchors/ + run_anchor_tests.js + run_case_tests.js + cases.md + report.md
+tests/                            # anchors/ + run_anchor_tests.js + run_case_tests.js + cases.md + report.md
 scripts/                         # check-release.sh + publish-online.sh
 .github/workflows/test.yml       # 回归 CI（git init 后生效）
 .gitignore                       # 安全防呆（.bak/密码等）

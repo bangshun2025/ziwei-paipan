@@ -3,7 +3,7 @@
 - 版本：v0.1.0
 - 日期：2026-09-02
 - 验收人：测试师（worker_d7e63072）
-- 测试基准：test/anchors/a01-a12.json（iztro@2.6.0 实测，cases.md，12 盘全字段快照）
+- 测试基准：tests/anchors/a01-a12.json（iztro@2.6.0 实测，cases.md，12 盘全字段快照）
 - 被测代码：运行目录 js/constants.js + js/algorithm.js + js/render.js + js/main.js（index.html?v=?test=1 内嵌自检 82 条实测通过）
 
 ---
@@ -27,8 +27,8 @@
 
 ## 2. 测试范围与方法
 
-1. **锚点全字段回归**（`test/run_anchor_tests.js`）：模拟 window 加载三个 js（node CLI，IIFE 剥离等价法），对 12 锚点逐盘断言顶层字段（农历/四柱/时辰/五行局/命身宫/命主身主/紫微宫）+ 十二宫每宫（宫干/宫名/主星含四化/辅星/大限干支） + mutagenMap。
-2. **cases.md 定向用例**（`test/run_case_tests.js`）：DIF-1 早子时不进位、DIF-2 闰月下半月实用月、DIF-3 真太阳时输入侧预处理、DIF-4 大限 index、a11 农历/公历双入口等价、展示层（render.monthPillarOf / cnLunar）、输入校验、结构不变量、辅星 base 单例复现。
+1. **锚点全字段回归**（`tests/run_anchor_tests.js`）：模拟 window 加载三个 js（node CLI，IIFE 剥离等价法），对 12 锚点逐盘断言顶层字段（农历/四柱/时辰/五行局/命身宫/命主身主/紫微宫）+ 十二宫每宫（宫干/宫名/主星含四化/辅星/大限干支） + mutagenMap。
+2. **cases.md 定向用例**（`tests/run_case_tests.js`）：DIF-1 早子时不进位、DIF-2 闰月下半月实用月、DIF-3 真太阳时输入侧预处理、DIF-4 大限 index、a11 农历/公历双入口等价、展示层（render.monthPillarOf / cnLunar）、输入校验、结构不变量、辅星 base 单例复现。
 3. **浏览器实测**：index.html?test=1 自检 82 条全过。
 4. **静态比对**：ALGORITHM.md（宪法）↔ constants.js/algorithm.js/render.js ↔ 锚点三方比对。
 
@@ -54,7 +54,7 @@
 ### P1-1 【阻断】六类辅星起宫常量系统性错误（文昌/文曲/左辅/右弼/地劫/地空）
 
 - **现象**：12 锚点全盘中，上述辅星全部落错一宫（或偏移 2 宫）。锚点回归失败 88 条宫级断言全部来自 minor；UI 盘面辅星随之错位。
-- **复现**：`cd 运行目录 && node test/run_case_tests.js`（I 组 6 条必失败）；单例：2000-8-16 寅时 女（a01），期望 文昌申/文曲午/左辅戌/右弼辰/地劫丑/地空酉，实得 文昌酉/文曲未/左辅亥/右弼巳/地劫亥/地空未。
+- **复现**：`cd 运行目录 && node tests/run_case_tests.js`（I 组 6 条必失败）；单例：2000-8-16 寅时 女（a01），期望 文昌申/文曲午/左辅戌/右弼辰/地劫丑/地空酉，实得 文昌酉/文曲未/左辅亥/右弼巳/地劫亥/地空未。
 - **根因**：`js/constants.js` 起宫基准常量与地支序号（ALGORITHM §1.1 子0…辰4…酉9戌10亥11）不符：
 
 | 常量 | 现值 | 应值 | 依据（传统口诀/锚点） |
@@ -68,13 +68,13 @@
 
   ALGORITHM.md §10.2/§10.3 同表公式（11−t / 5+t / 5+(M−1) / 11−(M−1) / 9+t / 9−t）数值与注释「戌起/辰起/亥起」及 §1.1 地支表自相矛盾——实现照抄了错误公式值。**需架构师修订宪法 §10.2/§10.3，再同步 constants.js。**
 - **影响**：六吉六煞中 6/12 类全盘错宫；依赖辅星落宫的四化（戊年右弼化科、辛年文昌化忌/文曲化科、壬年左辅化科）落点亦错；六合/暗合等 v2+ 扩展（若复用辅星位）将错。
-- **修复建议**：constants.js 六个常量改上表应值；同步修订 ALGORITHM.md 公式（文昌 `fix12(10−t)`、文曲 `fix12(4+t)`、左辅 `fix12(4+(M−1))`、右弼 `fix12(10−(M−1))`、地劫 `fix12(11+t)`、地空 `fix12(11−t)`）；修复后跑 `node test/run_anchor_tests.js` 全绿。
+- **修复建议**：constants.js 六个常量改上表应值；同步修订 ALGORITHM.md 公式（文昌 `fix12(10−t)`、文曲 `fix12(4+t)`、左辅 `fix12(4+(M−1))`、右弼 `fix12(10−(M−1))`、地劫 `fix12(11+t)`、地空 `fix12(11−t)`）；修复后跑 `node tests/run_anchor_tests.js` 全绿。
 - **验证**：改常量后 I 组 6 断言 + 锚点 88 条 minor 应全过。
 
 ### P2-1 UI 月柱展示错一月（仅闰月下半月出生者）
 
 - **现象**：2023-4-10 卯时 女（a07，农历闰二月二十 >15，实用月 mUse=3）：核心四柱月柱按宪法应 **丙辰**（锚点一致 ✅），但 UI 头部月柱显示 **乙卯**。
-- **复现**：`node test/run_case_tests.js` → DIF-2-UI（实得乙卯，期望丙辰）。
+- **复现**：`node tests/run_case_tests.js` → DIF-2-UI（实得乙卯，期望丙辰）。
 - **根因**：`js/render.js monthPillarOf()` 用 `chart.pre.lunar.lunarMonth`（=2），未用 `chart.pre.mUse`（=3）；核心算法 `placeAll` 已用 mUse，仅展示层遗漏。
 - **修复建议**：`monthPillarOf` 改用 `chart.pre.mUse`；或 algorithm getChart 直接输出 monthPillar（避免重复实现）。
 - **注**：该口径与 ALGORITHM §2.5/D-4（闰月十五分界 fixLeap）一致，若架构师确认「闰月下半月月柱按下月」，即按上述修复；否则需修订宪法与锚点（当前锚点=iztro 实测丙辰）。
@@ -88,7 +88,7 @@
 ### P3-1 lunarDate 年份数字「零」应为「〇」
 
 - **现象**：12 盘 lunarDate 年份全部「二**零**零零年」，锚点/iztro 为「二**〇**〇〇年」。
-- **复现**：任一盘 `node test/run_anchor_tests.js` → lunarDate 断言。
+- **复现**：任一盘 `node tests/run_anchor_tests.js` → lunarDate 断言。
 - **根因**：`render.js CN_D[0]='零'`，中文年份标准写法用「〇」。
 - **修复建议**：`CN_D[0]` 改为「〇」（注意 CN_M/日初十等不受影响；仅年份位用〇，日/月不用）。
 
@@ -117,7 +117,7 @@
 
 ## 7. 回归指引（修复后执行）
 
-1. 编程师修复 P1-1（constants 六常量）+ P2-1 + P3-1 → `node test/run_anchor_tests.js` 期望 0 失败（1242 全过）。
+1. 编程师修复 P1-1（constants 六常量）+ P2-1 + P3-1 → `node tests/run_anchor_tests.js` 期望 0 失败（1242 全过）。
 2. P2-2 待架构师裁决后实现 → 复跑 a03 用例。
 3. 全绿后更新本报告追加「回归记录」并给出最终结论。
 
@@ -129,8 +129,8 @@
 
 | 测试组 | 命令/方式 | 断言 | 结果 |
 |---|---|---|---|
-| 锚点全字段回归 | `node test/run_anchor_tests.js` | 1242 | **1242/1242 通过，0 失败**（12 盘 102-104/盘 全 PASS） |
-| cases.md 定向用例 | `node test/run_case_tests.js` | 45 | **45/45 通过，0 失败**（含 I 组六辅星复现全过） |
+| 锚点全字段回归 | `node tests/run_anchor_tests.js` | 1242 | **1242/1242 通过，0 失败**（12 盘 102-104/盘 全 PASS） |
+| cases.md 定向用例 | `node tests/run_case_tests.js` | 45 | **45/45 通过，0 失败**（含 I 组六辅星复现全过） |
 | 浏览器内嵌自检 | `index.html?test=1` | 88 | **88/88 通过**（较修复前 82 条新增 6 条辅星落宫断言，覆盖盲区已堵） |
 
 ### 8.2 缺陷逐项确认（修复后独立复核）

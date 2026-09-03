@@ -4,7 +4,7 @@
 - 日期：2026-09-02
 - 起草人：测试师（worker_d7e63072）
 - 权威参考实现：iztro@2.6.0（npm 实测输出，node v22.22.3）
-- 覆盖范围：12 组锚点（test/anchors/a01.json ~ a12.json，每组含整盘关键字段快照）
+- 覆盖范围：12 组锚点（tests/anchors/a01.json ~ a12.json，每组含整盘关键字段快照）
 - 用法：编程师 Phase 3 校准基准 + 正式验收回归基准（PRD AR01-AR05 / ADR-005 双轨锚点之 iztro 轨）
 
 ## 字段口径说明

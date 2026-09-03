@@ -8,7 +8,7 @@
 - **版本**：v0.1.0
 - **日期**：2026-09-02
 - **复盘**：Leader（编排协调）整理，素材来自各角色交付物
-- **素材**：PRD_v0.1.0_紫微斗数排盘.md / ADR_v0.1.0_紫微斗数架构.md / test/report.md（QA 首轮 + 回归）/ 修订说明_v0.1.0_验收后宪法勘误与裁决.md / docs/发布链路方案_v0.1.0.md / docs/TEST_全量测评手册.md
+- **素材**：PRD_v0.1.0_紫微斗数排盘.md / ADR_v0.1.0_紫微斗数架构.md / tests/report.md（QA 首轮 + 回归）/ 修订说明_v0.1.0_验收后宪法勘误与裁决.md / docs/发布链路方案_v0.1.0.md / docs/TEST_全量测评手册.md
 - **版本定版**：v0.1.0（已实现未发布，验收通过）
 - **状态**：定稿（v1.0）
 
@@ -19,9 +19,9 @@
 | 项目初始化 | Leader + 产品经理 | 运行目录、SYSTEM.md、README | 参照八字档案范式；`运行/` 目录 2026-09-02 建立，docs/_TEMPLATE 模板族就位 |
 | PRD | 产品经理（worker_ac80b8fc） | docs/PRD_v0.1.0_紫微斗数排盘.md | 项目级 PRD：启动规划 + v1 范围；设计参考 4 张 jpg 仅提炼布局不编造 |
 | 架构 | 架构师（worker_c4eff50c） | docs/ADR_v0.1.0_紫微斗数架构.md | AD-01~AD-08（多文件模块化、历法复用八字经验、全书派口径、争议默认值、iztro 双轨验证、按版本归档、core/ui 分离、v1 边界）；ALGORITHM.md 宪法草案 |
-| 锚点建设 | 测试师 + 编程师 | test/anchors/a01-a12.json + cases.md | iztro@2.6.0 npm 实测 12 盘全字段快照；a01 黄金锚点与 ALGORITHM §15.2 双重吻合 |
+| 锚点建设 | 测试师 + 编程师 | tests/anchors/a01-a12.json + cases.md | iztro@2.6.0 npm 实测 12 盘全字段快照；a01 黄金锚点与 ALGORITHM §15.2 双重吻合 |
 | 实现 | 编程师 | index.html + js/constants + algorithm + render + main + css | 四模块化实现，IIFE 结构；历法复用八字经验 |
-| QA 首轮 | 测试师（worker_d7e63072） | test/report.md（首轮） | 判暂不通过：P1-1 六辅星起宫常量系统性错误（12 盘全受影响）+ P2×2 + P3×1；自动化 1242/45 首次跑通 |
+| QA 首轮 | 测试师（worker_d7e63072） | tests/report.md（首轮） | 判暂不通过：P1-1 六辅星起宫常量系统性错误（12 盘全受影响）+ P2×2 + P3×1；自动化 1242/45 首次跑通 |
 | 宪法勘误 | 架构师 | docs/修订说明_v0.1.0 | P1 公式勘误（ALGORITHM §10.2/§10.3 六公式 + constants.js 六常量）；P2-2 晚子时农历文本口径裁决（展示跟原日、安星用进位） |
 | 修复回归 | 编程师 + 测试师 | constants.js/render.js/algorithm.js 修复 + report.md 回归段 | 1375 = 锚点 1242 + cases 45 + 自检 88 全过；P1/P2/P3 逐项复核 ✅ |
 | 发布脚手架 | 发布师 | scripts/check-release.sh + publish-online.sh + docs/发布链路方案_v0.1.0.md | 移植八字防呆红线：版本一致性/语法/结构/引用；.gitignore 安全规则（.bak/密码）；dry-run 默认 |

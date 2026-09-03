@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* 紫微斗数排盘 v0.1.0 — 锚点全字段回归脚本
- * 基准：test/anchors/a01-a12.json（iztro@2.6.0 实测，cases.md）
+ * 基准：tests/anchors/a01-a12.json（iztro@2.6.0 实测，cases.md）
  * 方式：模拟 window 加载 js/constants.js + js/algorithm.js + js/render.js，
  *       对每个锚点构造输入调 ALGO.getChart，做全字段比对。
- * 用法：node test/run_anchor_tests.js [a01|a02|...|all]
+ * 用法：node tests/run_anchor_tests.js [a01|a02|...|all]
  * 退出码：0=全部通过；1=有失败
  */
 'use strict';

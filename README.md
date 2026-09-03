@@ -16,7 +16,7 @@
 ├── css/                 ← 样式（v0.1.0 已实现）
 ├── scripts/             ← check-release.sh / publish-online.sh（发布脚手架，未执行）
 ├── docs/                ← 版本文档平铺（八字式）：PRD_v0.1.0/ADR_v0.1.0/修订说明/QA_v0.1.0/发布链路方案 + _TEMPLATE/
-└── test/                ← 验收：anchors/（12 盘锚点 JSON）+ run_anchor_tests.js + run_case_tests.js + report.md
+└── tests/                ← 验收：anchors/（12 盘锚点 JSON）+ run_anchor_tests.js + run_case_tests.js + report.md
 ```
 
 ## 相关位置
@@ -28,4 +28,4 @@
 
 - 浏览器直接打开 `index.html`（纯本地，零依赖）。
 - 自检：`index.html?test=1` 跑全量断言。
-- 回归：`node test/run_anchor_tests.js`（1242 断言）+ `node test/run_case_tests.js`（45 断言）。
+- 回归：`node tests/run_anchor_tests.js`（1242 断言）+ `node tests/run_case_tests.js`（45 断言）。
