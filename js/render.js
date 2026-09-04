@@ -12,15 +12,16 @@
   var fix12 = function (n) { return fix(n, 12); };
   var fix10 = function (n) { return fix(n, 10); };
 
-  // 地支序号 eb -> 4x4 宫格 (row, col)；外环顺时针：寅(4,1)起
-  // eb: 2寅 3卯 4辰 5巳 6午 7未 8申 9酉 10戌 11亥 0子 1丑
+  // 地支序号 eb -> 4x4 宫格 (row, col)；书式盘（顶部午未、底部子丑、四角寅巳申亥）
+  // 顶行：巳午未申；左列（下->上）：寅卯辰巳；右列（上->下）：申酉戌亥；底行：亥子丑寅
+  // eb: 0子 1丑 2寅 3卯 4辰 5巳 6午 7未 8申 9酉 10戌 11亥
   var POS_EB = {};
   (function () {
     var rows = [
-      { eb: 2, r: 4, c: 1 }, { eb: 3, r: 4, c: 2 }, { eb: 4, r: 4, c: 3 }, { eb: 5, r: 4, c: 4 },
-      { eb: 6, r: 3, c: 4 }, { eb: 7, r: 2, c: 4 }, { eb: 8, r: 1, c: 4 },
-      { eb: 9, r: 1, c: 3 }, { eb: 10, r: 1, c: 2 }, { eb: 11, r: 1, c: 1 },
-      { eb: 0, r: 2, c: 1 }, { eb: 1, r: 3, c: 1 }
+      { eb: 5, r: 1, c: 1 }, { eb: 6, r: 1, c: 2 }, { eb: 7, r: 1, c: 3 }, { eb: 8, r: 1, c: 4 },
+      { eb: 9, r: 2, c: 4 }, { eb: 10, r: 3, c: 4 }, { eb: 11, r: 4, c: 4 },
+      { eb: 0, r: 4, c: 3 }, { eb: 1, r: 4, c: 2 }, { eb: 2, r: 4, c: 1 },
+      { eb: 3, r: 3, c: 1 }, { eb: 4, r: 2, c: 1 }
     ];
     for (var i = 0; i < rows.length; i++) POS_EB[rows[i].eb] = { r: rows[i].r, c: rows[i].c };
   })();
@@ -51,7 +52,7 @@
 
   function esc(s) { return String(s == null ? '' : s); }
 
-  // 月柱（农历月五虎遁，非节气）——仅展示口径；用实用月 mUse（闰月下半月按下月，ALGORITHM §2.5/D-4）
+  // 月柱展示口径：五虎遁按实用月 mUse（v0.2.0 起 = 节气月序 1..12，与八字同源）
   function monthPillarOf(chart) {
     var ygz = chart.pre.yearGanZhi;
     var lm = chart.pre.mUse;
@@ -70,11 +71,31 @@
     return '<i class="hua hua-' + (cls || 'L') + '">' + esc(hua) + '</i>';
   }
 
-  function starEl(name, hua, minor) {
-    var cls = minor ? 'minor' : 'major';
-    return '<span class="star ' + cls + '">' + esc(name) + huaEl(hua) + '</span>';
-  }
+    function starEl(name, hua, minor) {
+      var cls = minor ? 'minor' : 'major';
+      return '<span class="star ' + cls + '">' + esc(name) + huaEl(hua) + '</span>';
+    }
 
+    // 满盘档 v0.2.1：杂曜 + 长生/博士/将前/岁前四神组
+    function fullStarsHtml(palace) {
+      var h = '';
+      var adj = palace.adjStars || [];
+      if (adj.length) {
+        h += '<div class="p-adj">';
+        for (var ai = 0; ai < adj.length; ai++) h += '<span>' + esc(adj[ai]) + '</span>';
+        h += '</div>';
+      }
+      var gods = [
+        ['cs', palace.changsheng12 ? palace.changsheng12[0] : ''],
+        ['bs', palace.boshi12 ? palace.boshi12[0] : ''],
+        ['jq', palace.jiangqian12 ? palace.jiangqian12[0] : ''],
+        ['sq', palace.suiqian12 ? palace.suiqian12[0] : '']
+      ];
+      var gs = '';
+      for (var gi = 0; gi < 4; gi++) if (gods[gi][1]) gs += '<i class="gd gd-' + gods[gi][0] + '">' + esc(gods[gi][1]) + '</i>';
+      if (gs) h += '<div class="p-gods">' + gs + '</div>';
+      return h;
+    }
   // 中宫「生年四化」chips
   function huaChips(chart) {
     var hs = chart.center.huaSummary || {};
@@ -112,12 +133,12 @@
     else if (pre.timeIndex === 0) tzTxt = '早子时(当日)';
     else tzTxt = (TIME_N[pre.timeIndex] || '') + '时';
     html += '<div class="lunar-line">' + cnLunar(chart)
-      + (luDisp.isLeap ? '（闰月按' + (C.CONFIG && C.CONFIG.FIX_LEAP ? '十五分界' : '本月') + '）' : '')
+      + (luDisp.isLeap ? '（农历闰月仅显示，安星不涉闰月）' : '')
       + (tzTxt ? ' · ' + tzTxt : '')
       + '</div>';
     var notes = '';
     for (var i = 0; i < (pre.note || []).length; i++) notes += (notes ? '；' : '') + esc(pre.note[i]);
-    html += '<div class="note-line">口径：年柱/日柱以正月初一为年界；月柱按农历月五虎遁（非节气，v1 展示用）。' + (notes ? '｜' + notes : '') + '</div>';
+    html += '<div class="note-line">口径 v0.2.0：年按立春换年、月按节气十二节、日按农历、时辰照旧。' + (notes ? '｜' + notes : '') + '</div>';
     el.innerHTML = html;
   }
 
@@ -149,6 +170,8 @@
     }
     var dirTxt2 = dx0 ? '起于' + esc(dx0.name) + '（' + esc(dx0.ganZhi) + ' ' + dx0.start + '-' + dx0.end + '岁）' : '';
     cH += '<div class="c-sub">' + dirTxt + ' · ' + dirTxt2 + '</div>';
+    cH += '<div class="c-legend"><span class="gd gd-cs">长生</span><span class="gd gd-bs">博士</span>'
+      + '<span class="gd gd-jq">将前</span><span class="gd gd-sq">岁前</span><span class="gd-g">四神随宫</span></div>';
     center.innerHTML = cH;
 
     var cells = {};
@@ -176,7 +199,8 @@
         + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
         + (dec ? '<div class="p-dec">' + dec + '</div>' : '')
         + (majors ? '<div class="p-major">' + majors + '</div>' : '')
-        + (minors ? '<div class="p-minor">' + minors + '</div>' : '');
+        + (minors ? '<div class="p-minor">' + minors + '</div>' : '')
+        + fullStarsHtml(palace);
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
       grid.appendChild(cell);
@@ -205,6 +229,13 @@
     }
     if (maj.length) h += '<span class="dblk"><b>主星</b>' + maj.join('　') + '</span>';
     if ((palace.minor || []).length) h += '<span class="dblk"><b>辅星</b>' + palace.minor.join('　') + '</span>';
+    if ((palace.adjStars || []).length) h += '<span class="dblk"><b>杂曜</b>' + palace.adjStars.join('　') + '</span>';
+    var godTxt = [];
+    if (palace.changsheng12 && palace.changsheng12.length) godTxt.push('长生·' + palace.changsheng12[0]);
+    if (palace.boshi12 && palace.boshi12.length) godTxt.push('博士·' + palace.boshi12[0]);
+    if (palace.jiangqian12 && palace.jiangqian12.length) godTxt.push('将前·' + palace.jiangqian12[0]);
+    if (palace.suiqian12 && palace.suiqian12.length) godTxt.push('岁前·' + palace.suiqian12[0]);
+    if (godTxt.length) h += '<span class="dblk"><b>神煞</b>' + godTxt.join('　') + '</span>';
     // 三方四正（三合 ±4，对宫 +6）
     var pTriA = chart.palaces[fix12(p + 8)]; // p-4
     var pTriB = chart.palaces[fix12(p + 4)];

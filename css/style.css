@@ -103,6 +103,7 @@ body {
 }
 .adv-box.show { display: block; }
 .adv-box .adv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; font-size: 13px; color: var(--ink-soft); }
+.adv-box .adv-note { font-size: 12px; color: var(--ink-faint, #9a938a); }
 
 .btn-main {
   display: inline-flex; align-items: center; justify-content: center;
@@ -159,6 +160,18 @@ body {
 .cell .p-dec { font-size: 10px; color: var(--ink-soft); background: #f6f4ec; border-radius: 4px; padding: 0 4px; align-self: flex-start; }
 .cell .p-major { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 3px 7px; }
 .cell .p-minor { margin-top: 2px; display: flex; flex-wrap: wrap; gap: 2px 6px; }
+/* 满盘档 v0.2.1：杂曜 + 长生/博士/将前/岁前 */
+.cell .p-adj { margin-top: 2px; display: flex; flex-wrap: wrap; gap: 1px 5px; border-top: 1px dashed var(--line); padding-top: 2px; }
+.cell .p-adj span { font-size: 9px; line-height: 1.3; color: var(--ink-soft); }
+.cell .p-gods { margin-top: 2px; display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: baseline; }
+.cell .p-gods .gd { font-style: normal; font-size: 9.5px; }
+.gd { font-style: normal; }
+.gd-cs { color: #c0392b; font-weight: 600; }   /* 长生十二神 */
+.gd-bs { color: #7d5fb8; font-weight: 600; }   /* 博士十二神 */
+.gd-jq { color: #0e8a7c; font-weight: 600; }   /* 将前十二星 */
+.gd-sq { color: #8a8a70; font-weight: 600; }   /* 岁前十二星 */
+.c-legend { margin-top: 4px; font-size: 9px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.c-legend .gd-g { color: var(--ink-soft); }
 .star { display: inline-flex; align-items: center; gap: 1px; white-space: nowrap; }
 .star.major { font-size: 16px; font-weight: 700; color: var(--main-star); letter-spacing: 1px; }
 .star.minor { font-size: 10.5px; color: var(--minor-star); }

@@ -138,7 +138,7 @@ function getChart(o) { return ALGO.getChart(o); }
     { y: 2023, m: 3, d: 31, h: 15, mi: 30, gender: 'M' },
     { y: 2023, m: 4, d: 10, h: 5, mi: 30, gender: 'F' },
     { y: 1800, m: 1, d: 1, h: 7, mi: 30, gender: 'M' },
-    { y: 2200, m: 12, d: 31, h: 13, mi: 30, gender: 'F' },
+    { y: 2099, m: 12, d: 31, h: 13, mi: 30, gender: 'F' },
     { y: 1990, m: 1, d: 1, h: 11, mi: 30, gender: 'M' },
     { y: 2000, m: 2, d: 29, h: 9, mi: 30, gender: 'F' },
     { y: 1982, m: 10, d: 18, h: 9, mi: 30, gender: 'M' },

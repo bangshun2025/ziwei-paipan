@@ -315,7 +315,7 @@
       gender: document.querySelectorAll('input[name="gender"]'),
       fCity: $('fCity'), fLng: $('fLng'), fTrueSolar: $('fTrueSolar'),
       btnAdv: $('btnAdv'), advBox: $('advBox'),
-      advLateZi: $('advLateZi'), advFixLeap: $('advFixLeap'), advYearDivide: $('advYearDivide'),
+      advLateZi: $('advLateZi'),
       btnCalc: $('btnCalc'), calcErr: $('calcErr'), dateErr: $('dateErr'),
       resultPanel: $('resultPanel'), resultHead: $('resultHead'),
       chartWrap: $('chartWrap'), timeline: $('timeline'), detailBody: $('detailBody'),
@@ -343,7 +343,7 @@
     }
     function fillYearMonth() {
       clearSel(els.fYear);
-      for (var y = 1800; y <= 2200; y++) addOpt(els.fYear, y + '年', y);
+      for (var y = 1800; y <= 2100; y++) addOpt(els.fYear, y + '年', y);
       clearSel(els.fMonth);
       for (var m = 1; m <= 12; m++) addOpt(els.fMonth, m + '月', m);
     }
@@ -432,13 +432,10 @@
     els.btnAdv.addEventListener('click', function () { els.advBox.classList.toggle('show'); });
     function applyConfig() {
       CONST.CONFIG.DAY_DIVIDE = els.advLateZi.value;          // forward | current
-      CONST.CONFIG.FIX_LEAP = els.advFixLeap.value === '1';    // true | false
-      CONST.CONFIG.YEAR_DIVIDE = els.advYearDivide.value;      // normal
+      // v0.2.0：年界(立春)/月轴(节气)为宪法口径，固定不可切换（原闰月分界、正月初一年界已废止）
       if (state.lastChart) doCalc();
     }
     els.advLateZi.addEventListener('change', applyConfig);
-    els.advFixLeap.addEventListener('change', applyConfig);
-    els.advYearDivide.addEventListener('change', applyConfig);
     els.btnTestPage.addEventListener('click', function () {
       location.href = location.pathname + '?test=1';
     });

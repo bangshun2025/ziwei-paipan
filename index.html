@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>紫微斗数排盘 v0.1.0</title>
+<title>紫微斗数排盘 v0.2.0</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -79,16 +79,7 @@
             <option value="forward">归次日（默认）</option>
             <option value="current">归当日</option>
           </select>
-          <label class="lbl">闰月</label>
-          <select id="advFixLeap">
-            <option value="1">十五分界（默认：下半月按下月安星）</option>
-            <option value="0">不折叠（闰月一律按本月安星）</option>
-          </select>
-          <label class="lbl">年界</label>
-          <select id="advYearDivide">
-            <option value="normal">正月初一（默认）</option>
-            <option value="exact" disabled title="立春年界 v1 未实现">立春（暂不可用）</option>
-          </select>
+          <span class="adv-note">年界=立春、月=节气（v0.2.0 固定，不可切换）</span>
         </div>
       </div>
 

@@ -1,5 +1,7 @@
-/* 紫微斗数排盘 v0.1.0 — algorithm.js
- * ALGO：历法换算 + 安星核心（纯函数，无 DOM）。口径：ALGORITHM.md（v0.1.0 定稿）。
+/* 紫微斗数排盘 v0.2.0 — algorithm.js（历法口径 v0.2.0 宪法）
+ * ALGO：历法换算 + 安星核心（纯函数，无 DOM）。
+ * 口径：年=立春换年、月=节气十二节、日=农历日序（安紫微 D）、时=时辰。
+ * 依据：docs/ALGORITHM_v0.2.0草案_生命算法紫微模块.md（v0.2.0 宪法）。
  * 依赖：window.CONST（constants.js 先加载）。
  */
 (function () {
@@ -97,6 +99,47 @@
     return plusDays(ly, cny.m, cny.d, off);
   }
 
+  // ===== 节气轴（v0.2.0 宪法 §3.1：年=立春换年、月=节气十二节；§3.2：日仍取农历日序）=====
+  // SOLAR_TERMS：sxtwl 生成（1000-2100），packed=daysFrom20000101*86400+seconds，秒为北京时间钟表。
+  // getSolarTerm 返回“BJT-as-UTC”假尺度 Date（getTime() 数值=北京钟表时间当作 UTC），
+  // 与 birthMs=Date.UTC(y,m-1,d,h,mi) 直接可比（与八字项目已验证实现同构）。
+  function getSolarTerm(y, n) {
+    // n: 0=小寒 ... 23=冬至
+    var packed = C.SOLAR_TERMS[(y - 1000) * 24 + n];
+    if (packed === undefined) return null; // 表外年份（999 / 2101 边界）
+    var days = Math.trunc(packed / 86400);
+    var secs = packed % 86400;
+    if (secs < 0) { secs += 86400; days -= 1; }
+    return new Date(Date.UTC(2000, 0, 1) + days * 86400000 + secs * 1000 - 288e5);
+  }
+
+  // v0.2.0：把出生钟表时刻（真太阳时修正后）分解为节气口径的年与月序
+  // 返回 { year: 干支用年（立春换年）, monthIdx: 0=寅月..11=丑月, monthZhi }；表外返回 null
+  function qiYearMonthOf(y, m, d, h, mi) {
+    var birthMs = Date.UTC(y, m - 1, d, h || 0, mi || 0);
+    var lc = getSolarTerm(y, 2); // 立春
+    if (!lc) return null; // 节气表外年份
+    var year = (birthMs < lc.getTime()) ? y - 1 : y; // 立春（含时刻）后才是 y 年
+    var beforeLC = birthMs < lc.getTime();
+    for (var i = 0; i < 12; i++) {
+      var termN = C.MONTH_TERM[i]; // 本月起始节：立春(2)..大雪(22)、小寒(0)
+      var stY = y;
+      if (i === 10) stY = beforeLC ? y - 1 : y;      // 子月大雪（12 月）：立春前归前一年
+      else if (i === 11) stY = beforeLC ? y : y + 1; // 丑月小寒（1 月）：立春后归次年
+      var st = getSolarTerm(stY, termN);
+      var stMs = st ? st.getTime() : -Infinity;      // 表外（999 大雪）视为已进入本月
+      var nextI = (i + 1) % 12;
+      var nextN = C.MONTH_TERM[nextI];
+      var nextY = (nextN <= termN) ? stY + 1 : stY;  // 跨年节（小寒/立春）顺延一年
+      var nextSt = getSolarTerm(nextY, nextN);
+      var nextMs = nextSt ? nextSt.getTime() : Infinity; // 表外（2101 节）视为未到
+      if (birthMs >= stMs && birthMs < nextMs) {
+        return { year: year, monthIdx: i, monthZhi: C.ZHI[(i + 2) % 12] };
+      }
+    }
+    return { year: year, monthIdx: 11, monthZhi: C.ZHI[1] }; // 兜底丑月（理论不可达）
+  }
+
   // ===== 干支 =====
   function yearGanZhi(y) { // 农历年 y（1984=甲子）
     var idx = fix60(y - 4);
@@ -177,16 +220,21 @@
     var lun = solarToLunar(eff.y, eff.m, eff.d);
     if (!lun) throw new Error('历法超出支持范围(1800-2200)：' + input.y + '-' + input.m + '-' + input.d);
     if (!lunDisplay) lunDisplay = lun; // 极边缘兜底（1799/2200 边界晚子时），显示与安星一致
-    // 实用月（闰月十五分界 D-4 fixLeap；按安星折算后 lunar 计算）
-    var mUse = lun.lunarMonth;
-    if (CFG.FIX_LEAP && lun.isLeap && lun.lunarDay > 15) mUse = lun.lunarMonth + 1;
-    var ygz = yearGanZhi(lun.lunarYear);
+    // v0.2.0 节气口径（宪法 §3.1/§3.2）：年=立春换年（YEAR_DIVIDE='exact'）、月=节气十二节
+    // （MONTH_AXIS='solar'）；农历仅剩两个用途：显示文本（lunarDisplay）与安紫微日序 D。
+    // 节气归属按真太阳时修正后的钟表时刻（含时分）判定；DAY_DIVIDE forward 只影响日序换算。
+    var qi = qiYearMonthOf(y, m, d, h, mi);
+    if (!qi) throw new Error('节气表超出支持范围(1000-2100)：' + y + '-' + m + '-' + d);
+    var mUse = qi.monthIdx + 1; // 实用月序 1..12：1=寅月（立春起），与命宫起寅顺数同尺度
+    var ygz = yearGanZhi(qi.year);
+    note.push('节气口径 v0.2.0：年按立春（' + qi.year + '年）、月按节气（' + qi.monthZhi + '月）、日仍按农历');
     var dgz = dayGanZhi(eff.y, eff.m, eff.d);
     var hgz = hourGanZhi(dgz.ganIdx, sh.zhiIdx);
     return {
       solar: { y: y, m: m, d: d }, tst: tst, effSolar: eff, note: note,
       hour: h, minute: mi, shichen: sh, timeIndex: sh.lateZi ? 12 : sh.zhiIdx, tZhi: sh.zhiIdx,
       lunar: lun, lunarDisplay: lunDisplay, mUse: mUse, lateZi: sh.lateZi,
+      qiYear: qi.year, qiMonthIdx: qi.monthIdx, qiMonthZhi: qi.monthZhi,
       yearGanZhi: ygz, dayGanZhi: dgz, hourGanZhi: hgz,
       gender: input.gender
     };
@@ -237,7 +285,8 @@
         index: i, name: PALACES[fix12(i - soulP)],
         ganIdx: fix10(firstStem + i), zhiIdx: fix12(2 + i),
         gan: GAN[fix10(firstStem + i)], zhi: ZHI[fix12(2 + i)],
-        major: [], minor: []
+        major: [], minor: [], adjStars: [],
+        changsheng12: [], boshi12: [], jiangqian12: [], suiqian12: []
       });
     }
     // 主星（§9）
@@ -300,6 +349,89 @@
     var hl = C.HUO_LING[groupKey];
     putMinor('火星', fix12(hl[0] + t));
     putMinor('铃星', fix12(hl[1] + t));
+
+    // ── 满盘档（§14 新增 v0.2.1）：杂曜37+年解 + 长生/博士/将前/岁前 神煞组 ──
+    // 口径说明：以 iztro 2.5.8 输出为对照锚（2026-09-04 逐宫核对一致）；
+    // 宫位一律使用「宫位序 p（寅=0，顺时针递增）」，palaces[p] 直接落宫。
+    var yg = yearGanIdx, yz = yearZhiIdx;
+    var lunM = pre.lunar.lunarMonth - 1;   // 农历月 0-based（月系杂曜按农历月，闰月视同本月）
+    var lunD = pre.lunar.lunarDay - 1;     // 农历日 0-based（日系杂曜按农历日）
+    var bodyZhi = fix12(2 + bodyP);
+    function putAdjP(name, p) { palaces[fix12(p)].adjStars.push(name); }
+
+    // §14.1 长生十二神：五行局长生宫起（水二申/木三亥/金四巳/土五申/火六寅），阳男阴女顺、阴男阳女逆
+    var csNames = ['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'];
+    var csStart = { 2: 6, 3: 9, 4: 3, 5: 6, 6: 0 }[juNum]; // 长生宫位序
+    var csDir = ((yz % 2 === 0) === (pre.gender === 'M')) ? 1 : -1;
+    for (var ci = 0; ci < 12; ci++) {
+      palaces[fix12(csDir === 1 ? csStart + ci : csStart - ci)].changsheng12.push(csNames[ci]);
+    }
+    // §14.2 博士十二神：禄存起，阳男阴女顺、阴男阳女逆
+    var bsNames = ['博士','力士','青龙','小耗','将军','奏书','飞廉','喜神','病符','大耗','伏兵','官府'];
+    var lucunP = fix12(LU_CUN[yg] - 2);
+    for (var bi = 0; bi < 12; bi++) {
+      palaces[fix12(csDir === 1 ? lucunP + bi : lucunP - bi)].boshi12.push(bsNames[bi]);
+    }
+    // §14.3 将前十二星：将星起（寅午戌午/申子辰子/巳酉丑酉/亥卯未卯）顺行
+    var jqStart = { '寅午戌': 4, '申子辰': 10, '巳酉丑': 7, '亥卯未': 1 }[groupKey];
+    var jqNames = ['将星','攀鞍','岁驿','息神','华盖','劫煞','灾煞','天煞','指背','咸池','月煞','亡神'];
+    for (var ji = 0; ji < 12; ji++) palaces[fix12(jqStart + ji)].jiangqian12.push(jqNames[ji]);
+    // §14.4 岁前十二星：岁建起（年支）顺行
+    var sqNames = ['岁建','晦气','丧门','贯索','官符','小耗','大耗','龙德','白虎','天德','吊客','病符'];
+    for (var si = 0; si < 12; si++) palaces[fix12((yz - 2) + si)].suiqian12.push(sqNames[si]);
+
+    // §14.5 年支/年干系杂曜
+    putAdjP('红鸾', fix12(1 - yz));              // 卯上起子逆数
+    putAdjP('天喜', fix12(7 - yz));              // 红鸾对宫
+    var hgxc = { '申子辰': [2, 7], '寅午戌': [8, 1], '巳酉丑': [11, 4], '亥卯未': [5, 10] }[groupKey];
+    putAdjP('华盖', hgxc[0]); putAdjP('咸池', hgxc[1]);
+    var hzcn = { '亥子丑': [11, 0, 1], '寅卯辰': [2, 3, 4], '巳午未': [5, 6, 7], '申酉戌': [8, 9, 10] };
+    var gkey3 = null;
+    for (var gk3 in hzcn) { if (hzcn[gk3].indexOf(yz) >= 0) { gkey3 = gk3; break; } }
+    var ggs = { '亥子丑': [0, 8], '寅卯辰': [3, 11], '巳午未': [6, 2], '申酉戌': [9, 5] }[gkey3];
+    putAdjP('孤辰', ggs[0]); putAdjP('寡宿', ggs[1]);
+    putAdjP('天哭', fix12(4 - yz));              // 午上起子逆数
+    putAdjP('天虚', fix12(4 + yz));              // 午上起子顺数（iztro 口径；子年与天哭同宫为流派特例，若按主流「未起顺」需改 5+yz）
+    putAdjP('龙池', fix12(2 + yz));              // 辰起子顺
+    putAdjP('凤阁', fix12(8 - yz));              // 戌起子逆
+    putAdjP('天才', fix12(soulP + yz));          // 命宫起子顺数至年支
+    putAdjP('天寿', fix12(bodyP + yz));          // 身宫起子顺数至年支
+    putAdjP('天厨', [3, 4, 10, 3, 4, 6, 0, 4, 7, 9][yg]); // 甲丁巳/乙戊辛午/丙子/己申/庚寅/壬酉/癸亥
+    putAdjP('破碎', [3, 11, 7][yz % 3]);         // 子午卯酉巳/丑辰未戌丑/寅申巳亥酉（宫位序）
+    putAdjP('蜚廉', [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11][yz]); // 申酉戌/巳午未/寅卯辰/亥子丑 顺列
+    putAdjP('天官', [5, 2, 3, 0, 1, 7, 9, 7, 8, 4][yg]);
+    putAdjP('天福', [7, 6, 10, 9, 1, 0, 4, 3, 4, 3][yg]);
+    putAdjP('天德', fix12(7 + yz));              // 酉起子顺
+    putAdjP('月德', fix12(3 + yz));              // 巳起子顺
+    putAdjP('天空', fix12(yz - 1));              // 年支顺数前一位
+    putAdjP('截路', [6, 4, 2, 0, 10][yg % 5]);   // 甲己申酉/乙庚午未/丙辛辰巳/丁壬寅卯/戊癸子丑
+    putAdjP('空亡', [7, 5, 3, 1, 11][yg % 5]);
+    var xkP = fix12((yz - 2) + (10 - yg));       // 旬空（年干定旬首顺推至年支）
+    if (yz % 2 !== xkP % 2) xkP = fix12(xkP + 1); // 阴阳校正（阳干阳宫阴干阴宫）
+    putAdjP('旬空', xkP);
+    putAdjP('天伤', fix12(soulP + 5));           // 奴仆（夹迁移）
+    putAdjP('天使', fix12(soulP + 7));           // 疾厄（夹迁移）
+    putAdjP('年解', fix12(8 - yz));              // 戌上起子逆数
+
+    // §14.6 月系杂曜（按农历生月）
+    putAdjP('解神', [6, 8, 10, 0, 2, 4][Math.floor(lunM / 2)]); // 正二申 三四戌 五六子 七八寅 九十辰 十一十二午
+    putAdjP('天姚', fix12(11 + lunM));           // 丑上起正月顺
+    putAdjP('天刑', fix12(7 + lunM));            // 酉上起正月顺
+    putAdjP('阴煞', [0, 10, 8, 6, 4, 2][lunM % 6]); // 正七寅 二八子 三九戌 四十申 五十一午 六十二辰
+    putAdjP('天月', [8, 3, 2, 0, 5, 1, 9, 5, 0, 4, 8, 0][lunM]);
+    putAdjP('天巫', [3, 6, 0, 9][lunM % 4]);     // 一五九巳 二六十申 三七十一寅 四八十二亥
+
+    // §14.7 日系/时系杂曜（农历日 + 命盘左辅右弼/时系昌曲）
+    var zuoP = fix12((C.ZUO_FU_BASE - 2) + (M - 1)); // 左辅宫位序（与 §10.2 同口径）
+    var youP = fix12((C.YOU_BI_BASE - 2) - (M - 1)); // 右弼宫位序
+    var changP = fix12(8 - t);                   // 时系文昌宫位序（戌起子逆）
+    var quP = fix12(2 + t);                      // 时系文曲宫位序（辰起子顺）
+    putAdjP('三台', fix12(zuoP + lunD));         // 左辅起初一顺至生日
+    putAdjP('八座', fix12(youP - lunD));         // 右弼起初一逆至生日
+    putAdjP('恩光', fix12(changP + lunD - 1));   // 文昌起初一顺至生日退一步
+    putAdjP('天贵', fix12(quP + lunD - 1));      // 文曲起初一顺至生日退一步
+    putAdjP('台辅', fix12(4 + t));               // 午上起子时顺
+    putAdjP('封诰', fix12(0 + t));               // 寅上起子时顺
 
     // 命主/身主（§12）
     var mingZhu = MING_ZHU[soulZhi];
@@ -365,6 +497,7 @@
       pre: {
         solar: pre.solar, effSolar: pre.effSolar, lunar: pre.lunar, lunarDisplay: pre.lunarDisplay, mUse: pre.mUse,
         lateZi: pre.lateZi, timeIndex: pre.timeIndex, tZhi: pre.tZhi, note: pre.note,
+        qiYear: pre.qiYear, qiMonthIdx: pre.qiMonthIdx, qiMonthZhi: pre.qiMonthZhi,
         yearGanZhi: pre.yearGanZhi, dayGanZhi: pre.dayGanZhi, hourGanZhi: pre.hourGanZhi
       },
       center: {
@@ -402,6 +535,7 @@
     solarToLunar: solarToLunar, lunarToSolar: lunarToSolar,
     cnyOf: cnyOf, leapMonthOf: leapMonthOf, mLength: mLength,
     yearGanZhi: yearGanZhi, dayGanZhi: dayGanZhi, hourGanZhi: hourGanZhi,
+    getSolarTerm: getSolarTerm, qiYearMonthOf: qiYearMonthOf,
     hourToShichen: hourToShichen, equationOfTime: equationOfTime, trueSolarTime: trueSolarTime,
     preprocess: preprocess, placeAll: placeAll, getChart: getChart, starPalace: starPalace
   };
