@@ -151,29 +151,41 @@ body {
 .cell.soul { border: 1.5px solid var(--red); background: #fffdf9; }
 .cell.body { border: 1.5px solid var(--blue); }
 .cell.active { box-shadow: 0 0 0 2px rgba(20,156,134,.45); }
-/* 竖式盘 v0.2.2：宫内结构——上=星曜竖列区，中=神煞小字带，底=宫名行（参照书式竖盘/热卜） */
-.cell .p-major { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 1px 4px; margin-top: 2px; }
-.cell .p-minor { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 1px 3px; margin-top: 2px; }
-.cell .p-adj {
+/* 热卜式试点 v0.2.3-ref：宫内结构——星带(主星玫粉/辅杂黑，单列wrap) + 庙旺行 + 四化行
+   + 神行(博士蓝) + meta行(将前灰·大限岁段·长生黑) + 宫名底红（参照热卜单宫 IMG_001） */
+.cell .p-stars {
   display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center;
-  gap: 1px 3px; border-top: 1px dashed var(--line); padding-top: 3px; margin-top: 3px;
+  gap: 1px 4px; margin-top: 1px;
 }
+.cell .p-bright {
+  display: flex; justify-content: center; font-size: 9px; letter-spacing: 1px;
+  color: #2b2b2b; margin-top: 2px;
+}
+.cell .p-hua {
+  display: flex; justify-content: center; gap: 0 3px; font-size: 9px; font-weight: 700;
+  color: #2b2b2b; margin-top: 1px;
+}
+.cell .p-god {
+  margin-top: auto; display: flex; justify-content: center; margin-bottom: 1px;
+}
+.cell .p-god .gd-bs { color: #0030f0; font-weight: 600; }
 .cell .p-meta {
-  margin-top: auto;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1px 6px;
+  font-size: 9px; margin-top: 1px;
 }
-.cell .p-meta .p-dec { font-size: 9px; color: var(--ink-soft); background: #f6f4ec; border-radius: 4px; padding: 0 4px; }
+.cell .p-meta .p-dec { font-size: 9px; color: #2b2b2b; background: #f6f4ec; border-radius: 4px; padding: 0 4px; }
 .cell .p-meta .gd { font-size: 9px; }
+.cell .p-meta .gd-cs { color: #2b2b2b; }
+.cell .p-meta .gd-jq { color: #9a9a9a; }
 .cell .p-foot {
   display: flex; align-items: baseline; justify-content: center; gap: 4px;
   border-top: 1px solid var(--line); margin-top: 3px; padding-top: 3px;
 }
 .cell .p-name { font-size: 13.5px; font-weight: 700; color: var(--blue); letter-spacing: .5px; }
-.cell.soul .p-foot .p-name, .cell.soul .p-foot .p-gz { color: var(--red); }
-.cell .soul-star { color: var(--red); font-size: 12px; line-height: 1; }
-.cell .p-name .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-left: 2px; }
-.cell .p-name .tag.soul-tag { background: var(--red); color: #fff; }
-.cell .p-name .tag.body-tag { background: var(--blue); color: #fff; }
+.cell.soul .p-foot .p-name, .cell.soul .p-foot .p-gz { color: #f02000; }
+.cell .soul-star { color: #f02000; font-size: 12px; line-height: 1; }
+.cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-left: 2px; }
+.cell .p-foot .tag.body-tag { background: var(--blue); color: #fff; }
 .cell .p-gz { font-size: 10.5px; color: var(--ink-soft); }
 .gd { font-style: normal; }
 .gd-cs { color: #c0392b; font-weight: 600; }   /* 长生十二神 */
@@ -182,13 +194,13 @@ body {
 .gd-sq { color: #8a8a70; font-weight: 600; }   /* 岁前十二星 */
 .c-legend { margin-top: 4px; font-size: 9px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .c-legend .gd-g { color: var(--ink-soft); }
-/* v0.2.2 竖写：星名列内字自上而下（主星 2 字 + 四化角标列尾） */
+/* 热卜试点：主星玫红粉(参考图天梁色 #C02090 系)、辅杂一律黑（参考图无分层色） */
 .star { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.14; white-space: nowrap; }
 .star .s-ch { display: block; }
-.star.major { font-size: 15px; font-weight: 700; color: var(--main-star); }
-.star.minor { font-size: 10px; color: var(--minor-star); }
-.star.adj { font-size: 9px; color: var(--ink-soft); }
-.star.minor.danger { color: #a0502b; }
+.star.major { font-size: 15px; font-weight: 700; color: #c02090; }
+.star.minor { font-size: 10px; color: #2b2b2b; }
+.star.adj { font-size: 9px; color: #3a3a3a; }
+.star.minor.danger { color: #2b2b2b; }
 .star .hua {
   display: block; font-size: 8px; font-weight: 700; line-height: 1.1;
   border-radius: 2px; padding: 0 1.5px; margin-top: 1px;

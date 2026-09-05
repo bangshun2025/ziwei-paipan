@@ -71,11 +71,11 @@
     return '<i class="hua hua-' + (cls || 'L') + '">' + esc(hua) + '</i>';
   }
 
-    function starEl(name, hua, minor) {
+    function starEl(name, minor) {
       var cls = minor ? 'minor' : 'major';
       var ch = '';
       for (var i = 0; i < name.length; i++) ch += '<span class="s-ch">' + esc(name.charAt(i)) + '</span>';
-      return '<span class="star ' + cls + '">' + ch + huaEl(hua) + '</span>';
+      return '<span class="star ' + cls + '">' + ch + '</span>';
     }
     function adjEl(name) {
       var ch = '';
@@ -83,27 +83,46 @@
       return '<span class="star adj">' + ch + '</span>';
     }
 
-    // 满盘档 v0.2.1：杂曜 + 长生/博士/将前/岁前四神组（竖式盘 v0.2.2：杂曜拆竖列、四神移宫底小字带）
-    function adjHtml(palace) {
-      var h = '';
-      var adj = palace.adjStars || [];
-      if (adj.length) {
-        h += '<div class="p-adj">';
-        for (var ai = 0; ai < adj.length; ai++) h += adjEl(adj[ai]);
-        h += '</div>';
+    // 热卜式试点 v0.2.3-ref：宫内单星带（主星玫粉、辅杂黑），庙旺/四化/神煞独立小字行
+    function brightRow(palace, eb) {
+      // 该宫星曜（主/辅/杂）凡 BRIGHT 表有定义者，输出亮度字（庙旺得利平不陷），仿「陷旺平」
+      var b = [];
+      var names = [];
+      var mi;
+      for (mi = 0; mi < (palace.major || []).length; mi++) names.push(palace.major[mi].name);
+      for (mi = 0; mi < (palace.minor || []).length; mi++) names.push(palace.minor[mi]);
+      for (mi = 0; mi < (palace.adjStars || []).length; mi++) names.push(palace.adjStars[mi]);
+      for (mi = 0; mi < names.length; mi++) {
+        var row = C.BRIGHT[names[mi]];
+        if (row && row[eb]) b.push(row[eb]);
       }
-      return h;
+      return b.length ? '<div class="p-bright">' + b.join('') + '</div>' : '';
     }
-    function godsHtml(palace) {
-      var gods = [
-        ['cs', palace.changsheng12 ? palace.changsheng12[0] : ''],
-        ['bs', palace.boshi12 ? palace.boshi12[0] : ''],
-        ['jq', palace.jiangqian12 ? palace.jiangqian12[0] : ''],
-        ['sq', palace.suiqian12 ? palace.suiqian12[0] : '']
-      ];
-      var gs = '';
-      for (var gi = 0; gi < 4; gi++) if (gods[gi][1]) gs += '<i class="gd gd-' + gods[gi][0] + '">' + esc(gods[gi][1]) + '</i>';
-      return gs;
+    function huaRow(palace) {
+      // 该宫主星四化字（禄权科忌），仿参考图独立「禄」行
+      var h = '';
+      var seen = {};
+      for (var mi = 0; mi < (palace.major || []).length; mi++) {
+        var mj = palace.major[mi];
+        if (mj.hua && !seen[mj.hua]) { seen[mj.hua] = 1; h += mj.hua; }
+      }
+      return h ? '<div class="p-hua">' + esc(h) + '</div>' : '';
+    }
+    // 热卜式神行：行5 = 博士组(蓝)；行6 = 将前组(灰) + 大限岁段(黑) + 长生(黑)。岁前组不显示（照参考图）。
+    function godLines(palace, dec) {
+      var bs = (palace.boshi12 && palace.boshi12[0]) || '';
+      var jq = (palace.jiangqian12 && palace.jiangqian12[0]) || '';
+      var cs = (palace.changsheng12 && palace.changsheng12[0]) || '';
+      var s = '';
+      if (bs) s += '<div class="p-god"><i class="gd gd-bs">' + esc(bs) + '</i></div>';
+      if (jq || dec || cs) {
+        s += '<div class="p-meta">';
+        if (jq) s += '<i class="gd gd-jq">' + esc(jq) + '</i>';
+        if (dec) s += '<span class="p-dec">' + esc(dec) + '</span>';
+        if (cs) s += '<i class="gd gd-cs">' + esc(cs) + '</i>';
+        s += '</div>';
+      }
+      return s;
     }
   // 中宫「生年四化」chips
   function huaChips(chart) {
@@ -191,28 +210,29 @@
       var cell = document.createElement('div');
       cell.className = 'cell' + (palace.isSoul ? ' soul' : '') + (palace.isBody ? ' body' : '');
       cell.style.gridRowStart = pos.r; cell.style.gridColumnStart = pos.c;
-      var tags = '';
-      if (palace.isSoul) tags += '<span class="tag soul-tag">命</span>';
-      if (palace.isBody) tags += '<span class="tag body-tag">身</span>';
       var dx = dxByPalace[p];
       var dec = dx ? dx.start + '-' + dx.end + '岁' : '';
-      var majors = '', minors = '';
+      var majors = '', minors = '', adjs = '';
       for (var mi = 0; mi < (palace.major || []).length; mi++) {
-        var mj = palace.major[mi];
-        majors += starEl(mj.name, mj.hua, false);
+        majors += starEl(palace.major[mi].name, false);
       }
       for (var ni = 0; ni < (palace.minor || []).length; ni++) {
-        minors += starEl(palace.minor[ni], null, true);
+        minors += starEl(palace.minor[ni], true);
       }
-      var godH = godsHtml(palace);
+      for (var ai2 = 0; ai2 < (palace.adjStars || []).length; ai2++) {
+        adjs += adjEl(palace.adjStars[ai2]);
+      }
+      var godH = godLines(palace, dec);
       var starMark = palace.isSoul ? '<span class="soul-star">★</span>' : '';
-      // 竖式盘 v0.2.2：上=星曜竖列区（主/辅/杂曜），中=神煞小字带，底=宫名+干支（参照书式竖盘）
+      // 热卜式试点 v0.2.3-ref：单星带 + 庙旺行 + 四化行 + 神行2行 + 宫名底（★ 即命宫，不再重复「命」tag）
+      var footTags = '';
+      if (palace.isBody) footTags += '<span class="tag body-tag">身</span>';
       cell.innerHTML =
-        (majors ? '<div class="p-major">' + majors + '</div>' : '')
-        + (minors ? '<div class="p-minor">' + minors + '</div>' : '')
-        + adjHtml(palace)
-        + ((dec || godH) ? '<div class="p-meta">' + (dec ? '<span class="p-dec">' + dec + '</span>' : '') + godH + '</div>' : '')
-        + '<div class="p-foot">' + starMark + '<span class="p-name">' + esc(palace.name) + '</span>' + tags
+        ((majors || minors || adjs) ? '<div class="p-stars">' + majors + minors + adjs + '</div>' : '')
+        + brightRow(palace, eb)
+        + huaRow(palace)
+        + godH
+        + '<div class="p-foot">' + starMark + '<span class="p-name">' + esc(palace.name) + '</span>' + footTags
         + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
