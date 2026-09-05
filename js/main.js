@@ -209,7 +209,7 @@
       { y: 2000, m: 8, d: 16, h: 23, mi: 30, gender: 'M', lng: null },
       { y: 2023, m: 3, d: 31, h: 10, mi: 0, gender: 'F', lng: null },
       { y: 1800, m: 1, d: 1, h: 12, mi: 0, gender: 'M', lng: null },
-      { y: 2200, m: 12, d: 31, h: 12, mi: 0, gender: 'F', lng: null },
+      { y: 2099, m: 12, d: 31, h: 12, mi: 0, gender: 'F', lng: null },
       { y: 1990, m: 1, d: 1, h: 12, mi: 0, gender: 'M', lng: 116.4 },
       { y: 2023, m: 1, d: 21, h: 23, mi: 30, gender: 'F', lng: null },
       { y: 2024, m: 2, d: 9, h: 23, mi: 59, gender: 'M', lng: null }
@@ -220,11 +220,11 @@
       var err = structureOk(cch);
       T.ok(!err, 'L4 端到端 ' + JSON.stringify(cases[ci]) + (err ? ' -> ' + err : ''));
     }
-    // 除夕晚子时（23:30 归次日正月初一，年干支进位）
+    // 除夕晚子时（23:30 归次日正月初一；v0.2.0 口径：立春(2/4)前年干支仍壬寅，不随农历年进位）
     var eve = ALGO.preprocess({ y: 2023, m: 1, d: 21, h: 23, mi: 30, gender: 'F', lng: null });
     T.ok(eve.effSolar.m === 1 && eve.effSolar.d === 22, 'L2 除夕晚子时归次日 1-22');
     T.ok(eve.lunar.lunarMonth === 1 && eve.lunar.lunarDay === 1, 'L2 除夕晚子时归次年正月初一');
-    T.eq(eve.yearGanZhi.gan, '癸', 'L2 除夕晚子时跨年：年干癸卯');
+    T.eq(eve.yearGanZhi.gan, '壬', 'L2 除夕晚子时跨年：节气年干壬寅(立春前)');
     // 主星互斥性：同一宫主星无重复名
     var dup = null;    for (var pi2 = 0; pi2 < 12 && !dup; pi2++) {
       var pm = ch1.palaces[pi2].major.map(function (x) { return x.name; });

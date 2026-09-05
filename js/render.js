@@ -73,18 +73,28 @@
 
     function starEl(name, hua, minor) {
       var cls = minor ? 'minor' : 'major';
-      return '<span class="star ' + cls + '">' + esc(name) + huaEl(hua) + '</span>';
+      var ch = '';
+      for (var i = 0; i < name.length; i++) ch += '<span class="s-ch">' + esc(name.charAt(i)) + '</span>';
+      return '<span class="star ' + cls + '">' + ch + huaEl(hua) + '</span>';
+    }
+    function adjEl(name) {
+      var ch = '';
+      for (var i = 0; i < name.length; i++) ch += '<span class="s-ch">' + esc(name.charAt(i)) + '</span>';
+      return '<span class="star adj">' + ch + '</span>';
     }
 
-    // 满盘档 v0.2.1：杂曜 + 长生/博士/将前/岁前四神组
-    function fullStarsHtml(palace) {
+    // 满盘档 v0.2.1：杂曜 + 长生/博士/将前/岁前四神组（竖式盘 v0.2.2：杂曜拆竖列、四神移宫底小字带）
+    function adjHtml(palace) {
       var h = '';
       var adj = palace.adjStars || [];
       if (adj.length) {
         h += '<div class="p-adj">';
-        for (var ai = 0; ai < adj.length; ai++) h += '<span>' + esc(adj[ai]) + '</span>';
+        for (var ai = 0; ai < adj.length; ai++) h += adjEl(adj[ai]);
         h += '</div>';
       }
+      return h;
+    }
+    function godsHtml(palace) {
       var gods = [
         ['cs', palace.changsheng12 ? palace.changsheng12[0] : ''],
         ['bs', palace.boshi12 ? palace.boshi12[0] : ''],
@@ -93,8 +103,7 @@
       ];
       var gs = '';
       for (var gi = 0; gi < 4; gi++) if (gods[gi][1]) gs += '<i class="gd gd-' + gods[gi][0] + '">' + esc(gods[gi][1]) + '</i>';
-      if (gs) h += '<div class="p-gods">' + gs + '</div>';
-      return h;
+      return gs;
     }
   // 中宫「生年四化」chips
   function huaChips(chart) {
@@ -195,12 +204,16 @@
       for (var ni = 0; ni < (palace.minor || []).length; ni++) {
         minors += starEl(palace.minor[ni], null, true);
       }
-      cell.innerHTML = '<div class="p-top"><span class="p-name">' + esc(palace.name) + tags + '</span>'
-        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
-        + (dec ? '<div class="p-dec">' + dec + '</div>' : '')
-        + (majors ? '<div class="p-major">' + majors + '</div>' : '')
+      var godH = godsHtml(palace);
+      var starMark = palace.isSoul ? '<span class="soul-star">★</span>' : '';
+      // 竖式盘 v0.2.2：上=星曜竖列区（主/辅/杂曜），中=神煞小字带，底=宫名+干支（参照书式竖盘）
+      cell.innerHTML =
+        (majors ? '<div class="p-major">' + majors + '</div>' : '')
         + (minors ? '<div class="p-minor">' + minors + '</div>' : '')
-        + fullStarsHtml(palace);
+        + adjHtml(palace)
+        + ((dec || godH) ? '<div class="p-meta">' + (dec ? '<span class="p-dec">' + dec + '</span>' : '') + godH + '</div>' : '')
+        + '<div class="p-foot">' + starMark + '<span class="p-name">' + esc(palace.name) + '</span>' + tags
+        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
       grid.appendChild(cell);
