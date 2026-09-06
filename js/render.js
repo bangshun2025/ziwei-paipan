@@ -180,26 +180,25 @@
     var dxByPalace = {};
     for (var k = 0; k < chart.daXian.length; k++) dxByPalace[chart.daXian[k].palaceIndex] = chart.daXian[k];
 
-    // 中宫
+    // 中宫（热卜式 v0.3.0-ref：大字 盘类型/命四化 + 双列 命宫身宫/命主身主）
     var cen = chart.center;
-    var cH = '<div class="c-ju">' + esc(cen.juName) + '</div>';
-    cH += '<div class="c-sub">' + esc(cen.juNum) + '岁起运</div>';
-    cH += '<div class="c-mz">命宫在' + esc(cen.soulZhi) + ' · 身宫在' + esc(cen.bodyZhi) + '</div>';
-    cH += '<div class="c-mz">命主' + esc(cen.mingZhu) + ' · 身主' + esc(cen.shenZhu) + '</div>';
-    cH += '<div class="c-sub">紫微在' + esc(cen.soulIndex === cen.ziweiIndex ? '' : '')
-      + esc(ZHI[fix12(cen.ziweiIndex + 2)] || '') + ' · 天府在'
-      + esc(ZHI[fix12(cen.tianfuIndex + 2)] || '') + '</div>';
-    cH += '<div class="c-hua">生年四化&nbsp; ' + huaChips(chart) + '</div>';
-    var dx0 = chart.daXian[0];
-    var dirTxt = '大限顺行';
-    if (chart.daXian.length > 1) {
-      var a = chart.daXian[0].palaceIndex, b = chart.daXian[1].palaceIndex;
-      dirTxt = (fix12(b - a) === 1 || fix12(b - a) === -11) ? '大限顺行' : '大限逆行';
+    var juTxt = '天盘' + esc(cen.juName);
+    var L4 = ['禄', '权', '科', '忌'];
+    var order4 = [], seenH = {};
+    var hk;
+    for (hk = 0; hk < L4.length; hk++) {
+      for (var hn in cen.huaSummary) {
+        if (cen.huaSummary[hn] === L4[hk] && !seenH[hn]) { order4.push(hn); seenH[hn] = 1; }
+      }
     }
-    var dirTxt2 = dx0 ? '起于' + esc(dx0.name) + '（' + esc(dx0.ganZhi) + ' ' + dx0.start + '-' + dx0.end + '岁）' : '';
-    cH += '<div class="c-sub">' + dirTxt + ' · ' + dirTxt2 + '</div>';
-    cH += '<div class="c-legend"><span class="gd gd-cs">长生</span><span class="gd gd-bs">博士</span>'
-      + '<span class="gd gd-jq">将前</span><span class="gd gd-sq">岁前</span><span class="gd-g">四神随宫</span></div>';
+    var huaTxt = order4.length ? '【' + order4.join('') + '】' : '【--】';
+    var cH = '';
+    cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
+    cH += '<div class="c-pan"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    cH += '<div class="c-pair"><span class="c-k">命宫在</span><span class="c-v c-v-pink">' + esc(cen.soulZhi) + '</span>'
+      + '<span class="c-k">身宫在</span><span class="c-v c-v-pink">' + esc(cen.bodyZhi) + '</span></div>';
+    cH += '<div class="c-pair"><span class="c-k">命主</span><span class="c-v c-v-green">' + esc(cen.mingZhu) + '</span>'
+      + '<span class="c-k">身主</span><span class="c-v c-v-green">' + esc(cen.shenZhu) + '</span></div>';
     center.innerHTML = cH;
 
     var cells = {};
@@ -224,15 +223,19 @@
       }
       var godH = godLines(palace, dec);
       var starMark = palace.isSoul ? '<span class="soul-star">★</span>' : '';
-      // 热卜式试点 v0.2.3-ref：单星带 + 庙旺行 + 四化行 + 神行2行 + 宫名底（★ 即命宫，不再重复「命」tag）
+      // 热卜式整盘 v0.3.0-ref：行结构 = 星带 + 庙旺行 + 四化行 + 博士蓝 + 将前·大限·长生
+      //   + 宫名底行（岁前星黑 + ★命宫/宫名/干支红，仿 887x1920 整盘基准图）
       var footTags = '';
       if (palace.isBody) footTags += '<span class="tag body-tag">身</span>';
+      var sq = (palace.suiqian12 && palace.suiqian12[0]) || '';
       cell.innerHTML =
         ((majors || minors || adjs) ? '<div class="p-stars">' + majors + minors + adjs + '</div>' : '')
         + brightRow(palace, eb)
         + huaRow(palace)
         + godH
-        + '<div class="p-foot">' + starMark + '<span class="p-name">' + esc(palace.name) + '</span>' + footTags
+        + '<div class="p-foot">'
+        + (sq ? '<span class="p-sq">' + esc(sq) + '</span>' : '')
+        + starMark + footTags + '<span class="p-name">' + esc(palace.name) + '</span>'
         + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
@@ -286,14 +289,17 @@
   }
 
   // ===== 渲染大限时间轴 =====
+  // 热卜式年份轴 v0.3.0-ref：节点 = 每大限段中点公历年（出生年 + start + 5，仿整盘基准图 1989/1999/…）
   function renderTimeline(root, chart, cells, detailEl, state) {
     root.innerHTML = '';
+    var by = (chart.pre && chart.pre.solar && chart.pre.solar.y) || 0;
     var items = [];
     for (var i = 0; i < chart.daXian.length; i++) {
       var dx = chart.daXian[i];
       var it = document.createElement('div');
       it.className = 'dx-item';
-      it.innerHTML = '<div class="dx-gz">' + esc(dx.ganZhi) + '</div>'
+      var yMid = by ? (by + dx.start + 5) : 0;
+      it.innerHTML = '<div class="dx-year">' + (yMid ? esc(String(yMid)) : '&nbsp;') + '</div>'
         + '<div class="dx-name">' + esc(dx.name) + '</div>'
         + '<div class="dx-age">' + dx.start + '-' + dx.end + '岁</div>';
       it.setAttribute('data-dx', i);

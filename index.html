@@ -1,11 +1,11 @@
-<!-- 紫微斗数排盘 v0.1.0 -->
+<!-- 紫微斗数排盘 v0.3.0-ref -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>紫微斗数排盘 v0.2.3-ref</title>
-<link rel="stylesheet" href="css/style.css?v=231">
+<title>紫微斗数排盘 v0.3.0-ref</title>
+<link rel="stylesheet" href="css/style.css?v=330">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 
 <div id="app" class="hidden">
   <header class="app-top">
-    <h1>紫微斗数排盘<span class="ver">v0.2.3-ref</span></h1>
+    <h1>紫微斗数排盘<span class="ver">v0.3.0-ref</span></h1>
     <span class="spacer"></span>
     <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
   </header>
@@ -109,16 +109,16 @@
   </main>
 
   <footer class="foot-note">
-    口径（ALGORITHM v0.1.0 宪法默认）：① 年界=正月初一（立春年界 v1 未实现）；② 晚子时=归次日；③ 闰月十五分界（下半月按下月安星）；
-    ④ 月柱仅按「农历月×五虎遁」展示（节气月柱 v1 再决策）；⑤ 未输入出生地时按北京时间（120°E）排盘，不做真太阳时校正；
+    口径（ALGORITHM v0.2.0 宪法默认）：① 年界=立春换年；② 月=节气十二节（十二节起月、五虎遁定干）；③ 晚子时=归次日；
+    ④ 日柱按农历日干支，不涉闰月安星；⑤ 未输入出生地时按北京时间（120°E）排盘，默认按真太阳时校正；
     ⑥ 大限：阳男阴女顺行、阴男阳女逆行，命宫起运，岁数=局数起（虚岁）。本页仅供命理研究参考。
   </footer>
 </div>
 
 <!-- 模块加载顺序：constants -> algorithm -> render -> main（零构建 IIFE + window 命名空间）-->
-<script src="js/constants.js?v=231"></script>
-<script src="js/algorithm.js?v=231"></script>
-<script src="js/render.js?v=231"></script>
-<script src="js/main.js?v=231"></script>
+<script src="js/constants.js?v=330"></script>
+<script src="js/algorithm.js?v=330"></script>
+<script src="js/render.js?v=330"></script>
+<script src="js/main.js?v=330"></script>
 </body>
 </html>
