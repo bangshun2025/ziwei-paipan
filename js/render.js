@@ -1,4 +1,4 @@
-/* 紫微斗数排盘 v0.1.0 — render.js
+/* 紫微斗数排盘 v0.4.0 — render.js
  * UI RENDER：纯渲染层（无排盘计算），输入盘对象 chart → 渲染十二宫方盘/中宫/大限轴/详情。
  * 依赖：window.CONST（constants.js）。
  * 口径：月柱为农历月五虎遁（v0.1 展示用，非节气月，界面已标注）。

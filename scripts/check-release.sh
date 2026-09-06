@@ -16,10 +16,10 @@ DIR="${1:-$(pwd)}"
 cd "$DIR" || { echo "❌ 目录不存在: $DIR"; exit 1; }
 
 # index.html 中关键结构 id（防渲染结构漏同步/误删）
-KEY_IDS="app testOut chartWrap resultPanel detailPanel detailBody calcErr dateErr fYear fMonth fDay fCity fLng segType segAmPm btnCalc btnAdv btnTestPage advBox timeline resultHead"
-# 模块加载顺序（constants 必须先于 algorithm，render/main 在后）
-LOAD_ORDER="constants algorithm render main"
-JS_FILES="js/constants.js js/algorithm.js js/render.js js/main.js"
+KEY_IDS="app testOut chartWrap resultPanel detailPanel detailBody calcErr dateErr fYear fMonth fDay fCity fLng segType segAmPm btnCalc btnAdv btnTestPage advBox timeline resultHead inName fProv fDist liveSolar btnArchive archiveMask editSave"
+# 模块加载顺序（constants/locdata 必须先于 algorithm；render/main/archive 在后）
+LOAD_ORDER="constants locdata algorithm render main archive"
+JS_FILES="js/constants.js js/locdata.js js/algorithm.js js/render.js js/main.js js/archive.js"
 CSS_FILES="css/style.css"
 
 FAIL=0
@@ -75,8 +75,8 @@ done
 python3 - <<'PYEOF'
 import re, sys
 src = open('index.html', encoding='utf-8').read()
-scripts = re.findall(r'<script\s+src="js/(\w+)\.js"', src)
-want = ['constants', 'algorithm', 'render', 'main']
+scripts = re.findall(r'<script\s+src="js/(\w+)\.js[^"]*"', src)
+want = ['constants', 'locdata', 'algorithm', 'render', 'main', 'archive']
 if scripts == want:
     print('  ✅ script 加载顺序正确: ' + ' -> '.join(scripts))
 else:
@@ -93,7 +93,7 @@ done
 echo "----------------------------------------"
 if [ $FAIL -eq 0 ]; then
   echo "🎉 全部校验通过（版本 ${VERSION}），可以发布。"
-  echo "   提醒：浏览器打开 index.html?test=1 确认 88 条断言 0 FAIL（人工红线）。"
+  echo "   提醒：浏览器打开 index.html?test=1 确认 94 条断言 0 FAIL（人工红线）。"
   exit 0
 else
   echo "⚠️  存在失败项，禁止发布。"

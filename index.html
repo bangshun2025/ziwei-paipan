@@ -1,11 +1,11 @@
-<!-- 紫微斗数排盘 v0.3.0-ref -->
+<!-- 紫微斗数排盘 v0.4.0 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>紫微斗数排盘 v0.3.0-ref</title>
-<link rel="stylesheet" href="css/style.css?v=330">
+<title>紫微斗数排盘 v0.4.0</title>
+<link rel="stylesheet" href="css/style.css?v=331">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 
 <div id="app" class="hidden">
   <header class="app-top">
-    <h1>紫微斗数排盘<span class="ver">v0.3.0-ref</span></h1>
+    <h1>紫微斗数排盘<span class="ver">v0.4.0</span></h1>
     <span class="spacer"></span>
     <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
   </header>
@@ -21,6 +21,10 @@
   <main class="wrap">
     <!-- ===== 输入面板 ===== -->
     <section class="panel input-panel">
+      <div class="row">
+        <span class="lbl">姓名</span>
+        <input type="text" id="inName" placeholder="请输入姓名（用于档案标识）" maxlength="24" style="width:150px">
+      </div>
       <div class="row">
         <span class="lbl">历法</span>
         <span class="seg" id="segType">
@@ -46,27 +50,22 @@
           <label><input type="radio" name="gender" value="M" checked> 男</label>
           <label><input type="radio" name="gender" value="F"> 女</label>
         </span>
+      </div>
+
+      <div class="row">
         <span class="lbl">出生地</span>
-        <select id="fCity">
-          <option value="">— 未选择（按北京时间）—</option>
-          <option value="116.4">北京（东经116.4°）</option>
-          <option value="121.5">上海（东经121.5°）</option>
-          <option value="113.3">广州（东经113.3°）</option>
-          <option value="114.1">深圳（东经114.1°）</option>
-          <option value="104.1">成都（东经104.1°）</option>
-          <option value="106.5">重庆（东经106.5°）</option>
-          <option value="108.9">西安（东经108.9°）</option>
-          <option value="118.8">南京（东经118.8°）</option>
-          <option value="120.2">杭州（东经120.2°）</option>
-          <option value="114.3">武汉（东经114.3°）</option>
-          <option value="123.4">沈阳（东经123.4°）</option>
-          <option value="126.6">哈尔滨（东经126.6°）</option>
-          <option value="87.6">乌鲁木齐（东经87.6°）</option>
-          <option value="91.1">拉萨（东经91.1°）</option>
+        <select id="fProv">
+          <option value="">— 未选择（按北京时间120°E）—</option>
           <option value="CUSTOM">自定义经度…</option>
         </select>
-        <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" style="width:110px">
-        <label class="lbl" style="margin-left:6px"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</label>
+        <select id="fCity" disabled></select>
+        <select id="fDist" disabled></select>
+        <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" style="width:100px" title="自动回填所选城市经度，可手动微调">
+      </div>
+
+      <div class="row">
+        <span class="lbl" style="margin-left:0"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</span>
+        <span class="live-solar" id="liveSolar"></span>
       </div>
 
       <div class="row">
@@ -84,6 +83,7 @@
       </div>
 
       <div class="form-actions">
+        <button type="button" class="btn-main btn-ghost" id="btnArchive">📋 档案</button>
         <button type="button" class="btn-main" id="btnCalc">开始排盘</button>
         <span class="err hidden" id="calcErr"></span>
       </div>
@@ -108,6 +108,54 @@
     </section>
   </main>
 
+  <!-- ===== 📋 档案面板（遮罩 + 卡片）===== -->
+  <div class="mask hidden" id="archiveMask">
+    <div class="panel-card" id="archivePanel">
+      <div class="card-head">
+        <span class="card-title">📋 档案</span>
+        <span class="spacer"></span>
+        <span class="card-hint" id="archCount"></span>
+        <button type="button" class="link-btn" id="archBtnTrash">🗑 回收站</button>
+        <button type="button" class="link-btn" id="archClose">✕ 关闭</button>
+      </div>
+      <div class="card-toolbar">
+        <input type="text" id="archiveSearch" placeholder="搜索 姓名 / 备注 / 日期…" class="search-input">
+        <button type="button" class="btn-main btn-small" id="archBtnSave">＋ 保存当前输入</button>
+      </div>
+      <div class="card-body" id="archList"></div>
+      <div class="card-empty hidden" id="archEmpty">暂无档案：排一次盘后点「＋ 保存当前输入」即可留存。</div>
+      <div class="card-err hidden" id="archErr"></div>
+    </div>
+  </div>
+
+  <!-- ===== 编辑面板 ===== -->
+  <div class="mask hidden" id="editMask">
+    <div class="panel-card panel-narrow" id="editPanel">
+      <div class="card-head">
+        <span class="card-title">编辑档案</span>
+        <span class="spacer"></span>
+        <button type="button" class="btn-main btn-small" id="editSave">保存修改</button>
+        <button type="button" class="link-btn" id="editClose">✕ 关闭</button>
+      </div>
+      <div class="card-body" id="editBody"></div>
+    </div>
+  </div>
+
+  <!-- ===== 回收站面板 ===== -->
+  <div class="mask hidden" id="trashMask">
+    <div class="panel-card" id="trashPanel">
+      <div class="card-head">
+        <span class="card-title">🗑 回收站</span>
+        <span class="spacer"></span>
+        <span class="card-hint" id="trashCount"></span>
+        <button type="button" class="link-btn" id="trashEmpty">清空回收站</button>
+        <button type="button" class="link-btn" id="trashClose">✕ 关闭</button>
+      </div>
+      <div class="card-body" id="trashList"></div>
+      <div class="card-empty hidden" id="trashEmpty2">回收站是空的。</div>
+    </div>
+  </div>
+
   <footer class="foot-note">
     口径（ALGORITHM v0.2.0 宪法默认）：① 年界=立春换年；② 月=节气十二节（十二节起月、五虎遁定干）；③ 晚子时=归次日；
     ④ 日柱按农历日干支，不涉闰月安星；⑤ 未输入出生地时按北京时间（120°E）排盘，默认按真太阳时校正；
@@ -115,10 +163,12 @@
   </footer>
 </div>
 
-<!-- 模块加载顺序：constants -> algorithm -> render -> main（零构建 IIFE + window 命名空间）-->
-<script src="js/constants.js?v=330"></script>
-<script src="js/algorithm.js?v=330"></script>
-<script src="js/render.js?v=330"></script>
-<script src="js/main.js?v=330"></script>
+<!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> main -> archive（零构建 IIFE + window 命名空间）-->
+<script src="js/constants.js?v=331"></script>
+<script src="js/locdata.js?v=331"></script>
+<script src="js/algorithm.js?v=331"></script>
+<script src="js/render.js?v=331"></script>
+<script src="js/main.js?v=331"></script>
+<script src="js/archive.js?v=331"></script>
 </body>
 </html>
