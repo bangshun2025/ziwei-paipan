@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=503">
+<link rel="stylesheet" href="css/style.css?v=504">
 </head>
 <body>
 
@@ -51,9 +51,12 @@
       </div>
 
       <div class="row">
-        <span class="lbl">时辰</span>
-        <span class="shichen-chips" id="chipShichen"></span>
-        <span class="seg" id="segAmPm" style="display:none"></span>
+        <span class="lbl">时间</span>
+        <input type="number" id="fHour" class="time-num" min="0" max="23" step="1" value="4" title="出生钟点（24 小时制）">
+        <span class="unit">时</span>
+        <input type="number" id="fMinute" class="time-num" min="0" max="59" step="1" value="0" title="出生分钟">
+        <span class="unit">分</span>
+        <span class="sc-hint" id="timeSc">≈寅时</span>
       </div>
 
       <div class="row">
@@ -194,7 +197,7 @@
 <script src="js/algorithm.js?v=501"></script>
 <script src="js/render.js?v=501"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=502"></script>
+<script src="js/main.js?v=503"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

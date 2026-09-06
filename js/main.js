@@ -338,7 +338,7 @@
     var els = {
       segType: $('segType'), fYear: $('fYear'), fMonth: $('fMonth'), fDay: $('fDay'),
       leapWrap: $('leapWrap'), fLeap: $('fLeap'), fLeapLbl: $('fLeapLbl'),
-      chipShichen: $('chipShichen'), fHour: null, fMinute: null,
+      chipShichen: null, fHour: $('fHour'), fMinute: $('fMinute'), timeSc: $('timeSc'),
       gender: document.querySelectorAll('input[name="gender"]'),
       inName: $('inName'), inNickname: $('inNickname'), inYiming: $('inYiming'),
       fProv: $('fProv'), fCity: $('fCity'), fDist: $('fDist'),
@@ -354,61 +354,64 @@
       btnTestPage: $('btnTestPage')
     };
 
-    var state = { mode: 'solar', sy: 2000, sm: 8, sd: 16, ly: 2000, lm: 7, ld: 17, leap: false, lastChart: null, name: '', nickname: '', yiming: '', prov: '', city: '', dist: '', scIdx: 2 };
+    var state = { mode: 'solar', sy: 2000, sm: 8, sd: 16, ly: 2000, lm: 7, ld: 17, leap: false, lastChart: null, name: '', nickname: '', yiming: '', prov: '', city: '', dist: '', h: 4, mi: 0, scIdx: 2 };
 
     // ---- 填充基础下拉 ----
     function fillDateSelects(mode) {
       if (mode === 'solar') {
         var dim = daysInSolarMonth(+els.fYear.value, +els.fMonth.value);
         clearSel(els.fDay);
-        for (var d = 1; d <= dim; d++) addOpt(els.fDay, d + '日', d);
+        for (var d = 1; d <= dim; d++) addOpt(els.fDay, String(d), d);
       } else {
         var ly = +els.fYear.value, lm = +els.fMonth.value, leap = els.fLeap.checked;
         var li = lunarYearInfo(ly);
         if (li) {
           var max = leap ? li.leapDays : li.mDays[lm - 1];
           clearSel(els.fDay);
-          for (var d2 = 1; d2 <= max; d2++) addOpt(els.fDay, d2 + '日', d2);
+          for (var d2 = 1; d2 <= max; d2++) addOpt(els.fDay, String(d2), d2);
         }
       }
     }
     function fillYearMonth() {
       clearSel(els.fYear);
-      for (var y = 1800; y <= 2100; y++) addOpt(els.fYear, y + '年', y);
+      for (var y = 1800; y <= 2100; y++) addOpt(els.fYear, String(y), y);
       clearSel(els.fMonth);
-      for (var m = 1; m <= 12; m++) addOpt(els.fMonth, m + '月', m);
+      for (var m = 1; m <= 12; m++) addOpt(els.fMonth, String(m), m);
     }
     fillYearMonth();
     setSel(els.fYear, 2000); setSel(els.fMonth, 8);
     fillDateSelects('solar'); setSel(els.fDay, 16);
 
-    // ---- 时辰 chips + 时/分（用 chips 表达；h/m 内嵌于 chip）----
-    var chipBtns = [];
-    function rebuildChips() {
-      els.chipShichen.innerHTML = '';
-      chipBtns.length = 0;
-      for (var i = 0; i < SHICHEN.length; i++) {
-        (function (sc, idx) {
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'chip' + (sc.late ? ' late' : '');
-          b.textContent = sc.name + (sc.late ? '' : '时');
-          b.title = sc.note;
-          b.addEventListener('click', function () {
-            for (var k = 0; k < chipBtns.length; k++) chipBtns[k].classList.remove('active');
-            b.classList.add('active');
-            state.h = sc.h; state.mi = sc.mi; state.scIdx = idx;
-            refreshLiveSolar();
-            if (state.lastChart) doCalc();
-          });
-          els.chipShichen.appendChild(b);
-          chipBtns.push(b);
-        })(SHICHEN[i], i);
-      }
-      chipBtns[2].classList.add('active'); // 默认寅时
-      state.h = SHICHEN[2].h; state.mi = SHICHEN[2].mi;
+    // ---- 出生时间：时/分输入 → 时辰（对齐 ALGO.hourToShichen：+60 整除 120，23 时起晚子）----
+    function scIdxOfTime(hh, mm) {
+      if (!(hh >= 0 && hh <= 23)) hh = 0;
+      if (!(mm >= 0 && mm <= 59)) mm = 0;
+      var zhiIdx = Math.floor(((hh * 60 + mm + 60) % 1440) / 120);
+      if (zhiIdx === 0) return (hh >= 23) ? 12 : 0;
+      return zhiIdx;
     }
-    rebuildChips();
+    function syncTimeSc() {
+      if (!els.timeSc) return;
+      var idx = scIdxOfTime(+els.fHour.value || 0, +els.fMinute.value || 0);
+      var sc = SHICHEN[idx];
+      els.timeSc.textContent = '≈' + sc.name + (sc.late ? '' : '时');
+    }
+    function applyTimeForm() {
+      var hh = parseInt(els.fHour.value, 10);
+      var mm = parseInt(els.fMinute.value, 10);
+      if (isNaN(hh) || hh < 0) hh = 0; if (hh > 23) hh = 23;
+      if (isNaN(mm) || mm < 0) mm = 0; if (mm > 59) mm = 59;
+      els.fHour.value = hh; els.fMinute.value = mm;
+      state.h = hh; state.mi = mm; state.scIdx = scIdxOfTime(hh, mm);
+      syncTimeSc();
+      refreshLiveSolar();
+      if (state.lastChart) doCalc();
+    }
+    els.fHour.addEventListener('input', applyTimeForm);
+    els.fMinute.addEventListener('input', applyTimeForm);
+    els.fHour.addEventListener('change', applyTimeForm);
+    els.fMinute.addEventListener('change', applyTimeForm);
+    applyTimeForm();
 
     // ---- 历法切换 ----
     function setMode(mode) {
@@ -537,17 +540,8 @@
 
     // ---- liveSolar：实时真太阳时显示（复用 ALGO.trueSolarTime）----
     function scNameOf(hh, mm) {
-      var arr = SHICHEN;
-      for (var i = 0; i < arr.length; i++) {
-        var a = arr[i];
-        var lo = (a.h === 0) ? 0 : a.h - 1;
-        var hi = a.h + 1;
-        var t = hh * 60 + mm;
-        if (a.late) { if (t >= 23 * 60 && t < 24 * 60) return a.name; continue; }
-        if (a.h === 0) { if (t >= 0 && t < 60) return a.name; continue; }
-        if (t >= lo * 60 && t < hi * 60) return a.name;
-      }
-      return '';
+      var sc = SHICHEN[scIdxOfTime(hh, mm)];
+      return sc ? sc.name : '';
     }
     function refreshLiveSolar() {
       if (!els.liveSolar) return;
@@ -644,14 +638,11 @@
       if (r.gender) {
         for (var gi = 0; gi < els.gender.length; gi++) els.gender[gi].checked = (els.gender[gi].value === (r.gender === '女' ? 'F' : 'M'));
       }
-      // 时辰（折算为 SHICHEN 序号，高亮 chip）
+      // 出生时间（真实时分直填，时辰由 applyTimeForm 换算）
       if (r.hour !== null) {
-        var idx = scIdxOf(r.hour, r.min);
-        if (idx >= 0 && idx < chipBtns.length) {
-          for (var k = 0; k < chipBtns.length; k++) chipBtns[k].classList.remove('active');
-          chipBtns[idx].classList.add('active');
-          state.h = SHICHEN[idx].h; state.mi = SHICHEN[idx].mi; state.scIdx = idx;
-        }
+        els.fHour.value = r.hour;
+        els.fMinute.value = (typeof r.min === 'number') ? r.min : 0;
+        applyTimeForm();
       }
       // 出生地省市区联动 + 经度回填（缺项插占位，避免默认第一项假数据）
       if (r.prov && window.LOC_DATA[r.prov]) {
@@ -777,12 +768,6 @@
       };
       return snap;
     }
-    function scIdxOf(h, mi) {
-      for (var i = 0; i < SHICHEN.length; i++) {
-        if (SHICHEN[i].h === h && SHICHEN[i].mi === mi) return i;
-      }
-      return 2;
-    }
     function writeForm(s) {
       if (!s) return false;
       if (state.mode !== s.mode) setMode(s.mode);
@@ -791,12 +776,17 @@
       if (state.mode === 'lunar') syncLeapLbl();
       fillDateSelects(state.mode);
       setSel(els.fDay, s.d);
-      var idx = (typeof s.scIdx === 'number') ? s.scIdx : scIdxOf(s.h, s.mi);
-      if (idx >= 0 && idx < chipBtns.length) {
-        for (var k = 0; k < chipBtns.length; k++) chipBtns[k].classList.remove('active');
-        chipBtns[idx].classList.add('active');
-        state.h = SHICHEN[idx].h; state.mi = SHICHEN[idx].mi; state.scIdx = idx;
+      // 出生时间回填：优先真实时/分（v0.5.1+）；旧档仅 scIdx 时取时辰代表点
+      if (typeof s.h === 'number' && s.h >= 0) {
+        els.fHour.value = s.h;
+        els.fMinute.value = (typeof s.mi === 'number' && s.mi >= 0) ? s.mi : 0;
+      } else {
+        var sc0 = (typeof s.scIdx === 'number' && s.scIdx >= 0 && s.scIdx < SHICHEN.length) ? s.scIdx : 2;
+        els.fHour.value = SHICHEN[sc0].h; els.fMinute.value = SHICHEN[sc0].mi;
       }
+      state.h = +els.fHour.value; state.mi = +els.fMinute.value;
+      state.scIdx = scIdxOfTime(state.h, state.mi);
+      syncTimeSc();
       for (var gi2 = 0; gi2 < els.gender.length; gi2++) els.gender[gi2].checked = (els.gender[gi2].value === s.gender);
       els.inName.value = s.name || '';
       els.inNickname.value = s.nickname || '';
@@ -850,13 +840,15 @@
         else { $('eDateErr').classList.add('hidden'); max = leap ? li.leapDays : li.mDays[m - 1]; }
       } else { $('eDateErr').classList.add('hidden'); max = ALGO.solarDim(y, m); }
       clearSel(ed);
-      for (var d = 1; d <= max; d++) addOpt(ed, d + '日', d);
+      for (var d = 1; d <= max; d++) addOpt(ed, String(d), d);
       var cur = editCtx.d;
       if (cur >= 1 && cur <= max) setSel(ed, cur);
     }
     function buildEditForm(s) {
-      editCtx = { mode: s.mode, prov: s.prov, city: s.city, dist: s.dist, scIdx: (typeof s.scIdx === 'number' ? s.scIdx : scIdxOf(s.h, s.mi)), d: s.d, lng: (typeof s.lng === 'number') ? s.lng : null, lngCustom: !!(!s.prov && s.lng) };
-      var sc0 = editCtx.scIdx;
+      var si0 = (typeof s.scIdx === 'number' && s.scIdx >= 0 && s.scIdx < SHICHEN.length) ? s.scIdx : 2;
+      var eh = (typeof s.h === 'number' && s.h >= 0) ? s.h : SHICHEN[si0].h;
+      var em = (typeof s.mi === 'number' && s.mi >= 0) ? s.mi : (SHICHEN[si0].mi || 0);
+      editCtx = { mode: s.mode, prov: s.prov, city: s.city, dist: s.dist, d: s.d, lng: (typeof s.lng === 'number') ? s.lng : null, lngCustom: !!(!s.prov && s.lng), h: eh, mi: em };
       var b = $('editBody');
       var h = '';
       h += '<div class="row"><span class="lbl">名字</span>' +
@@ -870,7 +862,10 @@
         '<select id="eYear"></select><span>年</span><select id="eMonth"></select>' +
         '<label class="lbl"><input type="checkbox" id="eLeap"' + (s.leap ? ' checked' : '') + '> 闰月</label>' +
         '<select id="eDay"></select><span>日</span><span class="err hidden" id="eDateErr"></span></div>';
-      h += '<div class="row"><span class="lbl">出生时辰</span><span class="shichen-chips" id="eChips"></span></div>';
+      h += '<div class="row"><span class="lbl">出生时间</span>' +
+        '<input type="number" id="eHour" class="time-num" min="0" max="23" step="1" value="' + editCtx.h + '"><span>时</span>' +
+        '<input type="number" id="eMin" class="time-num" min="0" max="59" step="1" value="' + editCtx.mi + '"><span>分</span>' +
+        '<span class="sc-hint" id="eTimeSc"></span></div>';
       h += '<div class="row"><span class="lbl">出生地</span><select id="eProv"><option value="">— 未选择 —</option></select>' +
         '<select id="eCity" disabled></select><select id="eDist" disabled></select>' +
         '<input type="number" id="eLng" step="0.1" min="73" max="136" placeholder="经度°E" style="width:90px" class="hidden"></div>';
@@ -879,8 +874,8 @@
       h += '<div class="row"><span class="lbl">备注</span><textarea id="eNote" rows="2" maxlength="200" style="flex:1">' + eEsc(s.note) + '</textarea></div>';
       b.innerHTML = h;
       var ey = $('eYear'), em = $('eMonth'), ed = $('eDay'), eleap = $('eLeap');
-      for (var y = 1800; y <= 2100; y++) addOpt(ey, y + '年', y);
-      for (var m2 = 1; m2 <= 12; m2++) addOpt(em, m2 + '月', m2);
+      for (var y = 1800; y <= 2100; y++) addOpt(ey, String(y), y);
+      for (var m2 = 1; m2 <= 12; m2++) addOpt(em, String(m2), m2);
       setSel(ey, s.y); setSel(em, s.m); eleap.checked = !!s.leap;
       eFillDay();
       $('eMode').addEventListener('change', function () {
@@ -891,24 +886,21 @@
       ey.addEventListener('change', eFillDay);
       em.addEventListener('change', eFillDay);
       eleap.addEventListener('change', eFillDay);
-      var ec = $('eChips');
-      ec.innerHTML = '';
-      for (var ci = 0; ci < SHICHEN.length; ci++) {
-        (function (sc2, idx2) {
-          var bb = document.createElement('button');
-          bb.type = 'button';
-          bb.className = 'chip' + (sc2.late ? ' late' : '');
-          bb.textContent = sc2.name + (sc2.late ? '' : '时');
-          if (idx2 === sc0) bb.classList.add('active');
-          bb.addEventListener('click', function () {
-            var all = ec.querySelectorAll('.chip');
-            for (var q = 0; q < all.length; q++) all[q].classList.remove('active');
-            bb.classList.add('active');
-            editCtx.scIdx = idx2;
-          });
-          ec.appendChild(bb);
-        })(SHICHEN[ci], ci);
-      }
+      var eSyncTime = function () {
+        var eh2 = parseInt($('eHour').value, 10);
+        var em2 = parseInt($('eMin').value, 10);
+        if (isNaN(eh2) || eh2 < 0) eh2 = 0; if (eh2 > 23) eh2 = 23;
+        if (isNaN(em2) || em2 < 0) em2 = 0; if (em2 > 59) em2 = 59;
+        $('eHour').value = eh2; $('eMin').value = em2;
+        editCtx.h = eh2; editCtx.mi = em2;
+        var scE = SHICHEN[scIdxOfTime(eh2, em2)];
+        $('eTimeSc').textContent = '≈' + scE.name + (scE.late ? '' : '时');
+      };
+      $('eHour').addEventListener('input', eSyncTime);
+      $('eMin').addEventListener('input', eSyncTime);
+      $('eHour').addEventListener('change', eSyncTime);
+      $('eMin').addEventListener('change', eSyncTime);
+      eSyncTime();
       eFillProv();
       bindEditDist();
     }
@@ -991,7 +983,8 @@
         nickname: $('eNickname').value.trim(),
         yiming: $('eYiming').value.trim(),
         gender: gender, mode: mode, y: y, m: m, d: d, leap: leap,
-        scIdx: (typeof editCtx.scIdx === 'number') ? editCtx.scIdx : 2,
+        scIdx: scIdxOfTime(editCtx.h, editCtx.mi),
+        h: editCtx.h, mi: editCtx.mi,
         prov: (prov && prov !== 'CUSTOM') ? prov : '',
         city: $('eCity').value || '', dist: $('eDist').value || '',
         lng: lngVal !== '' ? parseFloat(lngVal) : (editCtx.lng || null),

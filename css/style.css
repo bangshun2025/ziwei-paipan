@@ -98,6 +98,8 @@ body {
 .input-panel select#fProv { width: 310px; }
 .input-panel select#fCity, .input-panel select#fDist { width: 158px; }
 .unit { font-size: 11px; color: #b0a996; margin-left: -5px; white-space: nowrap; }
+.time-num { width: 54px; text-align: center; padding: 0 2px !important; }
+.sc-hint { font-size: 11px; color: #9a938a; white-space: nowrap; margin-left: 2px; user-select: none; }
 .seg { display: inline-flex; border: 1px solid #d8d3c4; border-radius: 7px; overflow: hidden; background: #fff; flex: none; }
 .seg button {
   border: 0; background: #fff; height: 31px; padding: 0 13px;
