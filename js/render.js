@@ -29,6 +29,17 @@
   var HUA_CLS = { 禄: 'L', 权: 'Q', 科: 'K', 忌: 'J' };
   var HUA_TXT = { 禄: '化禄', 权: '化权', 科: '化科', 忌: '化忌' };
 
+  // ===== 大限盘宫名环（v0.6.0）=====
+  // 生年十二宫沿地支顺环（命宫右邻=父母宫，与 CONST.PALACES 同构）；offset = 大限命宫所在格的环序号。
+  // 点「父母宫」→ 该宫显示 大限命宫，其右邻福德宫显示 大限父母宫：全盘右下角大限宫名随整体平移。
+  var DX_RING = C.PALACES;
+  function dxNameOf(palaceName, offset) {
+    var i = DX_RING.indexOf(palaceName);
+    if (i < 0) i = 0;
+    var nm = DX_RING[fix12(i - (offset || 0))];
+    return '大限' + nm + (nm.charAt(nm.length - 1) === '宫' ? '' : '宫');
+  }
+
   // 中文数字：CN_D[0] 用「〇」（年份标准写法）；CN_M 等日/月专用字不受影响（cnDay 不走 CN_D[0] 于 10/20/30 特判外均用一~九）
   var CN_D = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
   var CN_M = ['', '正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
@@ -247,7 +258,8 @@
         + '<div class="p-foot">'
         + (sq ? '<span class="p-sq">' + esc(sq) + '</span>' : '')
         + starMark + footTags + '<span class="p-name">' + esc(palace.name) + '</span>'
-        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>';
+        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
+        + '<div class="p-dx">' + dxNameOf(palace.name, 0) + '</div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
       grid.appendChild(cell);
@@ -339,6 +351,13 @@
     }
     if (detailEl) detailEl.innerHTML = detailHtml(chart, pi);
     if (state && state.onSelect) state.onSelect(pi);
+    // 大限盘宫名同步（v0.6.0）：选中宫 = 大限命宫 → 每格右下角「大限X宫」沿生年十二宫环整体偏移
+    var off = DX_RING.indexOf(chart.palaces[pi].name);
+    if (off < 0) off = 0;
+    for (var ci = 0; ci < 12; ci++) {
+      var dEl = cells[ci] && cells[ci].querySelector('.p-dx');
+      if (dEl) dEl.textContent = dxNameOf(chart.palaces[ci].name, off);
+    }
   }
 
   // ===== 对外 =====
@@ -350,6 +369,13 @@
     renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state) {
       renderHead(headEl, chart, state);
       var cells = renderGrid(gridRoot, chart);
+      // v0.6.0：宫格可点 —— 点击即选中该宫（高亮/详情/大限轴联动），且该宫成为「大限命宫」，
+      // 全盘右下角大限宫名沿生年十二宫环偏移（点命宫右邻父母宫 → 父母宫=大限命宫，福德宫=大限父母宫…）
+      for (var pc = 0; pc < 12; pc++) (function (pi) {
+        cells[pi].addEventListener('click', function () {
+          selectPalace(chart, pi, cells, timelineRoot, detailEl, state);
+        });
+      })(pc);
       renderTimeline(timelineRoot, chart, cells, detailEl, state);
       return { cells: cells, chart: chart };
     }
