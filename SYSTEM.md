@@ -14,7 +14,7 @@
 |------|-----|
 | 当前版本 | **v0.4.0**（本地已实现，未发布） |
 | 版本号位置 | index.html 头部 `<!-- vX.Y.Z -->` |
-| 发布状态 | **Git 化完成**：本地 main @ 9aaebee（v0.4.0 收口，tag v0.4.0 = fa686a6）；origin/main 停在 4b3e05a（v0.2.1），本地 ahead 5；origin 推送/正式发布待授权 |
+| 发布状态 | **Git 化完成**：本地 main @ 9aaebee（v0.4.0 收口，tag v0.4.0 = fa686a6）；origin/main 停在 4b3e05a（v0.2.1），本地 ahead 5；origin 推送/正式发布待授权。**侧栏扩展已部署**：ziwei-paipan ext 0.4.0（生命排盘启动器紫微卡片 → v0.4.0），见 docs/RELEASE_v0.4.0_侧栏扩展部署.md |
 | 口径裁决 | D-1~D-7 已由邦顺裁决采纳默认（2026-09-02）；v0.2.0 宪法勘误（年界=立春、月=节气、晚子时归次日）见 docs/修订说明_v0.2.0 与 ALGORITHM.md |
 | 质量状态 | ✅ v0.4.0 验证通过（自检 94 断言 0 FAIL；check-release.sh 全绿；CDP 浏览器 9 项功能验证 PASS）；基线 v0.3.0-ref 66c7f4c |
 
