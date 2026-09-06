@@ -1,4 +1,4 @@
-/* 紫微斗数排盘 v0.4.0 — style.css
+/* 紫微斗数排盘 v0.5.0 — style.css
  * 风格：浅色高信息密度（参考「热卜」系列界面：白/米白底、蓝黑正文、红强调、青主按钮）。
  * 布局：4x4 宫格方盘（外环12宫位按地支固定，中心2x2=中宫信息）+ 输入面板 + 大限时间轴 + 详情区。
  */
@@ -414,3 +414,26 @@ body {
   .card-toolbar { flex-wrap: wrap; }
 }
 
+
+/* ===== v0.5.0：AI 录入弹窗 + 隐私模式 + person 行 ===== */
+#aiPanel .card-body textarea#aiInput {
+  width:100%; box-sizing:border-box; padding:8px 10px; font-size:14px;
+  border:1px solid var(--line); border-radius:6px; font-family:inherit;
+  background:var(--panel); color:var(--ink); resize:vertical; line-height:1.6;
+}
+#aiPanel .card-body textarea#aiInput:focus { outline:none; border-color:var(--blue); }
+.ai-hint { font-size:12px; color:var(--ink-soft); margin:8px 0 0; line-height:1.6; }
+.ai-preview {
+  margin-top:10px; padding:8px 10px; font-size:13px; line-height:1.6;
+  background:#eef7ef; border:1px dashed var(--teal); border-radius:6px; color:#1e5a28;
+}
+.ai-preview.hidden { display:none; }
+/* 结果头 person 行（脱敏显示名 · 性别） */
+.person-line {
+  font-size:15px; font-weight:600; letter-spacing:.06em; color:var(--ink);
+  margin-bottom:6px; padding-bottom:4px; border-bottom:1px solid var(--line);
+}
+/* 隐私按钮激活态（隐私开启 = 显示名脱敏中） */
+#btnPrivacy.privacy-on, #btnPrivacy2.privacy-on { color:var(--red); border-color:var(--red); }
+
+.ai-preview.ai-bad { background:#fdf0ee; border-color:var(--red); color:#8c2f22; }

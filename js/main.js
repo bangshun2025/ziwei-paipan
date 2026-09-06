@@ -1,4 +1,4 @@
-/* 紫微斗数排盘 v0.4.0 — main.js
+/* 紫微斗数排盘 v0.5.0 — main.js
  * APP：入口 + ?test=1 内嵌自检（L1 常量 / L2 历法 / L3 安星 / L4 端到端）。
  * 依赖：constants.js -> algorithm.js（先加载）。
  */
@@ -304,6 +304,14 @@
   }
   function clearSel(sel) { sel.innerHTML = ''; }
   function setSel(sel, val) { sel.value = String(val); }
+  // v0.5.0 空值占位：目标值不在选项中时插入「— 未填 —」空选项并选中，避免默认第一项假数据
+  function phSel(sel) {
+    var o = document.createElement('option');
+    o.value = '';
+    o.textContent = '— 未填 —';
+    sel.insertBefore(o, sel.firstChild);
+    sel.selectedIndex = 0;
+  }
   function daysInSolarMonth(y, m) { return ALGO.solarDim(y, m); }
   function lunarYearInfo(ly) {
     // 返回该农历年每月长度 {leapMonth, mDays:[29/30...], leapDays}
@@ -332,18 +340,21 @@
       leapWrap: $('leapWrap'), fLeap: $('fLeap'), fLeapLbl: $('fLeapLbl'),
       chipShichen: $('chipShichen'), fHour: null, fMinute: null,
       gender: document.querySelectorAll('input[name="gender"]'),
-      inName: $('inName'), fProv: $('fProv'), fCity: $('fCity'), fDist: $('fDist'),
+      inName: $('inName'), inNickname: $('inNickname'), inYiming: $('inYiming'),
+      fProv: $('fProv'), fCity: $('fCity'), fDist: $('fDist'),
       fLng: $('fLng'), fTrueSolar: $('fTrueSolar'), liveSolar: $('liveSolar'),
       btnAdv: $('btnAdv'), advBox: $('advBox'),
       advLateZi: $('advLateZi'),
       btnCalc: $('btnCalc'), calcErr: $('calcErr'), dateErr: $('dateErr'),
+      btnAi: $('btnAi'), aiMask: $('aiMask'), aiInput: $('aiInput'),
+      aiPreview: $('aiPreview'), aiErr: $('aiErr'), aiApply: $('aiApply'), aiClose: $('aiClose'),
       resultPanel: $('resultPanel'), resultHead: $('resultHead'),
       chartWrap: $('chartWrap'), timeline: $('timeline'), detailBody: $('detailBody'),
       detailPanel: $('detailPanel'),
       btnTestPage: $('btnTestPage')
     };
 
-    var state = { mode: 'solar', sy: 2000, sm: 8, sd: 16, ly: 2000, lm: 7, ld: 17, leap: false, lastChart: null, name: '', prov: '', city: '', dist: '', scIdx: 2 };
+    var state = { mode: 'solar', sy: 2000, sm: 8, sd: 16, ly: 2000, lm: 7, ld: 17, leap: false, lastChart: null, name: '', nickname: '', yiming: '', prov: '', city: '', dist: '', scIdx: 2 };
 
     // ---- 填充基础下拉 ----
     function fillDateSelects(mode) {
@@ -519,6 +530,8 @@
     els.fLng.addEventListener('input', function () { refreshLiveSolar(); });
     els.fLng.addEventListener('change', function () { if (state.lastChart) doCalc(); });
     els.inName.addEventListener('input', function () { state.name = els.inName.value; });
+    els.inNickname.addEventListener('input', function () { state.nickname = els.inNickname.value; });
+    els.inYiming.addEventListener('input', function () { state.yiming = els.inYiming.value; });
     els.fTrueSolar.addEventListener('change', function () { refreshLiveSolar(); if (state.lastChart) doCalc(); });
     els.gender.forEach(function (r) { r.addEventListener('change', function () { if (state.lastChart) doCalc(); }); });
 
@@ -569,6 +582,115 @@
       location.href = location.pathname + '?test=1';
     });
 
+    // ===== v0.5.0 AI 自然语言录入（解析在 aiinput.js；时辰/历法联动用本闭包）=====
+    function shichenTxtOf(h, mi) {
+      var arr = SHICHEN;
+      for (var si = 0; si < arr.length; si++) {
+        if (arr[si].h === h && arr[si].mi === mi) return arr[si].name + (arr[si].late ? '' : '时');
+      }
+      var nm = scNameOf(h, mi);
+      return nm ? nm + '时' : '';
+    }
+    function aiPreviewStr(r) {
+      var sb = [];
+      if (r.name) sb.push('姓名：' + ((window.ARCHIVE && ARCHIVE.getPrivacyMode()) ? '已隐藏' : r.name));
+      sb.push('性别：' + (r.gender || '（不填，保持原状）'));
+      if (r.year) {
+        sb.push(r.year + '年' + r.month + '月' + r.day + '日'
+          + (r.calendarType === 'lunar' ? '（农历' + (r.leap ? ' ·闰' + r.month + '月' : '') + '）' : '（公历）'));
+      }
+      if (r.hour !== null) {
+        var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+        var st = shichenTxtOf(r.hour, r.min);
+        sb.push(p2(r.hour) + ':' + p2(r.min) + (st ? ' ≈' + st : ''));
+      }
+      if (r.prov) sb.push(r.prov + (r.city || '') + (r.dist || ''));
+      return sb.join(' · ');
+    }
+    function aiFillPreview() {
+      var r = window.AIINPUT.parse(els.aiInput.value, SHICHEN);
+      var pv = els.aiPreview;
+      pv.classList.remove('hidden');
+      pv.classList.toggle('ai-bad', !r.year);
+      if (!r.year) {
+        pv.textContent = '⚠ 未能识别完整日期，请补充（例：邦顺 男 1982年10月18日早上5点 广西南宁）';
+        return;
+      }
+      pv.textContent = '✅ 识别：' + aiPreviewStr(r);
+    }
+    function aiApply() {
+      var r = window.AIINPUT.parse(els.aiInput.value, SHICHEN);
+      var e = els.aiErr;
+      if (!r.year) {
+        if (e) { e.textContent = '未能识别完整日期，请补充年份（例：1982年10月18日）。'; e.classList.remove('hidden'); }
+        return;
+      }
+      if (e) e.classList.add('hidden');
+      if (r.name) { els.inName.value = r.name; state.name = r.name; }
+      // 历法（先切历再填值：setMode 内部会用旧表单值做换算覆盖）
+      var needLunar = r.calendarType === 'lunar';
+      if (needLunar !== (state.mode === 'lunar')) setMode(needLunar ? 'lunar' : 'solar');
+      els.fLeap.checked = needLunar ? !!r.leap : false;
+      setSel(els.fYear, r.year);
+      setSel(els.fMonth, r.month);
+      if (needLunar) {
+        syncLeapLbl();
+        fillDateSelects('lunar');
+      } else {
+        fillDateSelects('solar');
+      }
+      setSel(els.fDay, r.day);
+      // 性别（无性别词则保持原状）
+      if (r.gender) {
+        for (var gi = 0; gi < els.gender.length; gi++) els.gender[gi].checked = (els.gender[gi].value === (r.gender === '女' ? 'F' : 'M'));
+      }
+      // 时辰（折算为 SHICHEN 序号，高亮 chip）
+      if (r.hour !== null) {
+        var idx = scIdxOf(r.hour, r.min);
+        if (idx >= 0 && idx < chipBtns.length) {
+          for (var k = 0; k < chipBtns.length; k++) chipBtns[k].classList.remove('active');
+          chipBtns[idx].classList.add('active');
+          state.h = SHICHEN[idx].h; state.mi = SHICHEN[idx].mi; state.scIdx = idx;
+        }
+      }
+      // 出生地省市区联动 + 经度回填（缺项插占位，避免默认第一项假数据）
+      if (r.prov && window.LOC_DATA[r.prov]) {
+        setSel(els.fProv, r.prov);
+        fillCity(r.prov);
+        if (r.city) {
+          setSel(els.fCity, r.city);
+          fillDist(r.city);
+          if (r.dist) setSel(els.fDist, r.dist);
+          else phSel(els.fDist);
+        } else {
+          phSel(els.fCity);
+          clearSel(els.fDist); els.fDist.disabled = true;
+        }
+        els.fLng.classList.add('hidden');
+        els.fLng.value = placeLngOf() || '';
+      }
+      refreshLiveSolar();
+      aiHide();
+      doCalc();
+      if (window.ARCHIVE && ARCHIVE.toast) ARCHIVE.toast('已按 AI 录入排盘');
+    }
+    function aiShow() {
+      els.aiMask.classList.remove('hidden');
+      els.aiInput.value = '';
+      els.aiPreview.classList.add('hidden');
+      els.aiPreview.textContent = '';
+      if (els.aiErr) els.aiErr.classList.add('hidden');
+      setTimeout(function () { els.aiInput.focus(); }, 60);
+    }
+    function aiHide() { els.aiMask.classList.add('hidden'); }
+    if (els.btnAi) els.btnAi.addEventListener('click', aiShow);
+    if (els.aiClose) els.aiClose.addEventListener('click', aiHide);
+    if (els.aiApply) els.aiApply.addEventListener('click', aiApply);
+    if (els.aiMask) els.aiMask.addEventListener('click', function (ev) {
+      if (ev.target === els.aiMask) aiHide();
+    });
+    if (els.aiInput) els.aiInput.addEventListener('input', aiFillPreview);
+
     // ---- 表单读取 ----
     function solarFromLunarForm() {
       var ly = +els.fYear.value, lm = +els.fMonth.value, ld = +els.fDay.value, leap = els.fLeap.checked;
@@ -607,9 +729,11 @@
       }
       state.lastChart = chart;
       window.__CHART__ = chart;
+      var person = { name: state.name, nickname: state.nickname, yiming: state.yiming, gender: gender };
+      window.__LAST_HEAD__ = { chart: chart, person: person };
       els.resultPanel.classList.remove('hidden');
       if (els.resultHead) els.resultHead.classList.remove('hidden');
-      window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, null);
+      window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person);
       // 滚到结果
       if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -633,6 +757,8 @@
       var lunar = state.mode === 'lunar';
       var snap = {
         name: els.inName.value.trim(),
+        nickname: els.inNickname.value.trim(),
+        yiming: els.inYiming.value.trim(),
         gender: gender,
         mode: state.mode,
         y: lunar ? +els.fYear.value : sol.y,
@@ -673,10 +799,24 @@
       }
       for (var gi2 = 0; gi2 < els.gender.length; gi2++) els.gender[gi2].checked = (els.gender[gi2].value === s.gender);
       els.inName.value = s.name || '';
+      els.inNickname.value = s.nickname || '';
+      els.inYiming.value = s.yiming || '';
+      state.name = s.name || '';
+      state.nickname = s.nickname || '';
+      state.yiming = s.yiming || '';
       if (s.prov && window.LOC_DATA[s.prov]) {
         setSel(els.fProv, s.prov);
-        fillCity(s.prov, s.city);
-        fillDist(s.city, s.dist);
+        fillCity(s.prov);
+        if (s.city) {
+          if (els.fCity.querySelector('option[value="' + s.city + '"]')) setSel(els.fCity, s.city);
+          else phSel(els.fCity);
+          fillDist(els.fCity.value || s.city);
+          if (s.dist && els.fDist.querySelector('option[value="' + s.dist + '"]')) setSel(els.fDist, s.dist);
+          else phSel(els.fDist);
+        } else {
+          phSel(els.fCity);
+          clearSel(els.fDist); els.fDist.disabled = true;
+        }
         var pl = placeLngOf();
         els.fLng.classList.add('hidden');
         els.fLng.value = (typeof s.lng === 'number') ? s.lng : (pl || '');
@@ -719,7 +859,10 @@
       var sc0 = editCtx.scIdx;
       var b = $('editBody');
       var h = '';
-      h += '<div class="row"><span class="lbl">姓名</span><input type="text" id="eName" maxlength="24" style="width:150px" value="' + eEsc(s.name) + '"></div>';
+      h += '<div class="row"><span class="lbl">名字</span>' +
+        '<input type="text" id="eNickname" maxlength="24" style="width:84px" placeholder="小名" value="' + eEsc(s.nickname || '') + '">' +
+        '<input type="text" id="eYiming" maxlength="24" style="width:84px" placeholder="艺名" title="艺名（选填；隐私模式优先显示名）" value="' + eEsc(s.yiming || '') + '">' +
+        '<input type="text" id="eName" maxlength="24" style="width:150px" placeholder="姓名（必填）" value="' + eEsc(s.name || '') + '"></div>';
       h += '<div class="row"><span class="lbl">性别</span><span class="radio-group">' +
         '<label><input type="radio" name="eGender" value="M"' + (s.gender !== 'F' ? ' checked' : '') + '> 男</label>' +
         '<label><input type="radio" name="eGender" value="F"' + (s.gender === 'F' ? ' checked' : '') + '> 女</label></span></div>';
@@ -799,6 +942,7 @@
       ec.disabled = cks.length === 0;
       for (var i = 0; i < cks.length; i++) addOpt(ec, cks[i], cks[i]);
       if (editCtx.city && ec.querySelector('option[value="' + editCtx.city + '"]')) setSel(ec, editCtx.city);
+      else if (cks.length) phSel(ec);
       eSyncCity();
     }
     function eSyncCity() {
@@ -813,6 +957,7 @@
       ed.disabled = dts.length === 0;
       for (var i = 0; i < dts.length; i++) addOpt(ed, dts[i], dts[i]);
       if (editCtx.dist && ed.querySelector('option[value="' + editCtx.dist + '"]')) setSel(ed, editCtx.dist);
+      else if (dts.length) phSel(ed);
       editCtx.dist = ed.value || '';
       var c = (prov && prov !== 'CUSTOM' && city) ? window.LOC_DATA[prov].cities[city] : null;
       if (c) {
@@ -843,6 +988,8 @@
       var lngVal = $('eLng').value;
       var patch = {
         name: $('eName').value.trim(),
+        nickname: $('eNickname').value.trim(),
+        yiming: $('eYiming').value.trim(),
         gender: gender, mode: mode, y: y, m: m, d: d, leap: leap,
         scIdx: (typeof editCtx.scIdx === 'number') ? editCtx.scIdx : 2,
         prov: (prov && prov !== 'CUSTOM') ? prov : '',

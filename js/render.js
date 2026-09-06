@@ -1,4 +1,4 @@
-/* 紫微斗数排盘 v0.4.0 — render.js
+/* 紫微斗数排盘 v0.5.0 — render.js
  * UI RENDER：纯渲染层（无排盘计算），输入盘对象 chart → 渲染十二宫方盘/中宫/大限轴/详情。
  * 依赖：window.CONST（constants.js）。
  * 口径：月柱为农历月五虎遁（v0.1 展示用，非节气月，界面已标注）。
@@ -144,10 +144,21 @@
   }
 
   // ===== 渲染头部（四柱/农历/口径）=====
-  function renderHead(el, chart) {
+  function renderHead(el, chart, person) {
     var pre = chart.pre;
     var ganC = 'gan', zhiC = 'zhi';
     var html = '';
+    // v0.5.0 person 行：显示名走脱敏链（隐私开 艺名→小名→匿名；关 小名/正名）
+    var disp = '';
+    if (person) {
+      if (window.ARCHIVE && ARCHIVE.getDisplayName) disp = ARCHIVE.getDisplayName(person);
+      else disp = person.name || '';
+    }
+    if (disp) {
+      html += '<div class="person-line">' + esc(disp)
+        + (person && person.gender ? ' · ' + (person.gender === 'F' ? '女' : '男') : '')
+        + '</div>';
+    }
     html += '<div class="pillars">'
       + '<span class="gan">' + esc(pre.yearGanZhi.gan) + '</span><span class="zhi">' + esc(pre.yearGanZhi.zhi) + '</span> '
       + '<span class="gan">' + esc(monthPillarOf(chart).charAt(0)) + '</span><span class="zhi">' + esc(monthPillarOf(chart).charAt(1)) + '</span> '
@@ -332,12 +343,12 @@
 
   // ===== 对外 =====
   window.RENDER = {
-    version: 'v0.1.0',
+    version: 'v0.5.0',
     monthPillarOf: monthPillarOf,
     cnLunar: cnLunar,
     renderHead: renderHead,
     renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state) {
-      renderHead(headEl, chart);
+      renderHead(headEl, chart, state);
       var cells = renderGrid(gridRoot, chart);
       renderTimeline(timelineRoot, chart, cells, detailEl, state);
       return { cells: cells, chart: chart };

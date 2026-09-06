@@ -1,11 +1,11 @@
-<!-- 紫微斗数排盘 v0.4.0 -->
+<!-- 紫微斗数排盘 v0.5.0 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>紫微斗数排盘 v0.4.0</title>
-<link rel="stylesheet" href="css/style.css?v=331">
+<title>紫微斗数排盘 v0.5.0</title>
+<link rel="stylesheet" href="css/style.css?v=501">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 
 <div id="app" class="hidden">
   <header class="app-top">
-    <h1>紫微斗数排盘<span class="ver">v0.4.0</span></h1>
+    <h1>紫微斗数排盘<span class="ver">v0.5.0</span></h1>
     <span class="spacer"></span>
     <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
   </header>
@@ -22,8 +22,10 @@
     <!-- ===== 输入面板 ===== -->
     <section class="panel input-panel">
       <div class="row">
-        <span class="lbl">姓名</span>
-        <input type="text" id="inName" placeholder="请输入姓名（用于档案标识）" maxlength="24" style="width:150px">
+        <span class="lbl">名字</span>
+        <input type="text" id="inNickname" placeholder="小名" maxlength="24" style="width:84px" title="小名（选填；隐私模式显示用）">
+        <input type="text" id="inYiming" placeholder="艺名" maxlength="24" style="width:84px" title="艺名（选填；隐私模式优先显示名）">
+        <input type="text" id="inName" placeholder="姓名（必填，用于档案标识）" maxlength="24" style="width:150px">
       </div>
       <div class="row">
         <span class="lbl">历法</span>
@@ -83,6 +85,8 @@
       </div>
 
       <div class="form-actions">
+        <button type="button" class="btn-main btn-ghost" id="btnPrivacy">🔒 隐私</button>
+        <button type="button" class="btn-main btn-ghost" id="btnAi">🤖 AI 录入</button>
         <button type="button" class="btn-main btn-ghost" id="btnArchive">📋 档案</button>
         <button type="button" class="btn-main" id="btnCalc">开始排盘</button>
         <span class="err hidden" id="calcErr"></span>
@@ -115,6 +119,7 @@
         <span class="card-title">📋 档案</span>
         <span class="spacer"></span>
         <span class="card-hint" id="archCount"></span>
+        <button type="button" class="link-btn" id="btnPrivacy2">🔒 隐私</button>
         <button type="button" class="link-btn" id="archBtnTrash">🗑 回收站</button>
         <button type="button" class="link-btn" id="archClose">✕ 关闭</button>
       </div>
@@ -156,6 +161,24 @@
     </div>
   </div>
 
+  <!-- ===== 🤖 AI 自然语言录入（v0.5.0）===== -->
+  <div class="mask hidden" id="aiMask">
+    <div class="panel-card panel-narrow" id="aiPanel">
+      <div class="card-head">
+        <span class="card-title">🤖 AI 自然语言录入</span>
+        <span class="spacer"></span>
+        <button type="button" class="btn-main btn-small" id="aiApply">解析并填入</button>
+        <button type="button" class="link-btn" id="aiClose">✕ 取消</button>
+      </div>
+      <div class="card-body">
+        <textarea id="aiInput" rows="3" placeholder="输入包含姓名、性别、出生日期、时间和地点的自然语句&#10;例：邦顺 男 1982年10月18日早上5点 广西南宁"></textarea>
+        <div class="ai-hint">支持：公历/农历（注明「农历」即按农历，可带闰月）· 时辰（如「卯时」「晚子时」）或钟点（如「早上5点」「5:01」）· 出生地（省/市/区）。</div>
+        <div class="ai-preview hidden" id="aiPreview"></div>
+        <div class="err hidden" id="aiErr"></div>
+      </div>
+    </div>
+  </div>
+
   <footer class="foot-note">
     口径（ALGORITHM v0.2.0 宪法默认）：① 年界=立春换年；② 月=节气十二节（十二节起月、五虎遁定干）；③ 晚子时=归次日；
     ④ 日柱按农历日干支，不涉闰月安星；⑤ 未输入出生地时按北京时间（120°E）排盘，默认按真太阳时校正；
@@ -163,12 +186,13 @@
   </footer>
 </div>
 
-<!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> main -> archive（零构建 IIFE + window 命名空间）-->
-<script src="js/constants.js?v=331"></script>
-<script src="js/locdata.js?v=331"></script>
-<script src="js/algorithm.js?v=331"></script>
-<script src="js/render.js?v=331"></script>
-<script src="js/main.js?v=331"></script>
-<script src="js/archive.js?v=331"></script>
+<!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> aiinput(AI解析) -> main -> archive（零构建 IIFE + window 命名空间）-->
+<script src="js/constants.js?v=501"></script>
+<script src="js/locdata.js?v=501"></script>
+<script src="js/algorithm.js?v=501"></script>
+<script src="js/render.js?v=501"></script>
+<script src="js/aiinput.js?v=501"></script>
+<script src="js/main.js?v=502"></script>
+<script src="js/archive.js?v=501"></script>
 </body>
 </html>

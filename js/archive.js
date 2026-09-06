@@ -1,13 +1,52 @@
-// ===== 紫微斗数 档案功能（本地 localStorage；v0.4.0）=====
-// 借鉴：八字排盘 archive.js 本地主干（去云端/隐私分支）
-// 字段模型见 PRD_v0.4.0 §D：{id,name,gender,mode,y,m,d,leap,scIdx,h,mi,prov,city,dist,lng,useSolar,advLateZi,note,createdAt,updatedAt}
+// ===== 紫微斗数 档案功能（本地 localStorage；v0.5.0）=====
+// 借鉴：八字排盘 archive.js 本地主干（去云端分支）+ v0.19.0 隐私模式（默认开/持久化/降级链）
+// 字段模型见 PRD_v0.5.0 §C4：{id,name,nickname,yiming,gender,mode,y,m,d,leap,scIdx,h,mi,prov,city,dist,lng,useSolar,advLateZi,note,createdAt,updatedAt}
 (function () {
   var KEY = 'zw_arch_v1';
   var TRASH = 'zw_trash_v1';
   var CORRUPT = 'zw_arch_bak_corrupt';
+  var PRIVACY_KEY = 'zw_privacy_v1';
   var MAX_ARCH = 200;
 
   var curEditId = null;
+
+  // ---------- 隐私模式（v0.5.0，对齐八字 v0.19.0）----------
+  // 默认开启：localStorage 无记录视为开
+  function getPrivacyMode() {
+    var v = null;
+    try { v = localStorage.getItem(PRIVACY_KEY); } catch (e) { }
+    return v === null ? true : v === '1';
+  }
+  function setPrivacyMode(on) {
+    try { localStorage.setItem(PRIVACY_KEY, on ? '1' : '0'); } catch (e) { }
+  }
+  // 统一显示名：隐私关维持现状（小名 / 正名）；隐私开降级链 艺名 → 小名 → 匿名
+  function getDisplayName(s) {
+    if (!s) return '';
+    if (!getPrivacyMode()) {
+      return (s.nickname || '') ? (s.nickname + ' / ' + s.name) : (s.name || '');
+    }
+    if (s.yiming && s.yiming.trim()) return s.yiming.trim();
+    if (s.nickname && s.nickname.trim()) return s.nickname.trim();
+    return '匿名';
+  }
+  function syncPrivacyBtns() {
+    var on = getPrivacyMode();
+    var label = on ? '🔒 隐私' : '🔓 隐私';
+    var b1 = el('btnPrivacy'), b2 = el('btnPrivacy2');
+    if (b1) { b1.textContent = label; b1.classList.toggle('privacy-on', on); }
+    if (b2) { b2.textContent = label; b2.classList.toggle('privacy-on', on); }
+  }
+  // 切换：更新按钮 + 重渲档案面板（若开）+ 重渲结果头 person 行（若有）
+  function togglePrivacy() {
+    setPrivacyMode(!getPrivacyMode());
+    syncPrivacyBtns();
+    if (el('archiveMask') && !el('archiveMask').classList.contains('hidden')) renderMain();
+    var rh = el('resultHead');
+    if (window.RENDER && window.__LAST_HEAD__ && rh && !rh.classList.contains('hidden')) {
+      window.RENDER.renderHead(rh, window.__LAST_HEAD__.chart, window.__LAST_HEAD__.person);
+    }
+  }
 
   // ---------- 存储 ----------
   function readArr(key) {
@@ -73,7 +112,7 @@
 
   // ---------- 卡片渲染 ----------
   function cardHTML(s, inTrash) {
-    var name = esc(s.name || '未命名');
+    var name = esc(getDisplayName(s) || '未命名');
     var meta = esc(snapSummary(s));
     var note = s.note ? '<div class="arch-note">' + esc(s.note) + '</div>' : '';
     var btns;
@@ -97,7 +136,7 @@
     kw = (kw || '').trim().toLowerCase();
     if (!kw) return arr;
     return arr.filter(function (s) {
-      var hay = ((s.name || '未命名') + ' ' + (s.note || '') + ' ' + s.y + '-' + s.m + '-' + s.d + ' ' + (s.prov || '') + (s.city || '')).toLowerCase();
+      var hay = ((s.name || '') + ' ' + (s.nickname || '') + ' ' + (s.yiming || '') + ' ' + (s.note || '') + ' ' + s.y + '-' + s.m + '-' + s.d + ' ' + (s.prov || '') + (s.city || '')).toLowerCase();
       return hay.indexOf(kw) !== -1;
     });
   }
@@ -152,7 +191,7 @@
     arr.unshift(snap);
     if (!saveList(arr)) { toast('保存失败：本地存储已满'); return; }
     renderMain();
-    toast('已保存「' + (snap.name || '未命名') + '」');
+    toast('已保存「' + (getDisplayName(snap) || '未命名') + '」');
   }
   function loadOne(id) {
     var arr = list();
@@ -162,7 +201,7 @@
     if (!window.APP.writeForm(arr[i])) { toast('载入失败：数据异常'); return; }
     hideMask('archiveMask');
     el('archiveSearch').value = '';
-    toast('已载入「' + (arr[i].name || '未命名') + '」并排盘');
+    toast('已载入「' + (getDisplayName(arr[i]) || '未命名') + '」并排盘');
   }
   function delOne(id) {
     var arr = list();
@@ -247,6 +286,10 @@
       renderMain();
       showMask('archiveMask', 'archivePanel');
     });
+    var bp1 = el('btnPrivacy'), bp2 = el('btnPrivacy2');
+    if (bp1) bp1.addEventListener('click', togglePrivacy);
+    if (bp2) bp2.addEventListener('click', togglePrivacy);
+    syncPrivacyBtns();
     el('archClose').addEventListener('click', function () { hideMask('archiveMask'); });
     el('archiveMask').addEventListener('click', function (ev) {
       if (ev.target === el('archiveMask')) hideMask('archiveMask');
@@ -274,6 +317,10 @@
     });
     el('editSave').addEventListener('click', saveEdit);
   }
-  window.ARCHIVE = { init: init, renderMain: renderMain, toast: toast };
+  window.ARCHIVE = {
+    init: init, renderMain: renderMain, toast: toast,
+    getPrivacyMode: getPrivacyMode, setPrivacyMode: setPrivacyMode,
+    togglePrivacy: togglePrivacy, getDisplayName: getDisplayName
+  };
 })();
 
