@@ -1,6 +1,6 @@
 // ===== 紫微斗数 档案功能（本地 localStorage；v0.5.0）=====
 // 借鉴：八字排盘 archive.js 本地主干（去云端分支）+ v0.19.0 隐私模式（默认开/持久化/降级链）
-// 字段模型见 PRD_v0.5.0 §C4：{id,name,nickname,yiming,gender,mode,y,m,d,leap,scIdx,h,mi,prov,city,dist,lng,useSolar,advLateZi,note,createdAt,updatedAt}
+// 字段模型见 PRD_v0.5.0 §C4：{id,name,nickname,yiming,gender,mode,y,m,d,leap,scIdx,h,mi,prov,city,dist,lng,useSolar,note,createdAt,updatedAt}
 (function () {
   var KEY = 'zw_arch_v1';
   var TRASH = 'zw_trash_v1';

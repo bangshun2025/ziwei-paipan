@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=504">
+<link rel="stylesheet" href="css/style.css?v=505">
 </head>
 <body>
 
@@ -52,13 +52,14 @@
 
       <div class="row">
         <span class="lbl">时间</span>
-        <input type="number" id="fHour" class="time-num" min="0" max="23" step="1" value="4" title="出生钟点（24 小时制）">
+        <input type="number" id="fHour" class="time-num" min="0" max="23" step="1" value="6" title="出生钟点（24 小时制）">
         <span class="unit">时</span>
-        <input type="number" id="fMinute" class="time-num" min="0" max="59" step="1" value="0" title="出生分钟">
+        <input type="number" id="fMinute" class="time-num" min="0" max="59" step="1" value="30" title="出生分钟">
         <span class="unit">分</span>
-        <span class="sc-hint" id="timeSc">≈寅时</span>
+        <span class="sc-hint" id="timeSc">≈卯时</span>
       </div>
 
+      <div class="loc-area" id="locArea">
       <div class="row">
         <span class="lbl">出生地</span>
         <select id="fProv">
@@ -71,22 +72,12 @@
         <select id="fDist" disabled></select>
         <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" title="自动回填所选城市经度，可手动微调">
       </div>
+      </div>
 
       <div class="row">
         <label class="solar-lbl"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</label>
         <span class="live-solar" id="liveSolar"></span>
         <span class="spacer"></span>
-        <button type="button" class="adv-toggle" id="btnAdv" title="展开口径设置">⚙ 口径开关（默认=宪法）</button>
-      </div>
-      <div class="adv-box" id="advBox">
-        <div class="adv-row">
-          <label class="lbl">晚子时</label>
-          <select id="advLateZi">
-            <option value="forward">归次日（默认）</option>
-            <option value="current">归当日</option>
-          </select>
-          <span class="adv-note">年界=立春、月=节气（v0.2.0 固定，不可切换）</span>
-        </div>
       </div>
       <div class="ip-foot">
         <button type="button" class="btn-main btn-ghost" id="btnPrivacy">🔒 隐私</button>
@@ -195,9 +186,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=501"></script>
-<script src="js/render.js?v=501"></script>
+<script src="js/render.js?v=502"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=503"></script>
+<script src="js/main.js?v=504"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

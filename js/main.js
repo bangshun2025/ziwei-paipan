@@ -342,9 +342,7 @@
       gender: document.querySelectorAll('input[name="gender"]'),
       inName: $('inName'), inNickname: $('inNickname'), inYiming: $('inYiming'),
       fProv: $('fProv'), fCity: $('fCity'), fDist: $('fDist'),
-      fLng: $('fLng'), fTrueSolar: $('fTrueSolar'), liveSolar: $('liveSolar'),
-      btnAdv: $('btnAdv'), advBox: $('advBox'),
-      advLateZi: $('advLateZi'),
+      fLng: $('fLng'), fTrueSolar: $('fTrueSolar'), liveSolar: $('liveSolar'), locArea: $('locArea'),
       btnCalc: $('btnCalc'), calcErr: $('calcErr'), dateErr: $('dateErr'),
       btnAi: $('btnAi'), aiMask: $('aiMask'), aiInput: $('aiInput'),
       aiPreview: $('aiPreview'), aiErr: $('aiErr'), aiApply: $('aiApply'), aiClose: $('aiClose'),
@@ -354,7 +352,7 @@
       btnTestPage: $('btnTestPage')
     };
 
-    var state = { mode: 'solar', sy: 2000, sm: 8, sd: 16, ly: 2000, lm: 7, ld: 17, leap: false, lastChart: null, name: '', nickname: '', yiming: '', prov: '', city: '', dist: '', h: 4, mi: 0, scIdx: 2 };
+    var state = { mode: 'solar', sy: 1982, sm: 10, sd: 18, ly: 1982, lm: 9, ld: 2, leap: false, lastChart: null, name: '', nickname: '', yiming: '', prov: '', city: '', dist: '', h: 6, mi: 30, scIdx: 3 };
 
     // ---- 填充基础下拉 ----
     function fillDateSelects(mode) {
@@ -379,8 +377,8 @@
       for (var m = 1; m <= 12; m++) addOpt(els.fMonth, String(m), m);
     }
     fillYearMonth();
-    setSel(els.fYear, 2000); setSel(els.fMonth, 8);
-    fillDateSelects('solar'); setSel(els.fDay, 16);
+    setSel(els.fYear, 1982); setSel(els.fMonth, 10);
+    fillDateSelects('solar'); setSel(els.fDay, 18);
 
     // ---- 出生时间：时/分输入 → 时辰（对齐 ALGO.hourToShichen：+60 整除 120，23 时起晚子）----
     function scIdxOfTime(hh, mm) {
@@ -535,7 +533,7 @@
     els.inName.addEventListener('input', function () { state.name = els.inName.value; });
     els.inNickname.addEventListener('input', function () { state.nickname = els.inNickname.value; });
     els.inYiming.addEventListener('input', function () { state.yiming = els.inYiming.value; });
-    els.fTrueSolar.addEventListener('change', function () { refreshLiveSolar(); if (state.lastChart) doCalc(); });
+    els.fTrueSolar.addEventListener('change', function () { if (els.locArea) els.locArea.classList.toggle('hidden', !els.fTrueSolar.checked); refreshLiveSolar(); if (state.lastChart) doCalc(); });
     els.gender.forEach(function (r) { r.addEventListener('change', function () { if (state.lastChart) doCalc(); }); });
 
     // ---- liveSolar：实时真太阳时显示（复用 ALGO.trueSolarTime）----
@@ -564,14 +562,7 @@
       return v;
     }
 
-    // ---- 口径开关 ----
-    els.btnAdv.addEventListener('click', function () { els.advBox.classList.toggle('show'); });
-    function applyConfig() {
-      CONST.CONFIG.DAY_DIVIDE = els.advLateZi.value;          // forward | current
-      // v0.2.0：年界(立春)/月轴(节气)为宪法口径，固定不可切换（原闰月分界、正月初一年界已废止）
-      if (state.lastChart) doCalc();
-    }
-    els.advLateZi.addEventListener('change', applyConfig);
+    // ---- 口径（宪法 v0.2.0 固定）：年界=立春、月轴=节气、子时统一归次日（forward）----
     els.btnTestPage.addEventListener('click', function () {
       location.href = location.pathname + '?test=1';
     });
@@ -730,11 +721,13 @@
     }
     els.btnCalc.addEventListener('click', function () { doCalc(); });
 
-    // 初始默认排盘示例（2000-8-16 寅时 女）
-    setSel(els.fYear, 2000); setSel(els.fMonth, 8); fillDateSelects('solar'); setSel(els.fDay, 16);
-    for (var gi = 0; gi < els.gender.length; gi++) els.gender[gi].checked = (els.gender[gi].value === 'F');
+    // 初始默认排盘示例（1982-10-18 6:30 卯时 男 · 广西南宁青秀区 · 真太阳时）
+    setSel(els.fYear, 1982); setSel(els.fMonth, 10); fillDateSelects('solar'); setSel(els.fDay, 18);
+    for (var gi = 0; gi < els.gender.length; gi++) els.gender[gi].checked = (els.gender[gi].value === 'M');
     fillProv();
+    setSel(els.fProv, '广西'); fillCity('广西', '南宁市'); setSel(els.fCity, '南宁市'); fillDist('南宁市', '青秀区'); setSel(els.fDist, '青秀区');
     els.fLng.classList.add('hidden'); els.fLng.value = '';
+    els.fLng.value = placeLngOf() || '';
     refreshLiveSolar();
     doCalc();
 
@@ -762,10 +755,8 @@
         city: (prov && prov !== 'CUSTOM') ? els.fCity.value : '',
         dist: els.fDist.value || '',
         lng: currentLng(),
-        useSolar: els.fTrueSolar.checked,
-        advLateZi: els.advLateZi.value,
-        note: ''
-      };
+          useSolar: els.fTrueSolar.checked,
+          note: ''      };
       return snap;
     }
     function writeForm(s) {
@@ -815,8 +806,8 @@
         els.fLng.classList.toggle('hidden', !s.lng);
         els.fLng.value = s.lng || '';
       }
-      els.fTrueSolar.checked = !!s.useSolar;
-      if (s.advLateZi) { setSel(els.advLateZi, s.advLateZi); CONST.CONFIG.DAY_DIVIDE = els.advLateZi.value; }
+      els.fTrueSolar.checked = s.useSolar !== false;
+      if (els.locArea) els.locArea.classList.toggle('hidden', !els.fTrueSolar.checked);
       refreshLiveSolar();
       doCalc();
       return true;
@@ -869,8 +860,8 @@
       h += '<div class="row"><span class="lbl">出生地</span><select id="eProv"><option value="">— 未选择 —</option></select>' +
         '<select id="eCity" disabled></select><select id="eDist" disabled></select>' +
         '<input type="number" id="eLng" step="0.1" min="73" max="136" placeholder="经度°E" style="width:90px" class="hidden"></div>';
-      h += '<div class="row"><label class="lbl"><input type="checkbox" id="eUseSolar"' + (s.useSolar ? ' checked' : '') + '> 按真太阳时校正</label>' +
-        '<span class="lbl" style="margin-left:8px">晚子时</span><select id="eAdv"><option value="forward"' + (s.advLateZi !== 'current' ? ' selected' : '') + '>归次日（默认）</option><option value="current"' + (s.advLateZi === 'current' ? ' selected' : '') + '>归当日</option></select></div>';
+      h += '<div class="row"><label class="lbl"><input type="checkbox" id="eUseSolar"' + (s.useSolar !== false ? ' checked' : '') + '> 按真太阳时校正</label>' +
+        '<span class="adv-note">晚子时归次日（宪法口径固定）</span></div>';
       h += '<div class="row"><span class="lbl">备注</span><textarea id="eNote" rows="2" maxlength="200" style="flex:1">' + eEsc(s.note) + '</textarea></div>';
       b.innerHTML = h;
       var ey = $('eYear'), em = $('eMonth'), ed = $('eDay'), eleap = $('eLeap');
@@ -989,7 +980,6 @@
         city: $('eCity').value || '', dist: $('eDist').value || '',
         lng: lngVal !== '' ? parseFloat(lngVal) : (editCtx.lng || null),
         useSolar: $('eUseSolar').checked,
-        advLateZi: $('eAdv').value,
         note: $('eNote').value
       };
       return patch;

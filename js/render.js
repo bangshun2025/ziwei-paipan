@@ -177,7 +177,7 @@
       + '</div>';
     var notes = '';
     for (var i = 0; i < (pre.note || []).length; i++) notes += (notes ? '；' : '') + esc(pre.note[i]);
-    html += '<div class="note-line">口径 v0.2.0：年按立春换年、月按节气十二节、日按农历、时辰照旧。' + (notes ? '｜' + notes : '') + '</div>';
+    html += '<div class="note-line">口径 v0.2.0：年按立春换年、月按节气十二节、日按农历、子时统一归次日。' + (notes ? '｜' + notes : '') + '</div>';
     el.innerHTML = html;
   }
 

@@ -141,20 +141,7 @@ body {
   font-size: 11.5px; color: #9a938a; line-height: 1.3;
 }
 .spacer { flex: 1; }
-.adv-toggle {
-  flex: none; border: 0; background: none; color: var(--ink-soft);
-  font-size: 12px; cursor: pointer; padding: 3px 4px; border-radius: 6px;
-  font-family: var(--font); white-space: nowrap;
-}
-.adv-toggle:hover { color: var(--blue); background: #f2f5fb; }
-.adv-box {
-  display: none; margin: 2px 0 8px; padding: 9px 12px; background: #faf8f3;
-  border: 1px dashed var(--line-strong); border-radius: 8px;
-}
-.adv-box.show { display: block; }
-.adv-box .adv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--ink-soft); }
-.adv-box .adv-row select { height: 29px; border: 1px solid var(--line-strong); border-radius: 7px; background: #fff; font-size: 13px; font-family: var(--font); }
-.adv-box .adv-note { font-size: 11.5px; color: var(--ink-faint, #9a938a); }
+.adv-note { font-size: 11.5px; color: var(--ink-faint, #9a938a); white-space: nowrap; }
 
 .ip-foot {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
