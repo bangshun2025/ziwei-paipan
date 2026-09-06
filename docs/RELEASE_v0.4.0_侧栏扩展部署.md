@@ -41,3 +41,4 @@
 
 - ziwei-paipan 目录内 git 为空壳仓库（master 无 commit，历史遗留），未改动其 git 状态
 - bazi-paipan 仓库工作树中 launcher 原有未提交改动（生命排盘改名+奇门/紫微卡片加入）与本版共存，未代提交；其中紫微卡片文案更新包含在本报告变更清单内
+- 【增补·双卡】launcher 紫微改为双卡：`ziwei-online`「紫微斗数排盘 · 正式」（线上正式版 → GitHub Pages `https://bangshun2025.github.io/ziwei-paipan/`，icon 绿 #2e8b3d）+ `ziwei-paipan` 更名「紫微斗数排盘 · 本地」（本地版 v0.4.0）。⚠️ 线上站点当前实际内容为 v0.2.0 旧版（origin/main 停 v0.2.1），线上刷新至 v0.4.0 需推送 origin——待授权
