@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=501">
+<link rel="stylesheet" href="css/style.css?v=503">
 </head>
 <body>
 
@@ -23,35 +23,37 @@
     <section class="panel input-panel">
       <div class="row">
         <span class="lbl">名字</span>
-        <input type="text" id="inNickname" placeholder="小名" maxlength="24" style="width:84px" title="小名（选填；隐私模式显示用）">
-        <input type="text" id="inYiming" placeholder="艺名" maxlength="24" style="width:84px" title="艺名（选填；隐私模式优先显示名）">
-        <input type="text" id="inName" placeholder="姓名（必填，用于档案标识）" maxlength="24" style="width:150px">
+        <input type="text" id="inNickname" placeholder="小名" maxlength="24" title="小名（选填；隐私模式显示用）">
+        <input type="text" id="inYiming" placeholder="艺名" maxlength="24" title="艺名（选填；隐私模式优先显示名）">
+        <input type="text" id="inName" placeholder="姓名（必填）" maxlength="24" title="姓名（必填，用于档案标识）">
       </div>
+
       <div class="row">
         <span class="lbl">历法</span>
         <span class="seg" id="segType">
           <button type="button" data-type="solar" class="active">公历</button>
           <button type="button" data-type="lunar">农历</button>
         </span>
-        <select id="fYear"></select><span>年</span>
-        <select id="fMonth"></select><span>月</span>
-        <span class="leap-box" id="leapWrap"><input type="checkbox" id="fLeap"><label for="fLeap" id="fLeapLbl">闰月</label></span>
-        <select id="fDay"></select><span>日</span>
-        <span class="err hidden" id="dateErr"></span>
-      </div>
-
-      <div class="row">
-        <span class="lbl">出生时辰</span>
-        <span class="shichen-chips" id="chipShichen"></span>
-        <span class="seg" id="segAmPm" style="display:none"></span>
-      </div>
-
-      <div class="row">
-        <span class="lbl">性别</span>
+        <span class="lbl lbl-sec">性别</span>
         <span class="radio-group">
           <label><input type="radio" name="gender" value="M" checked> 男</label>
           <label><input type="radio" name="gender" value="F"> 女</label>
         </span>
+      </div>
+
+      <div class="row">
+        <span class="lbl">生日</span>
+        <select id="fYear"></select><span class="unit">年</span>
+        <select id="fMonth"></select><span class="unit">月</span>
+        <span class="leap-box" id="leapWrap"><input type="checkbox" id="fLeap"><label for="fLeap" id="fLeapLbl">闰月</label></span>
+        <select id="fDay"></select><span class="unit">日</span>
+        <span class="err hidden" id="dateErr"></span>
+      </div>
+
+      <div class="row">
+        <span class="lbl">时辰</span>
+        <span class="shichen-chips" id="chipShichen"></span>
+        <span class="seg" id="segAmPm" style="display:none"></span>
       </div>
 
       <div class="row">
@@ -60,18 +62,18 @@
           <option value="">— 未选择（按北京时间120°E）—</option>
           <option value="CUSTOM">自定义经度…</option>
         </select>
+      </div>
+      <div class="row row-sub">
         <select id="fCity" disabled></select>
         <select id="fDist" disabled></select>
-        <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" style="width:100px" title="自动回填所选城市经度，可手动微调">
+        <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" title="自动回填所选城市经度，可手动微调">
       </div>
 
       <div class="row">
-        <span class="lbl" style="margin-left:0"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</span>
+        <label class="solar-lbl"><input type="checkbox" id="fTrueSolar" checked> 按真太阳时校正</label>
         <span class="live-solar" id="liveSolar"></span>
-      </div>
-
-      <div class="row">
-        <button type="button" class="adv-toggle" id="btnAdv">口径开关（默认=宪法）</button>
+        <span class="spacer"></span>
+        <button type="button" class="adv-toggle" id="btnAdv" title="展开口径设置">⚙ 口径开关（默认=宪法）</button>
       </div>
       <div class="adv-box" id="advBox">
         <div class="adv-row">
@@ -83,11 +85,11 @@
           <span class="adv-note">年界=立春、月=节气（v0.2.0 固定，不可切换）</span>
         </div>
       </div>
-
-      <div class="form-actions">
+      <div class="ip-foot">
         <button type="button" class="btn-main btn-ghost" id="btnPrivacy">🔒 隐私</button>
         <button type="button" class="btn-main btn-ghost" id="btnAi">🤖 AI 录入</button>
         <button type="button" class="btn-main btn-ghost" id="btnArchive">📋 档案</button>
+        <span class="spacer"></span>
         <button type="button" class="btn-main" id="btnCalc">开始排盘</button>
         <span class="err hidden" id="calcErr"></span>
       </div>
