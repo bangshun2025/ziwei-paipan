@@ -85,6 +85,23 @@ else:
 PYEOF
 [ $? -eq 0 ] || FAIL=1
 
+echo "【3b】main.js 对外 API 挂载区断言（防 readForm 类挂载行丢失回归）"
+python3 - <<'PYEOF'
+import re, sys
+src = open('js/main.js', encoding='utf-8').read()
+# 挂载赋值在 main.js 中全文唯一，直接全文断言
+src = open('js/main.js', encoding='utf-8').read()
+need = ['window.APP.readForm = readForm', 'window.APP.writeForm = writeForm',
+        'window.APP.SHICHEN = SHICHEN', 'window.APP.buildEditForm = buildEditForm',
+        'window.APP.readEditForm = readEditForm']
+miss = [n for n in need if n not in src]
+if miss:
+    print('  ❌ main.js 挂载区缺失: ' + ', '.join(miss))
+    sys.exit(1)
+print('  ✅ main.js 挂载区完整（readForm/writeForm/SHICHEN/buildEditForm/readEditForm）')
+PYEOF
+[ $? -eq 0 ] || FAIL=1
+
 echo "【4/4】引用完整性（index.html 引用的 js/css 是否存在）"
 for ref in $(grep -oE '(src|href)="[^"]+\.(js|css)"' index.html | sed -E 's/^(src|href)="//; s/"$//'); do
   if [ -f "$ref" ]; then pass "引用存在: $ref"; else fail "引用缺失: $ref"; fi
