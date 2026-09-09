@@ -95,21 +95,7 @@
       return '<span class="star adj">' + ch + '</span>';
     }
 
-    // 热卜式试点 v0.2.3-ref：宫内单星带（主星玫粉、辅杂黑），庙旺/四化/神煞独立小字行
-    function brightRow(palace, eb) {
-      // 该宫星曜（主/辅/杂）凡 BRIGHT 表有定义者，输出亮度字（庙旺得利平不陷），仿「陷旺平」
-      var b = [];
-      var names = [];
-      var mi;
-      for (mi = 0; mi < (palace.major || []).length; mi++) names.push(palace.major[mi].name);
-      for (mi = 0; mi < (palace.minor || []).length; mi++) names.push(palace.minor[mi]);
-      for (mi = 0; mi < (palace.adjStars || []).length; mi++) names.push(palace.adjStars[mi]);
-      for (mi = 0; mi < names.length; mi++) {
-        var row = C.BRIGHT[names[mi]];
-        if (row && row[eb]) b.push(row[eb]);
-      }
-      return b.length ? '<div class="p-bright">' + b.join('') + '</div>' : '';
-    }
+    // v0.6.2：庙旺平陷行已按界面迭代废弃（原 brightRow 输出 .p-bright），BRIGHT 表保留于 constants.js 备用
     // 神煞区（横线上方）：行5 = 博士组(蓝)；行6 = 岁前组(灰绿) + 将前组(灰) + 大限岁段(黑) + 长生(黑)
     // v0.6.1：岁前星由宫位行首上移至此处，宫位行只保留 本命宫名/干支/大限宫名
     function godLines(palace, dec) {
@@ -240,19 +226,18 @@
       }
       var godH = godLines(palace, dec);
       var starMark = palace.isSoul ? '<span class="soul-star">★</span>' : '';
-      // v0.6.1 宫位行（横线下单行三段式）：[★命宫][身]本命X宫 干支 大限X宫
-      //   本命宫名 = 「本命」+宫名+宫字；大限宫名随点击沿生年十二宫环偏移（见 dxNameOf）
+      // v0.6.2：宫位行 = 底红两行式（★/身标保留）：行1 = ★/身 + 本命X宫 + 干支；行2 = 大限X宫（随点击沿生年十二宫环偏移，见 dxNameOf）
       var footTags = '';
       if (palace.isBody) footTags += '<span class="tag body-tag">身</span>';
       var bmName = '本命' + (palace.name.charAt(palace.name.length - 1) === '宫' ? palace.name : palace.name + '宫');
+      // v0.6.2：庙旺行（.p-bright）已废弃，宫内自上而下 = 星带 + 神煞 + 宫位行
       cell.innerHTML =
         ((majors || minors || adjs) ? '<div class="p-stars">' + majors + minors + adjs + '</div>' : '')
-        + brightRow(palace, eb)
         + godH
         + '<div class="p-foot">'
-        + starMark + footTags + '<span class="p-name">' + esc(bmName) + '</span>'
-        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span>'
-        + '<span class="p-dx">' + dxNameOf(palace.name, 0) + '</span></div>';
+        + '<div class="p-f1">' + starMark + footTags + '<span class="p-name">' + esc(bmName) + '</span>'
+        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
+        + '<div class="p-f2"><span class="p-dx">' + dxNameOf(palace.name, 0) + '</span></div></div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
       grid.appendChild(cell);
@@ -270,8 +255,16 @@
     var dxByPalace = {};
     for (var k = 0; k < chart.daXian.length; k++) dxByPalace[chart.daXian[k].palaceIndex] = chart.daXian[k];
     var h = '';
-    var title = palace.name + (palace.isSoul ? '（命宫）' : '') + (palace.isBody ? '（身宫）' : '') + ' ' + palace.ganZhi;
-    h += '<div class="detail-title">' + esc(title) + '</div><div class="detail-body">';
+    // v0.6.2：详情标题对齐宫格底行三段式（★/身 + 本命X宫 + 干支 + 大限X宫），修复旧式「命宫（命宫）丁未」残缺感
+    var tN = palace.name.charAt(palace.name.length - 1) === '宫' ? palace.name : palace.name + '宫';
+    var tSel = DX_RING.indexOf(palace.name); if (tSel < 0) tSel = 0;
+    var title = (palace.isSoul ? '<span class="dt-soul">★</span>' : '')
+      + '<span class="dt-bm">本命' + esc(tN) + '</span>'
+      + (palace.isBody ? '<span class="dt-tag">身</span>' : '')
+      + '<span class="dt-gz">' + esc(palace.ganZhi) + '</span>'
+      + '<span class="dt-sep">·</span>'
+      + '<span class="dt-dx">' + esc(dxNameOf(palace.name, tSel)) + '</span>';
+    h += '<div class="detail-title">' + title + '</div><div class="detail-body">';
     var dx = dxByPalace[p];
     if (dx) h += '<span class="dblk"><b>大限</b>' + dx.ganZhi + ' · ' + dx.start + '-' + dx.end + '岁</span>';
     var maj = [];

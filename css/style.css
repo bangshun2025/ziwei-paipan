@@ -201,15 +201,11 @@ body {
 .cell.soul { background: #fffdf9; }
 .cell.body { background: #fffefd; }
 .cell.active { background: #f3f7ff; box-shadow: inset 0 0 0 2px rgba(41, 89, 164, .35); }
-/* 热卜式试点 v0.2.3-ref：宫内结构——星带(主星玫粉/辅杂黑，单列wrap) + 庙旺行 + 四化行
-   + 神行(博士蓝) + meta行(将前灰·大限岁段·长生黑) + 宫名底红（参照热卜单宫 IMG_001） */
+/* 宫内结构 v0.6.2：星带(主星玫粉/辅杂黑) + 神行(博士蓝) + meta行(岁前·将前·大限岁段·长生)
+   + 宫位行底红两行（行1 ★/身+本命X宫+干支；行2 大限X宫）；庙旺行(.p-bright)已废弃 */
 .cell .p-stars {
   display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center;
   gap: 1px 4px; margin-top: 1px;
-}
-.cell .p-bright {
-  display: flex; justify-content: center; font-size: 9px; letter-spacing: 1px;
-  color: #2b2b2b; margin-top: 2px;
 }
 /* v0.6.1：四化已改贴星下徽章（.star .hua），独立四化行废弃 */.cell .p-god {
   margin-top: auto; display: flex; justify-content: center; margin-bottom: 1px;
@@ -224,17 +220,23 @@ body {
 .cell .p-meta .gd-cs { color: #2b2b2b; }
 .cell .p-meta .gd-jq { color: #9a9a9a; }
 .cell .p-foot {
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 5px;
+  /* v0.6.2：底红两行式（原单行三段超宽 24px 被 cell 裁左端——flex-end 溢出裁在左缘）
+     行1 = ★/身 + 本命X宫 + 干支（右对齐）；行2 = 大限X宫（右对齐） */
+  display: flex; flex-direction: column; align-items: flex-end;
   border-top: 1px solid #e4dfd2; margin-top: 3px; padding-top: 3px; padding-bottom: 2px;
 }
-/* v0.6.1：宫位行三段式 —— 本命X宫(朱红粗) + 干支(朱红) + 大限X宫(玫红)，随点击环偏移 */
-.cell .p-dx { font-size: 10px; font-weight: 600; color: #c02090; letter-spacing: .3px; line-height: 1.2; white-space: nowrap; margin-left: 3px; }
+.cell .p-f1 {
+  display: flex; align-items: baseline; justify-content: flex-end; gap: 3px;
+  flex-wrap: wrap; row-gap: 0; white-space: nowrap; line-height: 1.25;
+}
+.cell .p-f2 { margin-top: 1px; line-height: 1.2; }
+/* v0.6.2：宫位行两行式 —— 行1 本命X宫(朱红粗)+干支(朱红)，行2 大限X宫(玫红)，随点击环偏移 */
+.cell .p-dx { font-size: 10px; font-weight: 600; color: #c02090; letter-spacing: .3px; line-height: 1.2; white-space: nowrap; }
 /* v0.3.0-ref 热卜整盘：★命宫/本命宫名/干支 一律朱红 */
 .cell .p-name { font-size: 13px; font-weight: 700; color: #f02000; letter-spacing: .5px; white-space: nowrap; }
 .cell .p-gz { font-size: 10.5px; color: #f02000; white-space: nowrap; }
 .cell .soul-star { color: #f02000; font-size: 12px; line-height: 1; }
-.cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-right: 1px; }
-.cell .p-foot .tag.body-tag { background: none; color: #f02000; border: 1px solid #f02000; line-height: 1.3; }
+.cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-right: 1px; }.cell .p-foot .tag.body-tag { background: none; color: #f02000; border: 1px solid #f02000; line-height: 1.3; }
 .gd { font-style: normal; }
 .gd-cs { color: #c0392b; font-weight: 600; }   /* 长生十二神 */
 .gd-bs { color: #7d5fb8; font-weight: 600; }   /* 博士十二神 */
@@ -293,7 +295,14 @@ body {
 
 /* ===== 详情区 ===== */
 .detail-panel { padding: 14px 16px; min-height: 60px; }
+/* v0.6.2：详情标题 = 宫格底行三段式放大版（★/身 + 本命X宫(朱红) + 干支 + · + 大限X宫(玫红)） */
 .detail-title { font-size: 15px; font-weight: 600; color: var(--blue); margin-bottom: 6px; }
+.detail-title .dt-soul { color: #f02000; font-size: 15px; margin-right: 3px; }
+.detail-title .dt-bm { color: #f02000; font-weight: 700; letter-spacing: .5px; }
+.detail-title .dt-tag { color: #f02000; border: 1px solid #f02000; font-size: 10px; border-radius: 3px; padding: 0 3px; margin-left: 5px; vertical-align: 2px; }
+.detail-title .dt-gz { color: #f02000; margin-left: 7px; letter-spacing: .5px; }
+.detail-title .dt-sep { color: #c4bdaa; margin: 0 8px; }
+.detail-title .dt-dx { color: #c02090; font-weight: 600; }
 .detail-body { display: flex; flex-wrap: wrap; gap: 6px 26px; font-size: 13.5px; }
 .detail-body .dblk b { color: var(--ink-soft); font-weight: 400; margin-right: 6px; }
 
@@ -314,7 +323,7 @@ body {
   .star.adj { font-size: 8px; }
   .cell .p-name { font-size: 12px; }
   .cell .p-dx { font-size: 9.5px; }
-  .cell .p-foot, .cell .p-meta { gap: 0 3px; }
+  .cell .p-f1, .cell .p-meta { gap: 0 3px; }
   .center-area .c-v-red { font-size: 19px; }
   .center-area .c-pan { font-size: 12.5px; }
   .center-area .c-pair { font-size: 11px; gap: 10px; }
