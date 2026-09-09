@@ -228,15 +228,14 @@ body {
 .cell .p-meta .gd-cs { color: #2b2b2b; }
 .cell .p-meta .gd-jq { color: #9a9a9a; }
 .cell .p-foot {
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;
-  border-top: 1px solid #e4dfd2; margin-top: 3px; padding-top: 2px; padding-bottom: 1px;
+  display: flex; align-items: baseline; justify-content: flex-end; gap: 5px;
+  border-top: 1px solid #e4dfd2; margin-top: 3px; padding-top: 3px; padding-bottom: 2px;
 }
-/* v0.6.0：右下第二行 = 大限盘宫名（默认与生年同名；点击宫格/大限段后沿生年十二宫环偏移） */
-.cell .p-dx { text-align: right; font-size: 10px; font-weight: 600; color: #c02090; letter-spacing: .3px; line-height: 1.25; }
-/* v0.3.0-ref 热卜整盘：岁前星(宫名行首,黑) + ★命宫/宫名/干支 一律朱红 */
-.cell .p-foot .p-sq { font-size: 9px; color: #2b2b2b; }
-.cell .p-name { font-size: 13.5px; font-weight: 700; color: #f02000; letter-spacing: .5px; }
-.cell .p-gz { font-size: 10.5px; color: #f02000; }
+/* v0.6.1：宫位行三段式 —— 本命X宫(朱红粗) + 干支(朱红) + 大限X宫(玫红)，随点击环偏移 */
+.cell .p-dx { font-size: 10px; font-weight: 600; color: #c02090; letter-spacing: .3px; line-height: 1.2; white-space: nowrap; margin-left: 3px; }
+/* v0.3.0-ref 热卜整盘：★命宫/本命宫名/干支 一律朱红 */
+.cell .p-name { font-size: 13px; font-weight: 700; color: #f02000; letter-spacing: .5px; white-space: nowrap; }
+.cell .p-gz { font-size: 10.5px; color: #f02000; white-space: nowrap; }
 .cell .soul-star { color: #f02000; font-size: 12px; line-height: 1; }
 .cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-right: 1px; }
 .cell .p-foot .tag.body-tag { background: none; color: #f02000; border: 1px solid #f02000; line-height: 1.3; }

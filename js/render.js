@@ -119,15 +119,18 @@
       }
       return h ? '<div class="p-hua">' + esc(h) + '</div>' : '';
     }
-    // 热卜式神行：行5 = 博士组(蓝)；行6 = 将前组(灰) + 大限岁段(黑) + 长生(黑)。岁前组不显示（照参考图）。
+    // 神煞区（横线上方）：行5 = 博士组(蓝)；行6 = 岁前组(灰绿) + 将前组(灰) + 大限岁段(黑) + 长生(黑)
+    // v0.6.1：岁前星由宫位行首上移至此处，宫位行只保留 本命宫名/干支/大限宫名
     function godLines(palace, dec) {
       var bs = (palace.boshi12 && palace.boshi12[0]) || '';
       var jq = (palace.jiangqian12 && palace.jiangqian12[0]) || '';
       var cs = (palace.changsheng12 && palace.changsheng12[0]) || '';
+      var sq = (palace.suiqian12 && palace.suiqian12[0]) || '';
       var s = '';
       if (bs) s += '<div class="p-god"><i class="gd gd-bs">' + esc(bs) + '</i></div>';
-      if (jq || dec || cs) {
+      if (sq || jq || dec || cs) {
         s += '<div class="p-meta">';
+        if (sq) s += '<i class="gd gd-sq">' + esc(sq) + '</i>';
         if (jq) s += '<i class="gd gd-jq">' + esc(jq) + '</i>';
         if (dec) s += '<span class="p-dec">' + esc(dec) + '</span>';
         if (cs) s += '<i class="gd gd-cs">' + esc(cs) + '</i>';
@@ -245,21 +248,20 @@
       }
       var godH = godLines(palace, dec);
       var starMark = palace.isSoul ? '<span class="soul-star">★</span>' : '';
-      // 热卜式整盘 v0.3.0-ref：行结构 = 星带 + 庙旺行 + 四化行 + 博士蓝 + 将前·大限·长生
-      //   + 宫名底行（岁前星黑 + ★命宫/宫名/干支红，仿 887x1920 整盘基准图）
+      // v0.6.1 宫位行（横线下单行三段式）：[★命宫][身]本命X宫 干支 大限X宫
+      //   本命宫名 = 「本命」+宫名+宫字；大限宫名随点击沿生年十二宫环偏移（见 dxNameOf）
       var footTags = '';
       if (palace.isBody) footTags += '<span class="tag body-tag">身</span>';
-      var sq = (palace.suiqian12 && palace.suiqian12[0]) || '';
+      var bmName = '本命' + (palace.name.charAt(palace.name.length - 1) === '宫' ? palace.name : palace.name + '宫');
       cell.innerHTML =
         ((majors || minors || adjs) ? '<div class="p-stars">' + majors + minors + adjs + '</div>' : '')
         + brightRow(palace, eb)
         + huaRow(palace)
         + godH
         + '<div class="p-foot">'
-        + (sq ? '<span class="p-sq">' + esc(sq) + '</span>' : '')
-        + starMark + footTags + '<span class="p-name">' + esc(palace.name) + '</span>'
-        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
-        + '<div class="p-dx">' + dxNameOf(palace.name, 0) + '</div>';
+        + starMark + footTags + '<span class="p-name">' + esc(bmName) + '</span>'
+        + '<span class="p-gz">' + esc(palace.ganZhi) + '</span>'
+        + '<span class="p-dx">' + dxNameOf(palace.name, 0) + '</span></div>';
       cell.setAttribute('data-palace', p);
       cells[p] = cell;
       grid.appendChild(cell);
