@@ -82,11 +82,12 @@
     return '<i class="hua hua-' + (cls || 'L') + '">' + esc(hua) + '</i>';
   }
 
-    function starEl(name, minor) {
+    function starEl(name, minor, hua) {
       var cls = minor ? 'minor' : 'major';
       var ch = '';
       for (var i = 0; i < name.length; i++) ch += '<span class="s-ch">' + esc(name.charAt(i)) + '</span>';
-      return '<span class="star ' + cls + '">' + ch + '</span>';
+      // v0.6.1：四化徽章贴星正下方（禄权科忌小色块，见 .star .hua），独立四化行已废弃
+      return '<span class="star ' + cls + '">' + ch + (hua ? huaEl(hua) : '') + '</span>';
     }
     function adjEl(name) {
       var ch = '';
@@ -108,16 +109,6 @@
         if (row && row[eb]) b.push(row[eb]);
       }
       return b.length ? '<div class="p-bright">' + b.join('') + '</div>' : '';
-    }
-    function huaRow(palace) {
-      // 该宫主星四化字（禄权科忌），仿参考图独立「禄」行
-      var h = '';
-      var seen = {};
-      for (var mi = 0; mi < (palace.major || []).length; mi++) {
-        var mj = palace.major[mi];
-        if (mj.hua && !seen[mj.hua]) { seen[mj.hua] = 1; h += mj.hua; }
-      }
-      return h ? '<div class="p-hua">' + esc(h) + '</div>' : '';
     }
     // 神煞区（横线上方）：行5 = 博士组(蓝)；行6 = 岁前组(灰绿) + 将前组(灰) + 大限岁段(黑) + 长生(黑)
     // v0.6.1：岁前星由宫位行首上移至此处，宫位行只保留 本命宫名/干支/大限宫名
@@ -236,12 +227,13 @@
       cell.style.gridRowStart = pos.r; cell.style.gridColumnStart = pos.c;
       var dx = dxByPalace[p];
       var dec = dx ? dx.start + '-' + dx.end + '岁' : '';
+      var hs = chart.center.huaSummary || {};
       var majors = '', minors = '', adjs = '';
       for (var mi = 0; mi < (palace.major || []).length; mi++) {
-        majors += starEl(palace.major[mi].name, false);
+        majors += starEl(palace.major[mi].name, false, hs[palace.major[mi].name]);
       }
       for (var ni = 0; ni < (palace.minor || []).length; ni++) {
-        minors += starEl(palace.minor[ni], true);
+        minors += starEl(palace.minor[ni], true, hs[palace.minor[ni]]);
       }
       for (var ai2 = 0; ai2 < (palace.adjStars || []).length; ai2++) {
         adjs += adjEl(palace.adjStars[ai2]);
@@ -256,7 +248,6 @@
       cell.innerHTML =
         ((majors || minors || adjs) ? '<div class="p-stars">' + majors + minors + adjs + '</div>' : '')
         + brightRow(palace, eb)
-        + huaRow(palace)
         + godH
         + '<div class="p-foot">'
         + starMark + footTags + '<span class="p-name">' + esc(bmName) + '</span>'
@@ -289,7 +280,12 @@
       maj.push(m.name + (m.hua ? '（' + HUA_TXT[m.hua] + '）' : ''));
     }
     if (maj.length) h += '<span class="dblk"><b>主星</b>' + maj.join('　') + '</span>';
-    if ((palace.minor || []).length) h += '<span class="dblk"><b>辅星</b>' + palace.minor.join('　') + '</span>';
+    if ((palace.minor || []).length) {
+      var hs2 = chart.center.huaSummary || {};
+      h += '<span class="dblk"><b>辅星</b>' + palace.minor.map(function (nm) {
+        return nm + (hs2[nm] ? '（' + HUA_TXT[hs2[nm]] + '）' : '');
+      }).join('　') + '</span>';
+    }
     if ((palace.adjStars || []).length) h += '<span class="dblk"><b>杂曜</b>' + palace.adjStars.join('　') + '</span>';
     var godTxt = [];
     if (palace.changsheng12 && palace.changsheng12.length) godTxt.push('长生·' + palace.changsheng12[0]);

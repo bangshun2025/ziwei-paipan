@@ -211,11 +211,7 @@ body {
   display: flex; justify-content: center; font-size: 9px; letter-spacing: 1px;
   color: #2b2b2b; margin-top: 2px;
 }
-.cell .p-hua {
-  display: flex; justify-content: center; gap: 0 3px; font-size: 9px; font-weight: 700;
-  color: #2b2b2b; margin-top: 1px;
-}
-.cell .p-god {
+/* v0.6.1：四化已改贴星下徽章（.star .hua），独立四化行废弃 */.cell .p-god {
   margin-top: auto; display: flex; justify-content: center; margin-bottom: 1px;
 }
 .cell .p-god .gd-bs { color: #0030f0; font-weight: 600; }
