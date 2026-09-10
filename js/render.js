@@ -75,6 +75,18 @@
   function esc(s) { return String(s == null ? '' : s); }
 
   // 月柱展示口径：五虎遁按实用月 mUse（v0.2.0 起 = 节气月序 1..12，与八字同源）
+  // v0.6.18-iter（#47 #1）：新历（公历）生日行文本 —— 如「1982年10月18日 · 06:30」
+  //   公历日期取 pre.solar（农历模式录入时为换算结果）；时刻取输入钟点 input.h/mi
+  function solarLineText(chart) {
+    var s = (chart.pre && chart.pre.solar) || null;
+    if (!s || !s.y) return '—';
+    var t = '';
+    if (chart.input && typeof chart.input.h === 'number' && typeof chart.input.mi === 'number') {
+      t = ' · ' + pad2(chart.input.h) + ':' + pad2(chart.input.mi);
+    }
+    return s.y + '年' + s.m + '月' + s.d + '日' + t;
+  }
+
   function monthPillarOf(chart) {
     var ygz = chart.pre.yearGanZhi;
     var lm = chart.pre.mUse;
@@ -170,10 +182,16 @@
     else if (pre.timeIndex === 0) tzTxt = '早子时(当日)';
     else tzTxt = (TIME_N[pre.timeIndex] || '') + '时';
     // v0.6.16-iter（#45 #3）：出生日期行与八字行对调 —— 行序：艺名·性别 → 出生日期 → 八字 → 十二节
-    html += '<div class="lunar-line">' + cnLunar(chart)
-      + (luDisp.isLeap ? '（农历闰月仅显示，安星不涉闰月）' : '')
-      + (tzTxt ? ' · ' + tzTxt : '')
-      + '</div>';
+    // v0.6.18-iter（#47 #1/#2）：出生日期区加新历行（农历行上方）；隐私勾选（默认开）时 新历/农历 两行皆隐藏，
+    //   名字走上方 ARCHIVE 脱敏链（艺名→小名→匿名）
+    var priv = !!(window.ARCHIVE && window.ARCHIVE.getPrivacyMode && window.ARCHIVE.getPrivacyMode());
+    if (!priv) {
+      html += '<div class="solar-line">' + solarLineText(chart) + '</div>';
+      html += '<div class="lunar-line">' + cnLunar(chart)
+        + (luDisp.isLeap ? '（农历闰月仅显示，安星不涉闰月）' : '')
+        + (tzTxt ? ' · ' + tzTxt : '')
+        + '</div>';
+    }
     html += '<div class="pillars">'
       + '<span class="gan">' + esc(pre.yearGanZhi.gan) + '</span><span class="zhi">' + esc(pre.yearGanZhi.zhi) + '</span> '
       + '<span class="gan">' + esc(monthPillarOf(chart).charAt(0)) + '</span><span class="zhi">' + esc(monthPillarOf(chart).charAt(1)) + '</span> '

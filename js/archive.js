@@ -36,10 +36,16 @@
     var b1 = el('btnPrivacy'), b2 = el('btnPrivacy2');
     if (b1) { b1.textContent = label; b1.classList.toggle('privacy-on', on); }
     if (b2) { b2.textContent = label; b2.classList.toggle('privacy-on', on); }
+    // v0.6.18-iter（#47 #2）：页头右上角勾选框同步（勾选 = 隐私开）
+    var ck = el('chkPrivacy'), cl = el('privacyCkLbl'), ct = el('chkPrivacyTxt');
+    if (ck) ck.checked = on;
+    if (cl) cl.classList.toggle('privacy-on', on);
+    if (ct) ct.textContent = label;
   }
-  // 切换：更新按钮 + 重渲档案面板（若开）+ 重渲结果头 person 行（若有）
-  function togglePrivacy() {
-    setPrivacyMode(!getPrivacyMode());
+  // v0.6.18-iter（#47 #2）：应用指定隐私态（按钮切换/页头勾选框共用）——
+  // 更新按钮与勾选 + 重渲档案面板（若开）+ 重渲结果头（新历/农历行随之显隐）
+  function applyPrivacy(on) {
+    setPrivacyMode(!!on);
     syncPrivacyBtns();
     if (el('archiveMask') && !el('archiveMask').classList.contains('hidden')) renderMain();
     var rh = el('resultHead');
@@ -47,6 +53,8 @@
       window.RENDER.renderHead(rh, window.__LAST_HEAD__.chart, window.__LAST_HEAD__.person);
     }
   }
+  // 切换隐私
+  function togglePrivacy() { applyPrivacy(!getPrivacyMode()); }
 
   // ---------- 存储 ----------
   function readArr(key) {
@@ -289,6 +297,9 @@
     var bp1 = el('btnPrivacy'), bp2 = el('btnPrivacy2');
     if (bp1) bp1.addEventListener('click', togglePrivacy);
     if (bp2) bp2.addEventListener('click', togglePrivacy);
+    // v0.6.18-iter（#47 #2）：页头右上角勾选框变更 → 应用隐私
+    var cpk = el('chkPrivacy');
+    if (cpk) cpk.addEventListener('change', function () { applyPrivacy(this.checked); });
     syncPrivacyBtns();
     el('archClose').addEventListener('click', function () { hideMask('archiveMask'); });
     el('archiveMask').addEventListener('click', function (ev) {
@@ -319,7 +330,7 @@
   }
   window.ARCHIVE = {
     init: init, renderMain: renderMain, toast: toast,
-    getPrivacyMode: getPrivacyMode, setPrivacyMode: setPrivacyMode,
+    getPrivacyMode: getPrivacyMode, setPrivacyMode: setPrivacyMode, applyPrivacy: applyPrivacy,
     togglePrivacy: togglePrivacy, getDisplayName: getDisplayName
   };
 })();

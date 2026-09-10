@@ -54,6 +54,15 @@ body {
   border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer;
 }
 .app-top .link-btn:hover { border-color: var(--blue); color: var(--blue); }
+/* v0.6.18-iter（#47 #2）：页头右上角隐私勾选框（默认勾选 = 隐私开；勾选态用红系，与「🔒 隐私」按钮呼应） */
+.app-top .privacy-ck {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--line-strong); background: #fff; border-radius: 999px;
+  padding: 3px 12px; font-size: 12px; color: var(--ink-soft); cursor: pointer; user-select: none;
+}
+.app-top .privacy-ck:hover { border-color: var(--blue); }
+.app-top .privacy-ck input { width: 13px; height: 13px; margin: 0; accent-color: var(--red); cursor: pointer; }
+.app-top .privacy-ck.privacy-on { color: var(--red); border-color: var(--red); }
 
 /* ===== 主容器 ===== */
 .wrap { max-width: 1180px; margin: 0 auto; padding: 14px 16px 60px; }
@@ -177,6 +186,8 @@ body {
 .result-head .pillars .gan { color: var(--blue); }
 .result-head .pillars .zhi { color: var(--red); }
 .result-head .lunar-line { font-size: 13px; color: var(--ink-soft); }
+/* v0.6.18-iter（#47 #1）：新历（公历）生日行 —— 农历行上方、同款字色；隐私开时不渲染 */
+.result-head .solar-line { font-size: 13px; color: var(--ink-soft); }
 .result-head .note-line { width: 100%; font-size: 12px; color: var(--gold); }
 
 /* ===== v0.6.14-iter（#43 #3）出生年「十二节数据」块：每节一列、列内六行 =====
@@ -318,7 +329,9 @@ body {
   display: flex; flex-direction: column;
   align-items: flex-start; justify-content: center; text-align: left;
   /* v0.6.16-iter（#45 #2）：留白加大（padding 10×8→13×11、行距 7→9），更透气 */
-  padding: 13px 11px; gap: 9px; overflow: hidden;
+  /* v0.6.18-iter（#47 #4）：行距 9→7 更紧凑；左内边距 11→17 令最宽行（四化行）左右留白均等（≈17px）视觉居中，
+     全行仍共用一个左缘（下面三行与上五行左对齐不变） */
+  padding: 13px 11px 13px 17px; gap: 7px; overflow: hidden;
 }
 /* v0.6.3：中宫四行（盘类型/命四化/命宫身宫/命主身主），全部统一字号左对齐 */
 /* v0.6.16-iter（#45 #2）：字号 13→12px（调小、更精，配合留白） */
@@ -328,7 +341,7 @@ body {
 .center-area .c-v-red { color: #f02000; font-weight: 600; }
 .center-area .c-pair {
   display: flex; align-items: baseline; justify-content: flex-start; gap: 20px;
-  font-size: 12px; margin-top: 2px;
+  font-size: 12px; margin-top: 0; /* v0.6.18-iter（#47 #4）：行距统一 7px，不再额外加 2px */
 }
 .center-area .c-pair .c-k { color: #2b2b2b; font-weight: 600; }
 .center-area .c-pair .c-v { font-weight: 600; margin-left: 1px; }
@@ -466,6 +479,7 @@ body {
   #resultHead { flex-direction: column; align-items: flex-start; }
   #resultHead .pillars { font-size: 22px; letter-spacing: 3px; }
   #resultHead .lunar-line { font-size: 14px; }
+  #resultHead .solar-line { font-size: 14px; }
   #resultHead .note-line { font-size: 11.5px; line-height: 1.6; }
 
   /* 底部口径说明与两栏容器对齐 */

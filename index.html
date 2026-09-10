@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=527">
+<link rel="stylesheet" href="css/style.css?v=528">
 </head>
 <body>
 
@@ -16,6 +16,8 @@
     <h1>紫微斗数排盘<span class="ver">v0.5.0</span></h1>
     <span class="spacer"></span>
     <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
+    <!-- v0.6.18-iter（#47）：右上角隐私勾选框（默认勾选 = 隐私开：名字匿名化 + 隐藏新历/农历生日行），与档案隐私同一状态 -->
+    <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
   </header>
 
   <main class="wrap">
@@ -99,6 +101,7 @@
       <!-- v0.6.15-iter（#44）：① 真太阳时整行压缩保一行（11px/12.5px）；② 括号后常显时辰（如「卯时」） -->
       <!-- v0.6.16-iter（#45）：① 出生地省/市/区一行（禁用项收起）；② 中宫字号调小+留白，四化默认勾选改命/年；③ 结果头三行（艺名性别→出生日期→八字） -->
       <!-- v0.6.17-iter（#46）：宫格底部两行居中 —— 大限宫名与本命宫名居中对齐（干支负边距补偿；≤640 窄屏改行盒拉伸+干支折行，同样精确居中） -->
+      <!-- v0.6.18-iter（#47）：① 结果头加新历生日行（农历行上方）；② 页头右上角隐私勾选框（默认勾选=匿名+隐藏两生日行，与档案隐私同一状态）；③ 中宫行距调小 + 内容右移视觉居中 -->
       <div class="result-main">
         <div class="chart-col">
           <div class="chart-wrap" id="chartWrap"></div>
@@ -216,9 +219,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=506"></script>
-<script src="js/render.js?v=523"></script>
+<script src="js/render.js?v=524"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=513"></script>
-<script src="js/archive.js?v=501"></script>
+<script src="js/main.js?v=514"></script>
+<script src="js/archive.js?v=502"></script>
 </body>
 </html>

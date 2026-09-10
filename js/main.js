@@ -398,6 +398,9 @@
       var colN = hN.querySelectorAll('.jm-col');
       T.ok(colN.length === 12 && colN[0].querySelector('.jm-stm').textContent === '—', 'L8 无出生地真太阳列显示 —');
       // v0.6.16-iter（#45 #3）：结果头三行 —— 艺名·性别 → 出生日期 → 八字（日期与八字对调）
+      // v0.6.18-iter（#47）：隐私开（默认）会隐藏 新历/农历 两行 —— #45 行序断言前显式关隐私（须在渲染前），断言后还原
+      var privPrev8 = window.ARCHIVE ? ARCHIVE.getPrivacyMode() : false;
+      if (window.ARCHIVE) ARCHIVE.setPrivacyMode(false);
       var hP = document.createElement('div');
       RENDER.renderHead(hP, chN, { name: '测试', gender: 'F' });
       var plP = hP.querySelector('.person-line');
@@ -421,6 +424,7 @@
         var csl = getComputedStyle(document.querySelector('.solar-lbl'));
         T.eq(csl.fontSize, '12.5px', 'L8/#44 太阳时标签字号 12.5px');
       }
+      if (window.ARCHIVE) ARCHIVE.setPrivacyMode(privPrev8);
     })();
 
     // ===== L9 v0.6.17-iter（#46）：宫格底部两行居中 —— 大限宫名与本命宫名居中对齐 =====
@@ -447,6 +451,36 @@
         T.ok(Math.abs(dc9 - nc9) <= 2, 'L9/#46 大限宫名中心≈本命宫名中心（居中对齐 ±2px）');
       }
       document.body.removeChild(gRoot);
+    })();
+
+    // ===== L10 v0.6.18-iter（#47）：新历生日行 + 隐私勾选（默认开）显示规则 =====
+    (function () {
+      var ch47 = ALGO.getChart({ y: 1982, m: 10, d: 18, h: 6, mi: 30, gender: 'M', lng: 108.37 });
+      var prev47 = window.ARCHIVE ? ARCHIVE.getPrivacyMode() : false;
+      if (window.ARCHIVE) ARCHIVE.setPrivacyMode(false);
+      var hA = document.createElement('div');
+      RENDER.renderHead(hA, ch47, { name: '测试', gender: 'M' });
+      var sl = hA.querySelector('.solar-line');
+      var ll = hA.querySelector('.lunar-line');
+      T.ok(!!sl && sl.textContent === '1982年10月18日 · 06:30', 'L10/#47 新历生日行=1982年10月18日 · 06:30');
+      T.ok(!!sl && !!ll && !!(sl.compareDocumentPosition(ll) & 4), 'L10/#47 新历行在农历行之前（上方）');
+      var plA = hA.querySelector('.person-line');
+      T.ok(!!plA && plA.textContent.indexOf('测试') >= 0, 'L10/#47 隐私关时显示原姓名');
+      if (window.ARCHIVE) ARCHIVE.setPrivacyMode(true);
+      var hB = document.createElement('div');
+      RENDER.renderHead(hB, ch47, { name: '测试', gender: 'M' });
+      T.ok(!hB.querySelector('.solar-line') && !hB.querySelector('.lunar-line'), 'L10/#47 隐私开时隐藏新历/农历两行');
+      var plB = hB.querySelector('.person-line');
+      T.ok(!!plB && plB.textContent.indexOf('匿名') >= 0, 'L10/#47 隐私开时姓名匿名化（匿名 · 男）');
+      T.ok(!!hB.querySelector('.pillars') && !!hB.querySelector('.jieqi-mini'), 'L10/#47 隐私开时八字与十二节保留');
+      var cpk = document.getElementById('chkPrivacy');
+      T.ok(!!cpk && cpk.type === 'checkbox' && cpk.hasAttribute('checked'), 'L10/#47 页头右上角隐私勾选框存在且 HTML 默认勾选');
+      if (window.ARCHIVE && ARCHIVE.applyPrivacy) {
+        ARCHIVE.applyPrivacy(false);
+        T.eq(ARCHIVE.getPrivacyMode(), false, 'L10/#47 applyPrivacy(false) 生效（公开 API）');
+        ARCHIVE.applyPrivacy(prev47);
+        T.eq(ARCHIVE.getPrivacyMode(), prev47, 'L10/#47 隐私态复原');
+      }
     })();
 
     return T.summary();
