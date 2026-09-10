@@ -1,14 +1,14 @@
 #!/bin/bash
 # ============================================================
-# 紫微斗数排盘 发布前一致性校验（v0.1.0 发布链路脚手架）
+# 紫微斗数排盘 发布前一致性校验（v0.1.0 脚手架；2026-09-11 同步 v0.6.x-iter 现行 UI）
 # 用法: bash scripts/check-release.sh [目录]   （默认当前目录）
 # 校验项：
-#   1. 版本一致性：index.html 提取版本号，与 js×4/css/CHANGELOG/SYSTEM.md 逐一比对
-#   2. JS 语法：node --check constants/algorithm/render/main（IIFE 直接可查）
-#   3. 结构红线：index.html 关键 id 全部存在 + script 加载顺序 constants→algorithm→render→main
+#   1. 版本一致性：index.html 提取版本号，与 js×7/css/CHANGELOG/SYSTEM.md 逐一比对
+#   2. JS 语法：node --check 全部 7 模块（constants/locdata/algorithm/render/aiinput/main/archive）
+#   3. 结构红线：index.html 关键 id 全部存在 + script 加载顺序 constants→locdata→algorithm→render→aiinput→main→archive
 #   4. 引用完整性：index.html 引用的 js/css 文件真实存在
 # 全部通过退出码 0，任一失败退出码 1。
-# 注：?test=1 浏览器全量断言（88 条 0 FAIL）为人工红线，见发布链路方案 §五。
+# 注：?test=1 浏览器全量断言（204 条 0 FAIL ×4 档）为人工红线，见发布链路方案 §五。
 # 移植自：八字排盘 scripts/check-release.sh（v0.20.2/v0.20.3 事故防线）
 # ============================================================
 set -u
@@ -16,10 +16,11 @@ DIR="${1:-$(pwd)}"
 cd "$DIR" || { echo "❌ 目录不存在: $DIR"; exit 1; }
 
 # index.html 中关键结构 id（防渲染结构漏同步/误删）
-KEY_IDS="app testOut chartWrap resultPanel detailPanel detailBody calcErr dateErr fYear fMonth fDay fCity fLng segType segAmPm btnCalc btnAdv btnTestPage advBox timeline resultHead inName fProv fDist liveSolar btnArchive archiveMask editSave"
-# 模块加载顺序（constants/locdata 必须先于 algorithm；render/main/archive 在后）
-LOAD_ORDER="constants locdata algorithm render main archive"
-JS_FILES="js/constants.js js/locdata.js js/algorithm.js js/render.js js/main.js js/archive.js"
+# 2026-09-11 同步：删 segAmPm/btnAdv/advBox（时辰 chips/口径开关已移除）；增 fHour/fMinute/jieqiPanel/quickNav/chkPrivacy/aiPanel
+KEY_IDS="app testOut chartWrap resultPanel detailPanel detailBody calcErr dateErr fYear fMonth fDay fCity fLng segType fHour fMinute btnCalc btnTestPage timeline jieqiPanel quickNav resultHead inName fProv fDist liveSolar chkPrivacy aiPanel btnArchive archiveMask editSave"
+# 模块加载顺序（constants/locdata 必须先于 algorithm；render/aiinput/main/archive 在后）
+LOAD_ORDER="constants locdata algorithm render aiinput main archive"
+JS_FILES="js/constants.js js/locdata.js js/algorithm.js js/render.js js/aiinput.js js/main.js js/archive.js"
 CSS_FILES="css/style.css"
 
 FAIL=0
@@ -49,8 +50,15 @@ else
   fail "缺少 CHANGELOG.md"
 fi
 if [ -f SYSTEM.md ]; then
-  sv=$(grep -oE '\*\*v[0-9]+\.[0-9]+\.[0-9]+\*\*' SYSTEM.md | head -1 | tr -d '*')
-  if [ -n "$sv" ] && [ "$sv" = "$VERSION" ]; then pass "SYSTEM.md 当前版本 $sv"; else fail "SYSTEM.md 当前版本（${sv:-无}）≠ 版本 $VERSION"; fi
+  # 当前版本行现行格式（迭代期）：**v0.6.x-iter … @ <hash>**（…；最近发版标记 vX.Y.Z/tag …）
+  # —— 提取行内全部 vX.Y.Z 候选，要求包含基准版本 $VERSION（兼容旧格式 **vX.Y.Z**（…））
+  row=$(grep -m1 '^| 当前版本' SYSTEM.md || true)
+  cands=$(printf '%s\n' "$row" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -u | tr '\n' ' ' | sed 's/ *$//')
+  if printf ' %s ' "$cands" | grep -q " $VERSION "; then
+    pass "SYSTEM.md 当前版本行含基准版本 ${VERSION}（候选: ${cands}）"
+  else
+    fail "SYSTEM.md 当前版本行未含 ${VERSION}（候选: ${cands:-无}）"
+  fi
 else
   fail "缺少 SYSTEM.md"
 fi
@@ -76,7 +84,7 @@ python3 - <<'PYEOF'
 import re, sys
 src = open('index.html', encoding='utf-8').read()
 scripts = re.findall(r'<script\s+src="js/(\w+)\.js[^"]*"', src)
-want = ['constants', 'locdata', 'algorithm', 'render', 'main', 'archive']
+want = ['constants', 'locdata', 'algorithm', 'render', 'aiinput', 'main', 'archive']
 if scripts == want:
     print('  ✅ script 加载顺序正确: ' + ' -> '.join(scripts))
 else:
@@ -103,14 +111,15 @@ PYEOF
 [ $? -eq 0 ] || FAIL=1
 
 echo "【4/4】引用完整性（index.html 引用的 js/css 是否存在）"
-for ref in $(grep -oE '(src|href)="[^"]+\.(js|css)"' index.html | sed -E 's/^(src|href)="//; s/"$//'); do
+# 注：现行引用带缓存戳（?v=NNN），先剥离查询串再判定（2026-09-11 修复原空转）
+for ref in $(grep -oE '(src|href)="[^"]+\.(js|css)(\?[^"]*)?"' index.html | sed -E 's/^(src|href)="//; s/"$//; s/\?[^"]*$//'); do
   if [ -f "$ref" ]; then pass "引用存在: $ref"; else fail "引用缺失: $ref"; fi
 done
 
 echo "----------------------------------------"
 if [ $FAIL -eq 0 ]; then
   echo "🎉 全部校验通过（版本 ${VERSION}），可以发布。"
-  echo "   提醒：浏览器打开 index.html?test=1 确认 94 条断言 0 FAIL（人工红线）。"
+  echo "   提醒：浏览器打开 index.html?test=1 确认 204 条断言 0 FAIL（人工红线；断点 1512/1024/640/400）。"
   exit 0
 else
   echo "⚠️  存在失败项，禁止发布。"

@@ -2,6 +2,7 @@
 # 每次 push 到 main 时自动运行；参照八字 .github/workflows/test.yml，
 # 但紫微锚点/cases 为 node CLI 测试（无需浏览器），仅 ?test=1 浏览器自检用 Puppeteer。
 # 就绪说明：运行目录完成 git init 并推送 ziwei-paipan 仓库后自动生效（发布链路方案 §3.1）。
+# 2026-09-11：L3 自检断言数同步 88 → 204（v0.6.x-iter 现行口径）。
 
 name: 回归测试
 
@@ -33,7 +34,7 @@ jobs:
       - name: L2 cases 定向（run_case_tests.js）
         run: node tests/run_case_tests.js
 
-      # 4. L3 内嵌自检（?test=1 共 88 条；node CLI 无法覆盖，用 Puppeteer 加载页面）
+      # 4. L3 内嵌自检（?test=1 共 204 条；node CLI 无法覆盖，用 Puppeteer 加载页面）
       - name: 安装 Puppeteer
         run: npm install puppeteer
 
@@ -43,7 +44,7 @@ jobs:
           sleep 2
         shell: bash
 
-      - name: L3 浏览器自检（index.html?test=1 → 88 条 ALL PASS）
+      - name: L3 浏览器自检（index.html?test=1 → 204 条 ALL PASS）
         run: |
           node -e "
           const puppeteer = require('puppeteer');
@@ -57,8 +58,8 @@ jobs:
             console.log('?test=1 自检: total=' + r.total + ' passed=' + r.passed + ' failed=' + r.failed);
             if (r.failed > 0) console.log(r.fails.join('\n'));
             await browser.close();
-            if (r.total === 88 && r.passed === 88 && r.failed === 0) {
-              console.log('✅ 全部回归测试通过（check-release + 1242 + 45 + 88）');
+            if (r.total === 204 && r.passed === 204 && r.failed === 0) {
+              console.log('✅ 全部回归测试通过（check-release + 1242 + 45 + 204）');
               process.exit(0);
             } else {
               console.error('❌ 回归测试失败');
