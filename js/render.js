@@ -206,7 +206,8 @@
   // v0.6.14-iter（#43 #3）：出生年「十二节数据」块 —— 仿八字排盘 v0.26.0 当年节气数据块（12 节·立春→小寒）
   // 每节一列、列内六行：节名 / 月日 / 北京时间 / 真太阳月日 / 真太阳时间 / 干支（干上支下竖排）
   // 口径：年=出生年（pre.qiYear）；BJT 取节气表 UTC 字段（表即 BJT-as-UTC）；真太阳=出生地经度+均时差校正
-  //（未填出生地显示 —）；干支=交节当天（公历自然日）日柱（与八字排盘 D1 决策一致）。
+  //（未填出生地显示 —）；干支=月建（v0.6.19-iter #48 改：五虎遁月干，立春起寅月壬寅 → 小寒丑月癸丑；
+  // 复用 ALGO.liuMonthGz，与八字月柱 pre.mUse、流月轴同源口径）。
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function jieqiMiniHtml(pre) {
     if (!window.ALGO || !window.ALGO.getSolarTerm) return '';
@@ -230,7 +231,8 @@
         smd = t.m + '/' + t.d;
         stm = pad2(t.h) + ':' + pad2(t.mi);
       }
-      var gz = window.ALGO.dayGanZhi(ty, bm, bd);
+      // v0.6.19-iter（#48）：列干支由「交节日柱」改「月建」—— 第 i 列即第 i+1 个月（1=寅月/立春 … 12=丑月/小寒）
+      var gz = (window.ALGO.liuMonthGz && pre.qiYear) ? window.ALGO.liuMonthGz(pre.qiYear, i + 1) : null;
       cols.push('<div class="jm-col" data-term="' + name + '">'
         + '<div class="jm-name">' + name + '</div>'
         + '<div class="jm-md">' + bm + '/' + bd + '</div>'
@@ -242,7 +244,7 @@
         + '</div>');
     }
     return '<div class="jieqi-mini">'
-      + '<div class="jm-title">' + year + ' 年 · 十二节（立春→小寒）</div>'
+      + '<div class="jm-title">' + year + ' 年 · 十二节（立春→小寒）· 干支为月建</div>'
       + '<div class="jm-wrap"><div class="jm-grid">' + cols.join('') + '</div></div>'
       + '</div>';
   }

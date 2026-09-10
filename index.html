@@ -102,6 +102,7 @@
       <!-- v0.6.16-iter（#45）：① 出生地省/市/区一行（禁用项收起）；② 中宫字号调小+留白，四化默认勾选改命/年；③ 结果头三行（艺名性别→出生日期→八字） -->
       <!-- v0.6.17-iter（#46）：宫格底部两行居中 —— 大限宫名与本命宫名居中对齐（干支负边距补偿；≤640 窄屏改行盒拉伸+干支折行，同样精确居中） -->
       <!-- v0.6.18-iter（#47）：① 结果头加新历生日行（农历行上方）；② 页头右上角隐私勾选框（默认勾选=匿名+隐藏两生日行，与档案隐私同一状态）；③ 中宫行距调小 + 内容右移视觉居中 -->
+      <!-- v0.6.19-iter（#48）：十二节块列干支改「月建」口径（五虎遁月干：立春起壬寅 → 小寒癸丑；复用 ALGO.liuMonthGz，与八字月柱同源），标题加注「干支为月建」 -->
       <div class="result-main">
         <div class="chart-col">
           <div class="chart-wrap" id="chartWrap"></div>
@@ -219,9 +220,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=506"></script>
-<script src="js/render.js?v=524"></script>
+<script src="js/render.js?v=525"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=514"></script>
+<script src="js/main.js?v=515"></script>
 <script src="js/archive.js?v=502"></script>
 </body>
 </html>

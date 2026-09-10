@@ -389,14 +389,27 @@
       T.eq(hl.querySelector('.jm-smd').textContent, tstHl.m + '/' + tstHl.d, 'L8 寒露真太阳月日=ALGO');
       T.eq(hl.querySelector('.jm-stm').textContent, (tstHl.h < 10 ? '0' : '') + tstHl.h + ':' + (tstHl.mi < 10 ? '0' : '') + tstHl.mi, 'L8 寒露真太阳时间=ALGO');
       var gzHl = ALGO.dayGanZhi(1982, 10, 8);
-      T.eq(hl.querySelector('.jm-gan').textContent, gzHl.gan, 'L8 寒露日柱天干=ALGO');
-      T.eq(hl.querySelector('.jm-zhi').textContent, gzHl.zhi, 'L8 寒露日柱地支=ALGO');
-      T.ok(gzHl.gan === '甲' && gzHl.zhi === '子', 'L8 寒露日柱=甲子（1982-10-08）');
+      T.ok(gzHl.gan === '甲' && gzHl.zhi === '子', 'L8 寒露日柱=甲子（1982-10-08，ALGO 完整性）');
+      // v0.6.19-iter（#48）：列干支改月建口径（五虎遁；与八字月柱同源）—— 寒露=戌月=庚戌
+      T.eq(hl.querySelector('.jm-gan').textContent, '庚', 'L8/#48 寒露月建天干=庚');
+      T.eq(hl.querySelector('.jm-zhi').textContent, '戌', 'L8/#48 寒露月建地支=戌（庚戌）');
+      var colFirst = cols[0], colLast = cols[11];
+      T.ok(colFirst.querySelector('.jm-gan').textContent === '壬' && colFirst.querySelector('.jm-zhi').textContent === '寅', 'L8/#48 立春月建=壬寅（壬戌年五虎遁）');
+      T.ok(colLast.querySelector('.jm-gan').textContent === '癸' && colLast.querySelector('.jm-zhi').textContent === '丑', 'L8/#48 小寒月建=癸丑（丑月，次年1月）');
+      var mbExpect = ['壬寅', '癸卯', '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥', '壬子', '癸丑'];
+      var mbOk = true;
+      for (var mi2 = 0; mi2 < cols.length; mi2++) {
+        var mbTxt = cols[mi2].querySelector('.jm-gan').textContent + cols[mi2].querySelector('.jm-zhi').textContent;
+        if (mbTxt !== mbExpect[mi2]) mbOk = false;
+      }
+      T.ok(mbOk, 'L8/#48 十二列月建全列=壬寅…癸丑');
+      T.ok(ALGO.liuMonthGz(1982, 9).gan === '庚' && ALGO.liuMonthGz(1982, 9).zhi === '戌', 'L8/#48 liuMonthGz(1982,9)=庚戌（与列值同源）');
       var chN = ALGO.getChart({ y: 2000, m: 8, d: 16, h: 4, mi: 0, gender: 'F', lng: null });
       var hN = document.createElement('div');
       RENDER.renderHead(hN, chN, null);
       var colN = hN.querySelectorAll('.jm-col');
       T.ok(colN.length === 12 && colN[0].querySelector('.jm-stm').textContent === '—', 'L8 无出生地真太阳列显示 —');
+      T.ok(colN[0].querySelector('.jm-gan').textContent === '戊' && colN[0].querySelector('.jm-zhi').textContent === '寅', 'L8/#48 2000年立春月建=戊寅（庚辰年五虎遁）');
       // v0.6.16-iter（#45 #3）：结果头三行 —— 艺名·性别 → 出生日期 → 八字（日期与八字对调）
       // v0.6.18-iter（#47）：隐私开（默认）会隐藏 新历/农历 两行 —— #45 行序断言前显式关隐私（须在渲染前），断言后还原
       var privPrev8 = window.ARCHIVE ? ARCHIVE.getPrivacyMode() : false;
