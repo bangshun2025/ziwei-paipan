@@ -7,6 +7,7 @@
 
   var ALGO = window.ALGO;
   var CONST = window.CONST;
+  var RENDER = window.RENDER; // v0.6.13-iter：L7 自检直接调用渲染层（render.js 先于 main.js 加载）
 
   // ===== 断言小工具 =====
   function makeT() {
@@ -299,6 +300,65 @@
     T.ok(qs && qs.year === 2024 && qs.month === 3 && qs.day === 3, 'L6 本月=今年+本月（日不变）');
     qs = ALGO.quickStep({ year: 2001, month: 2, day: 3 }, 'cd', qtd);
     T.ok(qs && qs.year === 2024 && qs.month === 3 && qs.day === 5, 'L6 今日=年+月+日全套');
+
+    // ===== L7 v0.6.13-iter 四化线段（宫位框线四分色段）+ 勾选框 =====
+    (function () {
+      var gRoot = document.createElement('div');
+      var tlRoot = document.createElement('div');
+      var dEl = document.createElement('div');
+      var hEl = document.createElement('div');
+      var rz = RENDER.renderAll(hEl, gRoot, tlRoot, dEl, ch1, null, { ln: null, lm: null, ld: null });
+      var cells = rz.cells;
+      T.eq(gRoot.querySelectorAll('.hua-edge').length, 12, 'L7 12 宫各一条线段条');
+      T.eq(gRoot.querySelectorAll('.hua-edge.he-r').length, 4, 'L7 左四宫右缘 4 条');
+      T.eq(gRoot.querySelectorAll('.hua-edge.he-l').length, 4, 'L7 右四宫左缘 4 条');
+      T.eq(gRoot.querySelectorAll('.hua-edge.he-b').length, 2, 'L7 午未下缘 2 条');
+      T.eq(gRoot.querySelectorAll('.hua-edge.he-t').length, 2, 'L7 子丑上缘 2 条');
+      T.eq(gRoot.querySelectorAll('.hua-edge .hes').length, 48, 'L7 每条 4 段共 48 段');
+      T.ok(gRoot.querySelector('.hua-edge .hes').classList.contains('hes-ming'), 'L7 段序首段=命四化');
+      T.ok(gRoot.querySelector('.hua-edge .hes:last-child').classList.contains('hes-lr'), 'L7 段序末段=日四化');
+      var pOfZhi = {};
+      for (var pz = 0; pz < 12; pz++) pOfZhi[ch1.palaces[pz].zhi] = pz;
+      T.ok(!!cells[pOfZhi['巳']].querySelector('.hua-edge.he-r'), 'L7 巳(左列)右缘');
+      T.ok(!!cells[pOfZhi['亥']].querySelector('.hua-edge.he-l'), 'L7 亥(右列)左缘');
+      T.ok(!!cells[pOfZhi['午']].querySelector('.hua-edge.he-b'), 'L7 午下缘');
+      T.ok(!!cells[pOfZhi['子']].querySelector('.hua-edge.he-t'), 'L7 子上缘');
+      var cks = gRoot.querySelectorAll('.c-hua-ck');
+      T.eq(cks.length, 4, 'L7 四化行勾选框 4 个');
+      var allChecked = true;
+      for (var ci2 = 0; ci2 < cks.length; ci2++) { if (!cks[ci2].checked) allChecked = false; }
+      T.ok(allChecked, 'L7 勾选框默认全部勾选');
+      T.ok(cks[0] === gRoot.querySelector('[data-hua="ming"] .c-v-red').nextElementSibling, 'L7 勾选框紧随】之后');
+      function litExpect(stars) {
+        var hit = {};
+        for (var s2 = 0; s2 < stars.length; s2++) {
+          for (var p2 = 0; p2 < 12; p2++) {
+            if (cells[p2] && cells[p2].querySelector('.star[data-star="' + stars[s2] + '"]')) hit[p2] = 1;
+          }
+        }
+        return Object.keys(hit).length;
+      }
+      var st = RENDER.huaEdges(gRoot);
+      T.eq(st.strips, 12, 'L7 huaEdges 线段条 12');
+      T.eq(st.segs, 48, 'L7 huaEdges 段数 48');
+      var mingStars = [];
+      for (var mk in ch1.center.huaSummary) if (ch1.center.huaSummary.hasOwnProperty(mk)) mingStars.push(mk);
+      T.eq(st.lit.ming.length, litExpect(mingStars), 'L7 命线段点亮宫数=含命四化星宫数');
+      var sel0 = RENDER.navGet().sel;
+      var lh0 = ALGO.liuHuaOf(sel0);
+      T.eq(st.lit.ln.length, litExpect(lh0.nian.stars), 'L7 年线段点亮宫数');
+      T.eq(st.lit.ly.length, litExpect(lh0.yue.stars), 'L7 月线段点亮宫数');
+      T.eq(st.lit.lr.length, litExpect(lh0.ri ? lh0.ri.stars : []), 'L7 日线段点亮宫数');
+      var lnKeep = st.lit.ln.length;
+      cks[0].checked = false;
+      cks[0].dispatchEvent(new Event('change'));
+      var st2 = RENDER.huaEdges(gRoot);
+      T.eq(st2.lit.ming.length, 0, 'L7 取消命勾选→命线段全灭');
+      T.eq(st2.lit.ln.length, lnKeep, 'L7 取消命勾选不影响年线段');
+      cks[0].checked = true;
+      cks[0].dispatchEvent(new Event('change'));
+      T.eq(RENDER.huaEdges(gRoot).lit.ming.length, st.lit.ming.length, 'L7 复选→命线段恢复');
+    })();
 
     return T.summary();
   }

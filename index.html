@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=521">
+<link rel="stylesheet" href="css/style.css?v=523">
 </head>
 <body>
 
@@ -95,21 +95,22 @@
     <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴在盘旁 + 详情）===== -->
     <section id="resultPanel" class="hidden">
       <!-- v0.6.11-iter：result-main ≥1280px 两列 = 盘面左 + 时间轴右（窄屏自动堆叠，纯 CSS 控制） -->
-      <!-- v0.6.12-iter：盘面列 = 盘面 + 九宫下方快捷时间按钮条（上/下 月·年·日 + 回今天） -->
+      <!-- v0.6.12-iter：盘面列 = 盘面 + 九宫下方快捷时间按钮条（年·月·日 三组 + 回今天） -->
+      <!-- v0.6.13-iter：组序调整 —— 上一年/今年/下一年 在前，上个月/本月/下个月 随后（#1） -->
       <div class="result-main">
         <div class="chart-col">
           <div class="chart-wrap" id="chartWrap"></div>
 
           <div class="quick-nav panel" id="quickNav">
             <div class="qn-group">
-              <button type="button" class="qn-btn" data-qn="pm" title="流月：上一月">上个月</button>
-              <button type="button" class="qn-btn qn-mid" data-qn="cm" title="流月：回到本月">本月</button>
-              <button type="button" class="qn-btn" data-qn="nm" title="流月：下一月">下个月</button>
-            </div>
-            <div class="qn-group">
               <button type="button" class="qn-btn" data-qn="py" title="流年：上一年">上一年</button>
               <button type="button" class="qn-btn qn-mid" data-qn="cy" title="流年：回到今年">今年</button>
               <button type="button" class="qn-btn" data-qn="ny" title="流年：下一年">下一年</button>
+            </div>
+            <div class="qn-group">
+              <button type="button" class="qn-btn" data-qn="pm" title="流月：上一月">上个月</button>
+              <button type="button" class="qn-btn qn-mid" data-qn="cm" title="流月：回到本月">本月</button>
+              <button type="button" class="qn-btn" data-qn="nm" title="流月：下一月">下个月</button>
             </div>
             <div class="qn-group">
               <button type="button" class="qn-btn" data-qn="pd" title="流日：上一日">上一日</button>
@@ -213,9 +214,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=505"></script>
-<script src="js/render.js?v=520"></script>
+<script src="js/render.js?v=521"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=508"></script>
+<script src="js/main.js?v=509"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

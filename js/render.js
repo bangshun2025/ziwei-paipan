@@ -28,6 +28,15 @@
 
   var HUA_CLS = { 禄: 'L', 权: 'Q', 科: 'K', 忌: 'J' };
   var HUA_TXT = { 禄: '化禄', 权: '化权', 科: '化科', 忌: '化忌' };
+  // v0.6.13-iter（#4）：四化线段层序（宫位框线四分：命→年→月→日）与色彩（绿/红/橙/蓝）
+  var EDGE_LAYERS = ['ming', 'ln', 'ly', 'lr'];
+  var EDGE_ZH = { ming: '命四化', ln: '年四化', ly: '月四化', lr: '日四化' };
+  var EDGE_COLOR_ZH = { ming: '绿色', ln: '红色', ly: '橙色', lr: '蓝色' };
+  // v0.6.13-iter（#3）：四化行末尾勾选框（默认勾选；change → huaEdgesRefresh，见 renderGrid 绑定）
+  function huaCkHtml(layer) {
+    return '<input type="checkbox" class="c-hua-ck" data-layer="' + layer + '" checked'
+      + ' title="勾选：在宫位框线点亮' + EDGE_ZH[layer] + '线段（' + EDGE_COLOR_ZH[layer] + '）">';
+  }
 
   // ===== 大限盘宫名环（v0.6.0）=====
   // 生年十二宫沿地支顺环（命宫右邻=父母宫，与 CONST.PALACES 同构）；offset = 大限命宫所在格的环序号。
@@ -333,7 +342,50 @@
     }
     // v0.6.6-iter：年/月/日选择变更 → 常显标签全量重贴
     tagsRefreshAll(NAV.cells, NAV.chart);
+    // v0.6.13-iter（#4）：年/月/日四化线段随选择同步刷新
+    huaEdgesRefresh();
   }
+
+  // ===== v0.6.13-iter（#4）：四化线段（宫位框线四分色段）=====
+  // 层星表：命=生年四化四星（huaSummary）；年/月/日=当前选择（NAV.liuHua）
+  function edgeLayerStars(layer) {
+    if (layer === 'ming') {
+      var hs = (NAV.chart && NAV.chart.center && NAV.chart.center.huaSummary) || {};
+      var arr = [];
+      for (var k in hs) if (hs.hasOwnProperty(k)) arr.push(k);
+      return arr;
+    }
+    var lh = NAV.liuHua || {};
+    var hd = layer === 'ln' ? lh.nian : layer === 'ly' ? lh.yue : lh.ri;
+    return (hd && hd.stars) || [];
+  }
+  // 每宫框线四段各自点亮：勾选框已勾（默认全勾）且宫内确有该层四化星（主/辅星任一）
+  function huaEdgesRefresh() {
+    if (!NAV.chart || !NAV.cells || !NAV.rowEls) return;
+    for (var li = 0; li < EDGE_LAYERS.length; li++) {
+      var layer = EDGE_LAYERS[li];
+      var stars = edgeLayerStars(layer);
+      var hit = [];
+      for (var hi = 0; hi < 12; hi++) hit.push(false);
+      for (var s = 0; s < stars.length; s++) {
+        var nm = stars[s];
+        if (!nm) continue;
+        for (var p = 0; p < 12; p++) {
+          if (hit[p] || !NAV.cells[p]) continue;
+          if (NAV.cells[p].querySelector('.star[data-star="' + nm + '"]')) hit[p] = true;
+        }
+      }
+      var row = NAV.rowEls[layer];
+      var ck = row && row.querySelector('.c-hua-ck');
+      var on = ck ? !!ck.checked : true;
+      for (var p2 = 0; p2 < 12; p2++) {
+        var seg = NAV.cells[p2] && NAV.cells[p2].querySelector('.hes-' + layer);
+        if (!seg) continue;
+        if (on && hit[p2]) seg.classList.add('on'); else seg.classList.remove('on');
+      }
+    }
+  }
+
   // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
   function onDxChange(pi) {
     NAV.dxPi = pi;
@@ -443,14 +495,15 @@
     var huaTxt = huaTextOf(order4);
     var cH = '';
     cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
-    cH += '<div class="c-pan c-hua" data-hua="ming"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    cH += '<div class="c-pan c-hua" data-hua="ming"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span>' + huaCkHtml('ming') + '</div>';
     // v0.6.4-iter：流年/流月/流日四化行（点击各行 → 提亮对应四化宫位；蓝系高亮）
     // v0.6.6-iter：命名去「流」字（年四化/月四化/日四化），与盘中「年权/月禄/日忌」标签呼应
     var lh = cen.liuHua || {};
     function mkLiuHuaRow(label, hd, key) {
       if (!hd || !hd.stars) return '';
       return '<div class="c-pan c-hua" data-hua="' + key + '" title="' + label + '四化（' + esc(hd.gz) + '）">'
-        + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">' + esc(huaTextOf(hd.stars)) + '</span></div>';
+        + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">' + esc(huaTextOf(hd.stars)) + '</span>'
+        + huaCkHtml(key) + '</div>';
     }
     cH += mkLiuHuaRow('年', lh.nian, 'ln');
     cH += mkLiuHuaRow('月', lh.yue, 'ly');
@@ -462,6 +515,11 @@
     cH += '<div class="c-pair"><span class="c-k">命主</span><span class="c-v c-v-green">' + esc(cen.mingZhu) + '</span>'
       + '<span class="c-k">身主</span><span class="c-v c-v-green">' + esc(cen.shenZhu) + '</span></div>';
     center.innerHTML = cH;
+    // v0.6.13-iter（#3）：勾选框 change → 四化线段实时刷新
+    var ckEls = center.querySelectorAll('.c-hua-ck');
+    for (var cki = 0; cki < ckEls.length; cki++) {
+      ckEls[cki].addEventListener('change', function () { huaEdgesRefresh(); });
+    }
 
     var cells = {};
     for (var p = 0; p < 12; p++) {
@@ -499,6 +557,18 @@
         + '<span class="p-gz">' + esc(palace.ganZhi) + '</span></div>'
         + '<div class="p-f2"><span class="p-dx">' + dxNameOf(palace.name, 0) + '</span></div></div>';
       cell.setAttribute('data-palace', p);
+      // v0.6.13-iter（#4）：四化线段条 —— 朝中宫的框线（左四宫右缘 / 右四宫左缘 / 午未下缘 / 子丑上缘），
+      // 每条四分线段 = 命(绿)/年(红)/月(橙)/日(蓝)；勾选且该宫确有该层四化时点亮（huaEdgesRefresh）
+      var edgeDir = pos.c === 1 ? 'he-r' : pos.c === 4 ? 'he-l' : pos.r === 1 ? 'he-b' : pos.r === 4 ? 'he-t' : '';
+      if (edgeDir) {
+        var segs = '';
+        for (var ei = 0; ei < EDGE_LAYERS.length; ei++) segs += '<i class="hes hes-' + EDGE_LAYERS[ei] + '"></i>';
+        var edgeEl = document.createElement('div');
+        edgeEl.className = 'hua-edge ' + edgeDir;
+        edgeEl.setAttribute('aria-hidden', 'true');
+        edgeEl.innerHTML = segs;
+        cell.appendChild(edgeEl);
+      }
       cells[p] = cell;
       grid.appendChild(cell);
     }
@@ -652,6 +722,31 @@
         sel: { year: NAV.sel.year, month: NAV.sel.month, day: NAV.sel.day },
         dxPi: NAV.dxPi
       };
+    },
+    // v0.6.13-iter（#4）：四化线段状态（CDP/自检用；root 缺省 #chartWrap）
+    huaEdges: function (root) {
+      var scope = root || document.getElementById('chartWrap') || document;
+      var out = { strips: 0, segs: 0, checked: {}, lit: { ming: [], ln: [], ly: [], lr: [] } };
+      for (var li = 0; li < EDGE_LAYERS.length; li++) {
+        var layer = EDGE_LAYERS[li];
+        var row = NAV.rowEls && NAV.rowEls[layer];
+        var ck = row && row.querySelector('.c-hua-ck');
+        out.checked[layer] = ck ? !!ck.checked : false;
+      }
+      var all = scope.querySelectorAll('.hua-edge');
+      out.strips = all.length;
+      for (var i = 0; i < all.length; i++) {
+        var segs = all[i].querySelectorAll('.hes');
+        out.segs += segs.length;
+        var pi = parseInt(all[i].parentNode.getAttribute('data-palace'), 10);
+        for (var j = 0; j < segs.length; j++) {
+          for (var li2 = 0; li2 < EDGE_LAYERS.length; li2++) {
+            var l2 = EDGE_LAYERS[li2];
+            if (segs[j].classList.contains('hes-' + l2) && segs[j].classList.contains('on')) out.lit[l2].push(pi);
+          }
+        }
+      }
+      return out;
     },
     renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state, axes) {
       renderHead(headEl, chart, state);

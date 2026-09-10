@@ -201,8 +201,23 @@ body {
 .cell.soul { background: #fffdf9; }
 .cell.body { background: #fffefd; }
 /* v0.6.10-iter（#3）：三方四正高亮（青绿系）= 选中宫 + 三合两宫 + 对宫；选中宫本身由后置的 .active 蓝标覆盖 */
-.cell.sq-lit { background: #ecf8f1; box-shadow: inset 0 0 0 2px rgba(22, 132, 88, .38); }
+/* v0.6.13-iter（#2）：去掉边框高亮（原 inset 青绿描边移除），保留框内底色高亮 */
+.cell.sq-lit { background: #ecf8f1; }
 .cell.active { background: #f3f7ff; box-shadow: inset 0 0 0 2px rgba(41, 89, 164, .35); }
+/* v0.6.13-iter（#4）：四化线段 —— 外环宫位朝中宫的框线分四段（命绿/年红/月橙/日蓝）；
+ * 段顺序沿框线按阅读方向排（竖线自上而下、横线自左而右）= 命→年→月→日；
+ * 勾选四化行勾选框且该宫确有该层四化星时点亮（.on，逻辑见 render.js huaEdgesRefresh） */
+.hua-edge { position: absolute; display: flex; pointer-events: none; z-index: 2; }
+.hua-edge.he-r { top: 0; right: 0; bottom: 0; width: 4px; flex-direction: column; }
+.hua-edge.he-l { top: 0; left: 0; bottom: 0; width: 4px; flex-direction: column; }
+.hua-edge.he-b { left: 0; right: 0; bottom: 0; height: 4px; flex-direction: row; }
+.hua-edge.he-t { left: 0; right: 0; top: 0; height: 4px; flex-direction: row; }
+.hua-edge .hes { flex: 1 1 0; background: transparent; }
+.hua-edge .hes.on { border-radius: 1px; }
+.hua-edge .hes.on.hes-ming { background: #17a45b; }
+.hua-edge .hes.on.hes-ln { background: #e0392e; }
+.hua-edge .hes.on.hes-ly { background: #e8862e; }
+.hua-edge .hes.on.hes-lr { background: #3568d4; }
 /* 宫内结构 v0.6.6-iter：星带(主星玫粉/辅杂黑) + 神煞行(博士蓝·岁前·将前·大限岁段·长生 一行合并)
    + 宫位行底红两行（行1 ★/身+本命X宫+干支；行2 大限X宫）；庙旺行(.p-bright)已废弃 */
 .cell .p-stars {
@@ -292,6 +307,13 @@ body {
 .center-area .c-v-pink { color: #c02090; }
 .center-area .c-v-green { color: #008000; }
 .center-area .c-v-blue { color: #3568d4; }
+/* v0.6.13-iter（#3）：四化行勾选框（】后，默认勾选）——颜色与对应线段一致（命绿/年红/月橙/日蓝）；
+   行尾空间紧：列距 5→3、右借 4px，默认缩进的勾选框回到「】后」同一行 */
+.center-area .c-pan.c-hua { gap: 3px; margin-right: -4px; }
+.center-area .c-hua-ck { width: 13px; height: 13px; margin: 0; flex: none; align-self: center; cursor: pointer; accent-color: #17a45b; }
+.center-area .c-hua[data-hua="ln"] .c-hua-ck { accent-color: #e0392e; }
+.center-area .c-hua[data-hua="ly"] .c-hua-ck { accent-color: #e8862e; }
+.center-area .c-hua[data-hua="lr"] .c-hua-ck { accent-color: #3568d4; }
 
 /* ===== 大限时间轴（热卜式年份轴：段中点年份大字 + 宫名/岁段小字）===== */
 .timeline-panel { padding: 10px 16px; margin: 6px 0 14px; }
