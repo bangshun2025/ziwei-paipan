@@ -136,6 +136,11 @@
     T.eq(ch1.center.juName, '木三局', 'L3 木三局');
     T.eq(ch1.center.mingZhu, '破军', 'L3 命主破军');
     T.eq(ch1.center.shenZhu, '文昌', 'L3 身主文昌');
+    // 子斗/流斗（热卜口径锚，2026-09-10 实测：1982戌九月→未 / 2026午→寅）
+    T.eq(ch1.center.ziDouZhi, '亥', 'L3 子斗 庚辰年申月(mUse=7)→亥');
+    var _lz = ((new Date().getFullYear() - 1984) % 12 + 12) % 12;
+    var _zl = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+    T.eq(ch1.center.liuDouZhi, _zl[(_lz + 6) % 12], 'L3 流斗 流年支+6');
     T.eq(ch1.center.ziweiIndex, 4, 'L3 紫微在午');
     T.eq(ch1.center.tianfuIndex, 8, 'L3 天府在戌');
     T.ok(ch1.daXian[0].name === '命宫' && ch1.daXian[0].start === 3 && ch1.daXian[0].end === 12, 'L3 大限0 3-12岁命宫');

@@ -285,6 +285,7 @@ body {
 .center-area .c-pair .c-v { font-weight: 600; margin-left: 1px; }
 .center-area .c-v-pink { color: #c02090; }
 .center-area .c-v-green { color: #008000; }
+.center-area .c-v-blue { color: #3568d4; }
 
 /* ===== 大限时间轴（热卜式年份轴：段中点年份大字 + 宫名/岁段小字）===== */
 .timeline-panel { padding: 10px 16px; margin: 6px 0 14px; }

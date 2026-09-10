@@ -182,7 +182,7 @@
     var dxByPalace = {};
     for (var k = 0; k < chart.daXian.length; k++) dxByPalace[chart.daXian[k].palaceIndex] = chart.daXian[k];
 
-    // 中宫 v0.6.3：四行（盘类型/命四化/命宫身宫/命主身主），字号全统一+左对齐（样式见 .center-area）
+    // 中宫 v0.6.3-iter：五行（盘类型/命四化/命宫身宫/子斗流斗/命主身主），字号全统一+左对齐（样式见 .center-area）
     var cen = chart.center;
     var juTxt = '天盘' + esc(cen.juName);
     var L4 = ['禄', '权', '科', '忌'];
@@ -199,6 +199,8 @@
     cH += '<div class="c-pan c-hua" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
     cH += '<div class="c-pair"><span class="c-k">命宫在</span><span class="c-v c-v-pink">' + esc(cen.soulZhi) + '</span>'
       + '<span class="c-k">身宫在</span><span class="c-v c-v-pink">' + esc(cen.bodyZhi) + '</span></div>';
+    cH += '<div class="c-pair" title="流斗随当前流年（' + esc(String(cen.liuYear || '')) + '）"><span class="c-k">子斗在</span><span class="c-v c-v-blue">' + esc(cen.ziDouZhi) + '</span>'
+      + '<span class="c-k">流斗在</span><span class="c-v c-v-blue">' + esc(cen.liuDouZhi) + '</span></div>';
     cH += '<div class="c-pair"><span class="c-k">命主</span><span class="c-v c-v-green">' + esc(cen.mingZhu) + '</span>'
       + '<span class="c-k">身主</span><span class="c-v c-v-green">' + esc(cen.shenZhu) + '</span></div>';
     center.innerHTML = cH;

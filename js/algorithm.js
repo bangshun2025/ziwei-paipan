@@ -467,6 +467,18 @@
   function getChart(input) {
     var pre = preprocess(input);
     var placed = placeAll(pre);
+
+    // 子斗/流斗（中宫行，v0.6.3-iter）：口径对齐参考盘「热卜紫微斗数」（2026-09-10 实测锚）
+    // 锚：1982 壬戌年九月（mUse=9）→ 子斗在未（戌10+9=19≡7）；2026 丙午流年 → 流斗在寅（午6+8=14≡2）
+    // 子斗 = 生年支 + 实用月序（较「太岁起正月顺数至生月」通式多走一位）
+    // 流斗 = 流年支 +（实用月序 - 1）（通式：流年支宫起正月，顺数至生月）
+    var ziDouIdx = fix12(pre.yearGanZhi.zhiIdx + pre.mUse);
+    var nowD = new Date();
+    var liuY = nowD.getFullYear();
+    var lcD = getSolarTerm(liuY, 2); // 立春换流年
+    if (lcD && nowD.getTime() < lcD.getTime()) liuY--;
+    var liuZhiIdx = ((liuY - 1984) % 12 + 12) % 12;
+    var liuDouIdx = fix12(liuZhiIdx + pre.mUse - 1);
     // 宫干支字符串回填
     for (var i = 0; i < 12; i++) {
       var p = placed.palaces[i];
@@ -506,7 +518,8 @@
         soulIndex: placed.soulP, soulZhi: ZHI[placed.soulZhi],
         bodyIndex: placed.bodyP, bodyZhi: ZHI[fix12(2 + placed.bodyP)],
         ziweiIndex: placed.ziweiP, tianfuIndex: placed.tianfuP,
-        huaSummary: placed.huaSummary
+        huaSummary: placed.huaSummary,
+        ziDouZhi: ZHI[ziDouIdx], liuDouZhi: ZHI[liuDouIdx], liuYear: liuY
       },
       palaces: placed.palaces,
       huaStars: huaStars,
