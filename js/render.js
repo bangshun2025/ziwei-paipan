@@ -196,7 +196,7 @@
     var huaTxt = order4.length ? '【' + order4.join('') + '】' : '【--】';
     var cH = '';
     cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
-    cH += '<div class="c-pan"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    cH += '<div class="c-pan c-hua" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
     cH += '<div class="c-pair"><span class="c-k">命宫在</span><span class="c-v c-v-pink">' + esc(cen.soulZhi) + '</span>'
       + '<span class="c-k">身宫在</span><span class="c-v c-v-pink">' + esc(cen.bodyZhi) + '</span></div>';
     cH += '<div class="c-pair"><span class="c-k">命主</span><span class="c-v c-v-green">' + esc(cen.mingZhu) + '</span>'
@@ -243,6 +243,28 @@
       grid.appendChild(cell);
     }
     grid.appendChild(center);
+
+    // v0.6.3：点击「命四化」行 → 金色提亮四化星所在宫（toggle；四化星名见 order4，宫定位=major/minor 星名匹配）
+    var huaCells = [];
+    var huaNameSet = {};
+    for (var hz = 0; hz < order4.length; hz++) huaNameSet[order4[hz]] = 1;
+    if (order4.length) {
+      for (var hp2 = 0; hp2 < 12; hp2++) {
+        var pj = chart.palaces[hp2];
+        var hHit = false;
+        for (var hx = 0; hx < (pj.major || []).length; hx++) if (huaNameSet[pj.major[hx].name]) hHit = true;
+        for (var hy = 0; hy < (pj.minor || []).length; hy++) if (huaNameSet[pj.minor[hy]]) hHit = true;
+        if (hHit) huaCells.push(cells[hp2]);
+      }
+    }
+    var huaBtn = center.querySelector('.c-hua');
+    if (huaBtn && order4.length) {
+      huaBtn.addEventListener('click', function () {
+        var on = !huaBtn.classList.contains('on');
+        for (var hg = 0; hg < huaCells.length; hg++) huaCells[hg].classList.toggle('hua-lit', on);
+        huaBtn.classList.toggle('on', on);
+      });
+    }
 
     root.innerHTML = '';
     root.appendChild(grid);
