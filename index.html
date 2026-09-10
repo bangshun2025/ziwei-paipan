@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=520">
+<link rel="stylesheet" href="css/style.css?v=521">
 </head>
 <body>
 
@@ -95,8 +95,29 @@
     <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴在盘旁 + 详情）===== -->
     <section id="resultPanel" class="hidden">
       <!-- v0.6.11-iter：result-main ≥1280px 两列 = 盘面左 + 时间轴右（窄屏自动堆叠，纯 CSS 控制） -->
+      <!-- v0.6.12-iter：盘面列 = 盘面 + 九宫下方快捷时间按钮条（上/下 月·年·日 + 回今天） -->
       <div class="result-main">
-        <div class="chart-wrap" id="chartWrap"></div>
+        <div class="chart-col">
+          <div class="chart-wrap" id="chartWrap"></div>
+
+          <div class="quick-nav panel" id="quickNav">
+            <div class="qn-group">
+              <button type="button" class="qn-btn" data-qn="pm" title="流月：上一月">上个月</button>
+              <button type="button" class="qn-btn qn-mid" data-qn="cm" title="流月：回到本月">本月</button>
+              <button type="button" class="qn-btn" data-qn="nm" title="流月：下一月">下个月</button>
+            </div>
+            <div class="qn-group">
+              <button type="button" class="qn-btn" data-qn="py" title="流年：上一年">上一年</button>
+              <button type="button" class="qn-btn qn-mid" data-qn="cy" title="流年：回到今年">今年</button>
+              <button type="button" class="qn-btn" data-qn="ny" title="流年：下一年">下一年</button>
+            </div>
+            <div class="qn-group">
+              <button type="button" class="qn-btn" data-qn="pd" title="流日：上一日">上一日</button>
+              <button type="button" class="qn-btn qn-mid" data-qn="cd" title="流日：回到今日">今日</button>
+              <button type="button" class="qn-btn" data-qn="nd" title="流日：下一日">下一日</button>
+            </div>
+          </div>
+        </div>
 
         <div class="panel timeline-panel">
           <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
@@ -191,10 +212,10 @@
 <!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> aiinput(AI解析) -> main -> archive（零构建 IIFE + window 命名空间）-->
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
-<script src="js/algorithm.js?v=504"></script>
-<script src="js/render.js?v=519"></script>
+<script src="js/algorithm.js?v=505"></script>
+<script src="js/render.js?v=520"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=507"></script>
+<script src="js/main.js?v=508"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

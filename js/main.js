@@ -276,6 +276,30 @@
     T.ok(!!window.ARCHIVE && typeof window.ARCHIVE.init === 'function', 'L5 archive.js 模块挂载');
     T.ok(!!window.LOC_DATA['北京市'] && !!window.LOC_DATA['新疆'], 'L5 京/疆键可达');
 
+    // ===== L6 v0.6.12-iter 快捷时间步进（quickStep 纯函数）=====
+    var qs;
+    qs = ALGO.quickStep({ year: 2026, month: 7, day: 1 }, 'pm', null);
+    T.ok(qs && qs.year === 2026 && qs.month === 6 && qs.day === 1, 'L6 上一月 2026七月→六月');
+    qs = ALGO.quickStep({ year: 2026, month: 1, day: 15 }, 'pm', null);
+    T.ok(qs && qs.year === 2025 && qs.month === 12 && qs.day === 15, 'L6 上一月跨年 正月→上年腊月');
+    qs = ALGO.quickStep({ year: 2025, month: 12, day: 1 }, 'nm', null);
+    T.ok(qs && qs.year === 2026 && qs.month === 1 && qs.day === 1, 'L6 下一月跨年 腊月→下年正月');
+    qs = ALGO.quickStep({ year: 2026, month: 7, day: 29 }, 'nd', null);
+    T.ok(qs && qs.year === 2026 && qs.month === 8 && qs.day === 1, 'L6 下一日跨月 七月廿九→八月初一');
+    qs = ALGO.quickStep({ year: 2026, month: 7, day: 1 }, 'pd', null);
+    T.ok(qs && qs.month === 6 && qs.day === (ALGO.lunarMonthDays(2026, 6) || 29), 'L6 上一日跨月 初一→上月尾日');
+    qs = ALGO.quickStep({ year: 2026, month: 7, day: 29 }, 'pd', null);
+    T.ok(qs && qs.month === 7 && qs.day === 28, 'L6 上一日 廿九→廿八');
+    qs = ALGO.quickStep({ year: 2026, month: 7, day: 29 }, 'pm', null);
+    T.ok(qs && qs.month === 6 && qs.day === (Math.min(29, ALGO.lunarMonthDays(2026, 6) || 29)), 'L6 换月后日序按新月长钳制');
+    var qtd = { year: 2024, month: 3, day: 5 };
+    qs = ALGO.quickStep({ year: 2001, month: 2, day: 3 }, 'cy', qtd);
+    T.ok(qs && qs.year === 2024 && qs.month === 2 && qs.day === 3, 'L6 今年=取今天年（月日不变）');
+    qs = ALGO.quickStep({ year: 2001, month: 2, day: 3 }, 'cm', qtd);
+    T.ok(qs && qs.year === 2024 && qs.month === 3 && qs.day === 3, 'L6 本月=今年+本月（日不变）');
+    qs = ALGO.quickStep({ year: 2001, month: 2, day: 3 }, 'cd', qtd);
+    T.ok(qs && qs.year === 2024 && qs.month === 3 && qs.day === 5, 'L6 今日=年+月+日全套');
+
     return T.summary();
   }
 

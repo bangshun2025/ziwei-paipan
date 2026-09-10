@@ -346,13 +346,69 @@
     navClamp();
     navRebuild();
   }
-  function navInit(chart, cells, axes) {
+  function navInit(chart, cells, axes, ctx) {
     NAV.chart = chart; NAV.cells = cells;
     NAV.axes = axes || { ln: null, lm: null, ld: null };
+    // v0.6.12-iter：快捷按钮跨大限段切换需复用 selectPalace 全套联动，故记录渲染上下文
+    NAV.timelineRoot = (ctx && ctx.timelineRoot) || NAV.timelineRoot || null;
+    NAV.detailEl = (ctx && ctx.detailEl) || NAV.detailEl || null;
+    NAV.state = (ctx && ctx.state) || NAV.state || null;
     var tsel = window.ALGO.todayLiuSel();
     NAV.sel = { year: tsel.year, month: tsel.month, day: tsel.day };
     NAV.dxPi = -1;
     navClamp();
+  }
+
+  // ===== v0.6.12-iter：九宫下方快捷时间按钮（上/下 月·年·日 + 回今天）=====
+  // 语义：上/下 = 相对步进（跨月/跨年自动进位）；本/今 = 回真实今天（本月=今年+本月，今日=年+月+日全套）
+  // 跨大限段：目标年份越出当前段时自动切换该段（复用 selectPalace → 宫位选中/详情/大限盘名/限标签同步）
+  function navYearSpans(chart) {
+    var spans = [];
+    for (var i = 0; i < chart.daXian.length; i++) {
+      var r = dxYearRange(chart, chart.daXian[i]);
+      spans.push({ pi: chart.daXian[i].palaceIndex, y0: r.y0, y1: r.y1 });
+    }
+    return spans;
+  }
+  function navGoTo(y, m, d) {
+    var chart = NAV.chart;
+    if (!chart || !NAV.cells) return;
+    var spans = navYearSpans(chart);
+    var yMin = spans[0].y0, yMax = spans[spans.length - 1].y1;
+    if (y < yMin || y > yMax) return;                 // 盘面年限外 → 不动
+    m = Math.max(1, Math.min(12, m));
+    var lim = window.ALGO.lunarMonthDays(y, m) || 29;
+    d = Math.max(1, Math.min(lim, d));
+    var tgt = null;
+    for (var i = 0; i < spans.length; i++) {
+      if (y >= spans[i].y0 && y <= spans[i].y1) { tgt = spans[i]; break; }
+    }
+    if (tgt && tgt.pi !== NAV.dxPi && NAV.timelineRoot) {
+      // 跨段：先走一次大限选中（重列流年轴 / 宫位/详情/大限名环/限标签），再落定目标年月日
+      selectPalace(chart, tgt.pi, NAV.cells, NAV.timelineRoot, NAV.detailEl, NAV.state);
+    }
+    NAV.sel.year = y; NAV.sel.month = m; NAV.sel.day = d;
+    navClamp();
+    navRebuild();
+  }
+  function quickNav(action) {
+    if (!NAV.chart) return;
+    var ns = window.ALGO.quickStep(NAV.sel, action);
+    if (!ns) return;
+    navGoTo(ns.year, ns.month, ns.day);
+  }
+  var quickBound = false;
+  function bindQuickNav() {
+    if (quickBound) return;
+    var root = document.getElementById('quickNav');
+    if (!root) return;
+    var btns = root.querySelectorAll('[data-qn]');
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.addEventListener('click', function () { quickNav(b.getAttribute('data-qn')); });
+      })(btns[i]);
+    }
+    quickBound = true;
   }
 
   // v0.6.8-iter：中宫四化行文字 —— 按【星禄 星权 星科 星忌】输出（禄权科忌顺序，#1）
@@ -589,11 +645,20 @@
     monthPillarOf: monthPillarOf,
     cnLunar: cnLunar,
     renderHead: renderHead,
+    // v0.6.12-iter：快捷导航对外接口（CDP 冒烟/自动化校验用）
+    navQuick: quickNav,
+    navGet: function () {
+      return {
+        sel: { year: NAV.sel.year, month: NAV.sel.month, day: NAV.sel.day },
+        dxPi: NAV.dxPi
+      };
+    },
     renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state, axes) {
       renderHead(headEl, chart, state);
       var cells = renderGrid(gridRoot, chart);
       // v0.6.5-iter：时间导航初始化（默认=今天：大限段/流年/流月/流日）——需在 renderTimeline 前
-      navInit(chart, cells, axes);
+      // v0.6.12-iter：ctx 记录渲染上下文（快捷按钮跨段切换用）
+      navInit(chart, cells, axes, { timelineRoot: timelineRoot, detailEl: detailEl, state: state });
       // v0.6.0：宫格可点 —— 点击即选中该宫（高亮/详情/大限轴联动），且该宫成为「大限命宫」，
       // 全盘右下角大限宫名沿生年十二宫环偏移（点命宫右邻父母宫 → 父母宫=大限命宫，福德宫=大限父母宫…）
       for (var pc = 0; pc < 12; pc++) (function (pi) {
@@ -603,6 +668,7 @@
       })(pc);
       renderTimeline(timelineRoot, chart, cells, detailEl, state);
       navRefresh(); // 兜底同步（selectPalace 已触发导航刷新，此处幂等保齐）
+      bindQuickNav(); // v0.6.12-iter：九宫下方快捷按钮绑定（一次）
       return { cells: cells, chart: chart };
     }
   };

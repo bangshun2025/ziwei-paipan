@@ -185,6 +185,32 @@
     if (lc && d.getTime() < lc.getTime()) y--;
     return { year: y, month: lu ? lu.lunarMonth : 1, day: lu ? lu.lunarDay : 1 };
   }
+  // v0.6.12-iter：快捷时间步进（九宫下方快捷按钮）——纯日期级联，不含大限段（段切换由渲染层按年归属处理）
+  // sel: {year, month(1-12), day(1-30)}；action: py/ny/cy 年 · pm/nm/cm 月 · pd/nd/cd 日；today: todayLiuSel() 形态
+  // 规则：上/下 = 相对步进（跨月/跨年自动进位）；今/本 = 回真实今天（cy 仅换年、cm 换年+月、cd 换年+月+日）；日序按新月长钳制
+  function quickStep(sel, action, today) {
+    var y = sel.year, m = sel.month, d = sel.day;
+    var t = today || todayLiuSel();
+    if (action === 'py') { y -= 1; }
+    else if (action === 'ny') { y += 1; }
+    else if (action === 'cy') { y = t.year; }
+    else if (action === 'pm') { m -= 1; if (m < 1) { m = 12; y -= 1; } }
+    else if (action === 'nm') { m += 1; if (m > 12) { m = 1; y += 1; } }
+    else if (action === 'cm') { y = t.year; m = t.month; }
+    else if (action === 'pd') {
+      d -= 1;
+      if (d < 1) { m -= 1; if (m < 1) { m = 12; y -= 1; } d = lunarMonthDays(y, m) || 29; }
+    } else if (action === 'nd') {
+      var nd = lunarMonthDays(y, m) || 29;
+      d += 1;
+      if (d > nd) { m += 1; if (m > 12) { m = 1; y += 1; } d = 1; }
+    } else if (action === 'cd') { y = t.year; m = t.month; d = t.day; }
+    else { return null; }
+    var lim = lunarMonthDays(y, m);
+    if (lim && d > lim) d = lim;   // 月长变化后日序钳制（如换月后三十→廿九）
+    if (d < 1) d = 1;
+    return { year: y, month: m, day: d };
+  }
   function hourGanZhi(dayGanIdx, t) { // 五鼠遁；t=时支序号
     var sub = { 0: 0, 5: 0, 1: 2, 6: 2, 2: 4, 7: 4, 3: 6, 8: 6, 4: 8, 9: 8 }[dayGanIdx];
     var ganIdx = fix10(sub + t);
@@ -586,7 +612,7 @@
     cnyOf: cnyOf, leapMonthOf: leapMonthOf, mLength: mLength,
     yearGanZhi: yearGanZhi, dayGanZhi: dayGanZhi, hourGanZhi: hourGanZhi,
     getSolarTerm: getSolarTerm, qiYearMonthOf: qiYearMonthOf,
-    liuMonthGz: liuMonthGz, lunarMonthDays: lunarMonthDays, liuHuaOf: liuHuaOf, todayLiuSel: todayLiuSel,
+    liuMonthGz: liuMonthGz, lunarMonthDays: lunarMonthDays, liuHuaOf: liuHuaOf, todayLiuSel: todayLiuSel, quickStep: quickStep,
     hourToShichen: hourToShichen, equationOfTime: equationOfTime, trueSolarTime: trueSolarTime,
     preprocess: preprocess, placeAll: placeAll, getChart: getChart, starPalace: starPalace
   };
