@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=525">
+<link rel="stylesheet" href="css/style.css?v=526">
 </head>
 <body>
 
@@ -63,11 +63,9 @@
       <div class="row">
         <span class="lbl">出生地</span>
         <select id="fProv">
-          <option value="">— 未选择（按北京时间120°E）—</option>
+          <option value="">— 未选择 —</option>
           <option value="CUSTOM">自定义经度…</option>
         </select>
-      </div>
-      <div class="row row-sub">
         <select id="fCity" disabled></select>
         <select id="fDist" disabled></select>
         <input type="number" id="fLng" step="0.1" min="73" max="136" placeholder="经度°E" class="hidden" title="自动回填所选城市经度，可手动微调">
@@ -99,6 +97,7 @@
       <!-- v0.6.13-iter：组序调整 —— 上一年/今年/下一年 在前，上个月/本月/下个月 随后（#1） -->
       <!-- v0.6.14-iter（#43）：① 真太阳时行内化（#1）；② 结果头口径行移除（#2）；③ 出生年十二节数据块（#3） -->
       <!-- v0.6.15-iter（#44）：① 真太阳时整行压缩保一行（11px/12.5px）；② 括号后常显时辰（如「卯时」） -->
+      <!-- v0.6.16-iter（#45）：① 出生地省/市/区一行（禁用项收起）；② 中宫字号调小+留白，四化默认勾选改命/年；③ 结果头三行（艺名性别→出生日期→八字） -->
       <div class="result-main">
         <div class="chart-col">
           <div class="chart-wrap" id="chartWrap"></div>
@@ -216,9 +215,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=506"></script>
-<script src="js/render.js?v=522"></script>
+<script src="js/render.js?v=523"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=511"></script>
+<script src="js/main.js?v=512"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

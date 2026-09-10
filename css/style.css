@@ -74,7 +74,6 @@ body {
   letter-spacing: 1px; user-select: none; flex: none;
 }
 .input-panel .row .lbl-sec { margin-left: 8px; }
-.input-panel .row-sub { padding-left: 37px; border-top: 0 !important; padding-top: 0; padding-bottom: 7px; }
 .input-panel select,
 .input-panel input[type="text"],
 .input-panel input[type="number"] {
@@ -95,8 +94,11 @@ body {
 .input-panel select:disabled { background: #f5f2ea; color: #b7b0a0; cursor: not-allowed; }
 .input-panel select#fYear { width: 74px; }
 .input-panel select#fMonth, .input-panel select#fDay { width: 54px; }
-.input-panel select#fProv { width: 310px; }
-.input-panel select#fCity, .input-panel select#fDist { width: 158px; }
+/* v0.6.16-iter（#45 #1）：出生地省/市/区收进一行（「出生地」41 + 省108 + 市86 + 区86 + 缝 ≈348px ≤ 366px）；
+   禁用/未选的市、区收起（display:none），选择逐级出现；自定义经度时市/区同样收起 */
+.input-panel select#fProv { width: 108px; }
+.input-panel select#fCity, .input-panel select#fDist { width: 86px; }
+#locArea #fCity:disabled, #locArea #fDist:disabled { display: none; }
 .unit { font-size: 11px; color: #b0a996; margin-left: -5px; white-space: nowrap; }
 .time-num { width: 54px; text-align: center; padding: 0 2px !important; }
 .sc-hint { font-size: 11px; color: #9a938a; white-space: nowrap; margin-left: 2px; user-select: none; }
@@ -307,16 +309,18 @@ body {
   background: #fffdf7; border: 0; border-radius: 0;
   display: flex; flex-direction: column;
   align-items: flex-start; justify-content: center; text-align: left;
-  padding: 10px 8px; gap: 7px; overflow: hidden;
+  /* v0.6.16-iter（#45 #2）：留白加大（padding 10×8→13×11、行距 7→9），更透气 */
+  padding: 13px 11px; gap: 9px; overflow: hidden;
 }
 /* v0.6.3：中宫四行（盘类型/命四化/命宫身宫/命主身主），全部统一字号左对齐 */
-.center-area .c-pan { display: flex; align-items: baseline; justify-content: flex-start; flex-wrap: wrap; gap: 3px 5px; font-size: 13px; }
+/* v0.6.16-iter（#45 #2）：字号 13→12px（调小、更精，配合留白） */
+.center-area .c-pan { display: flex; align-items: baseline; justify-content: flex-start; flex-wrap: wrap; gap: 3px 5px; font-size: 12px; }
 /* v0.6.10-iter（#3）：中宫四化行取消点击交互（行点击高亮/再点取消/单层互斥逻辑已移除，回归纯展示） */
 .center-area .c-lb { color: #2b2b2b; font-weight: 600; }
 .center-area .c-v-red { color: #f02000; font-weight: 600; }
 .center-area .c-pair {
   display: flex; align-items: baseline; justify-content: flex-start; gap: 20px;
-  font-size: 13px; margin-top: 3px;
+  font-size: 12px; margin-top: 2px;
 }
 .center-area .c-pair .c-k { color: #2b2b2b; font-weight: 600; }
 .center-area .c-pair .c-v { font-weight: 600; margin-left: 1px; }
@@ -387,8 +391,10 @@ body {
   .cell .p-name { font-size: 12px; }
   .cell .p-dx { font-size: 9.5px; }
   .cell .p-f1, .cell .p-meta { gap: 0 3px; }
-  .center-area .c-pan, .center-area .c-pair { font-size: 11.5px; }
+  .center-area .c-pan, .center-area .c-pair { font-size: 11px; }
   .center-area .c-pair { gap: 10px; }
+  /* v0.6.16-iter（#45 #1）：窄屏出生地保一行 —— 省/市/区弹性收窄不折行 */
+  #locArea #fProv, #locArea #fCity, #locArea #fDist { flex: 1 1 0; min-width: 0; }
   .result-head .pillars { font-size: 16px; }
   .btn-main { width: 100%; }
 }
@@ -431,7 +437,7 @@ body {
   /* v0.6.6-iter：主星不再随超宽屏放大（统一 14px 基础档，见 .star.major 定义处） */
   .star.minor { font-size: 10.5px; }
   .star.adj { font-size: 9.5px; }
-  .center-area .c-pan, .center-area .c-pair { font-size: 15px; }
+  .center-area .c-pan, .center-area .c-pair { font-size: 14px; }
   .center-area .c-pair { gap: 26px; }
 
   /* 右栏时间轴/详情更紧凑，配合一屏 */

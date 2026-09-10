@@ -32,9 +32,11 @@
   var EDGE_LAYERS = ['ming', 'ln', 'ly', 'lr'];
   var EDGE_ZH = { ming: '命四化', ln: '年四化', ly: '月四化', lr: '日四化' };
   var EDGE_COLOR_ZH = { ming: '绿色', ln: '红色', ly: '橙色', lr: '蓝色' };
-  // v0.6.13-iter（#3）：四化行末尾勾选框（默认勾选；change → huaEdgesRefresh，见 renderGrid 绑定）
+  // v0.6.13-iter（#3）：四化行末尾勾选框（change → huaEdgesRefresh，见 renderGrid 绑定）
+  // v0.6.16-iter（#45 #2）：默认勾选改为「命四化/年四化 ✓，月四化/日四化 ✗」
   function huaCkHtml(layer) {
-    return '<input type="checkbox" class="c-hua-ck" data-layer="' + layer + '" checked'
+    var defOn = (layer === 'ming' || layer === 'ln');
+    return '<input type="checkbox" class="c-hua-ck" data-layer="' + layer + '"' + (defOn ? ' checked' : '')
       + ' title="勾选：在宫位框线点亮' + EDGE_ZH[layer] + '线段（' + EDGE_COLOR_ZH[layer] + '）">';
   }
 
@@ -161,21 +163,22 @@
         + (person && person.gender ? ' · ' + (person.gender === 'F' ? '女' : '男') : '')
         + '</div>';
     }
-    html += '<div class="pillars">'
-      + '<span class="gan">' + esc(pre.yearGanZhi.gan) + '</span><span class="zhi">' + esc(pre.yearGanZhi.zhi) + '</span> '
-      + '<span class="gan">' + esc(monthPillarOf(chart).charAt(0)) + '</span><span class="zhi">' + esc(monthPillarOf(chart).charAt(1)) + '</span> '
-      + '<span class="gan">' + esc(pre.dayGanZhi.gan) + '</span><span class="zhi">' + esc(pre.dayGanZhi.zhi) + '</span> '
-      + '<span class="gan">' + esc(pre.hourGanZhi.gan) + '</span><span class="zhi">' + esc(pre.hourGanZhi.zhi) + '</span> '
-      + '</div>';
     var TIME_N = ['早子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '晚子'];
     var luDisp = pre.lunarDisplay || pre.lunar;
     var tzTxt = '';
     if (pre.lateZi) tzTxt = '晚子时(归次日)';
     else if (pre.timeIndex === 0) tzTxt = '早子时(当日)';
     else tzTxt = (TIME_N[pre.timeIndex] || '') + '时';
+    // v0.6.16-iter（#45 #3）：出生日期行与八字行对调 —— 行序：艺名·性别 → 出生日期 → 八字 → 十二节
     html += '<div class="lunar-line">' + cnLunar(chart)
       + (luDisp.isLeap ? '（农历闰月仅显示，安星不涉闰月）' : '')
       + (tzTxt ? ' · ' + tzTxt : '')
+      + '</div>';
+    html += '<div class="pillars">'
+      + '<span class="gan">' + esc(pre.yearGanZhi.gan) + '</span><span class="zhi">' + esc(pre.yearGanZhi.zhi) + '</span> '
+      + '<span class="gan">' + esc(monthPillarOf(chart).charAt(0)) + '</span><span class="zhi">' + esc(monthPillarOf(chart).charAt(1)) + '</span> '
+      + '<span class="gan">' + esc(pre.dayGanZhi.gan) + '</span><span class="zhi">' + esc(pre.dayGanZhi.zhi) + '</span> '
+      + '<span class="gan">' + esc(pre.hourGanZhi.gan) + '</span><span class="zhi">' + esc(pre.hourGanZhi.zhi) + '</span> '
       + '</div>';
     // v0.6.14-iter（#43）：① 原「口径 note-line」整行移除（#2）；② 结果头下方渲染出生年「十二节数据」块（#3）
     html += jieqiMiniHtml(pre);
@@ -402,7 +405,7 @@
     var hd = layer === 'ln' ? lh.nian : layer === 'ly' ? lh.yue : lh.ri;
     return (hd && hd.stars) || [];
   }
-  // 每宫框线四段各自点亮：勾选框已勾（默认全勾）且宫内确有该层四化星（主/辅星任一）
+  // 每宫框线四段各自点亮：勾选框已勾（v0.6.16-iter #45：默认命/年勾选）且宫内确有该层四化星（主/辅星任一）
   function huaEdgesRefresh() {
     if (!NAV.chart || !NAV.cells || !NAV.rowEls) return;
     for (var li = 0; li < EDGE_LAYERS.length; li++) {
@@ -420,7 +423,8 @@
       }
       var row = NAV.rowEls[layer];
       var ck = row && row.querySelector('.c-hua-ck');
-      var on = ck ? !!ck.checked : true;
+      // v0.6.16-iter（#45 #2）：行缺失（该层无数据）按未勾选处理，与新默认（命/年✓、月/日✗）一致
+      var on = ck ? !!ck.checked : false;
       for (var p2 = 0; p2 < 12; p2++) {
         var seg = NAV.cells[p2] && NAV.cells[p2].querySelector('.hes-' + layer);
         if (!seg) continue;

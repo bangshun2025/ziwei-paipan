@@ -325,9 +325,9 @@
       T.ok(!!cells[pOfZhi['子']].querySelector('.hua-edge.he-t'), 'L7 子上缘');
       var cks = gRoot.querySelectorAll('.c-hua-ck');
       T.eq(cks.length, 4, 'L7 四化行勾选框 4 个');
-      var allChecked = true;
-      for (var ci2 = 0; ci2 < cks.length; ci2++) { if (!cks[ci2].checked) allChecked = false; }
-      T.ok(allChecked, 'L7 勾选框默认全部勾选');
+      // v0.6.16-iter（#45 #2）：默认勾选改为 命/年 ✓、月/日 ✗
+      T.ok(cks[0].checked && cks[1].checked, 'L7/#45 命、年勾选框默认勾选');
+      T.ok(!cks[2].checked && !cks[3].checked, 'L7/#45 月、日勾选框默认未勾选');
       T.ok(cks[0] === gRoot.querySelector('[data-hua="ming"] .c-v-red').nextElementSibling, 'L7 勾选框紧随】之后');
       function litExpect(stars) {
         var hit = {};
@@ -347,8 +347,15 @@
       var sel0 = RENDER.navGet().sel;
       var lh0 = ALGO.liuHuaOf(sel0);
       T.eq(st.lit.ln.length, litExpect(lh0.nian.stars), 'L7 年线段点亮宫数');
-      T.eq(st.lit.ly.length, litExpect(lh0.yue.stars), 'L7 月线段点亮宫数');
-      T.eq(st.lit.lr.length, litExpect(lh0.ri ? lh0.ri.stars : []), 'L7 日线段点亮宫数');
+      // v0.6.16-iter（#45 #2）：月/日默认未勾选 → 线段不亮；勾选后点亮、取消后恢复全灭
+      T.eq(st.lit.ly.length, 0, 'L7/#45 月线段默认不亮（未勾选）');
+      T.eq(st.lit.lr.length, 0, 'L7/#45 日线段默认不亮（未勾选）');
+      cks[2].checked = true;
+      cks[2].dispatchEvent(new Event('change'));
+      T.eq(RENDER.huaEdges(gRoot).lit.ly.length, litExpect(lh0.yue.stars), 'L7/#45 勾选月→月线段按命星点亮');
+      cks[2].checked = false;
+      cks[2].dispatchEvent(new Event('change'));
+      T.eq(RENDER.huaEdges(gRoot).lit.ly.length, 0, 'L7/#45 取消月勾选→月线段全灭');
       var lnKeep = st.lit.ln.length;
       cks[0].checked = false;
       cks[0].dispatchEvent(new Event('change'));
@@ -390,6 +397,19 @@
       RENDER.renderHead(hN, chN, null);
       var colN = hN.querySelectorAll('.jm-col');
       T.ok(colN.length === 12 && colN[0].querySelector('.jm-stm').textContent === '—', 'L8 无出生地真太阳列显示 —');
+      // v0.6.16-iter（#45 #3）：结果头三行 —— 艺名·性别 → 出生日期 → 八字（日期与八字对调）
+      var hP = document.createElement('div');
+      RENDER.renderHead(hP, chN, { name: '测试', gender: 'F' });
+      var plP = hP.querySelector('.person-line');
+      var luP = hP.querySelector('.lunar-line');
+      var piP = hP.querySelector('.pillars');
+      T.ok(!!plP && plP.textContent.indexOf('· 女') >= 0, 'L8/#45 person 行含性别（· 女）');
+      T.ok(!!luP && !!piP && !!(luP.compareDocumentPosition(piP) & 4), 'L8/#45 出生日期行在八字行之前（对调）');
+      T.ok(!!plP && !!luP && !!(plP.compareDocumentPosition(luP) & 4), 'L8/#45 person 行在出生日期行之前');
+      // v0.6.16-iter（#45 #1）：出生地 省/市/区 同容器一行 + locArea 单行
+      var elProv = document.getElementById('fProv'), elCity = document.getElementById('fCity'), elDist = document.getElementById('fDist');
+      T.ok(!!elProv && !!elCity && !!elDist && elProv.parentElement === elCity.parentElement && elCity.parentElement === elDist.parentElement, 'L8/#45 出生地 省/市/区 同容器一行');
+      T.ok(document.querySelectorAll('#locArea .row').length === 1, 'L8/#45 locArea 收为单行（无 row-sub）');
       var ls = document.getElementById('liveSolar');
       T.ok(!!ls, 'L8 表单 liveSolar 存在');
       if (ls) {
@@ -613,7 +633,8 @@
     }
     function fillProv() {
       clearSel(els.fProv);
-      addOpt(els.fProv, '— 未选择（按北京时间120°E）—', '');
+      // v0.6.16-iter（#45 #1）：占位文案缩短适配 108px 宽（「默认按北京时间 120°E」口径见页脚说明）
+      addOpt(els.fProv, '— 未选择 —', '');
       var ks = provNames();
       for (var i = 0; i < ks.length; i++) addOpt(els.fProv, ks[i], ks[i]);
       addOpt(els.fProv, '自定义经度…', 'CUSTOM');
@@ -957,6 +978,9 @@
         els.fLng.value = (typeof s.lng === 'number') ? s.lng : (pl || '');
       } else {
         setSel(els.fProv, s.lng ? 'CUSTOM' : '');
+        // v0.6.16-iter（#45 #1）：自定义经度/无出生地时，市/区一并收起（与 CUSTOM 联动一致）
+        clearSel(els.fCity); els.fCity.disabled = true;
+        clearSel(els.fDist); els.fDist.disabled = true;
         els.fLng.classList.toggle('hidden', !s.lng);
         els.fLng.value = s.lng || '';
       }
