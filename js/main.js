@@ -360,6 +360,45 @@
       T.eq(RENDER.huaEdges(gRoot).lit.ming.length, st.lit.ming.length, 'L7 复选→命线段恢复');
     })();
 
+    // ===== L8 v0.6.14-iter（#43）：结果头节数据块（出生年十二节）+ 口径行移除 + liveSolar 行内化 =====
+    (function () {
+      var ch82 = ALGO.getChart({ y: 1982, m: 10, d: 18, h: 6, mi: 30, gender: 'M', lng: 108.37 });
+      var h82 = document.createElement('div');
+      RENDER.renderHead(h82, ch82, null);
+      var mini = h82.querySelector('.jieqi-mini');
+      T.ok(!!mini, 'L8 结果头含节数据块');
+      T.eq(h82.querySelector('.note-line'), null, 'L8 口径 note-line 已移除');
+      var ttl = h82.querySelector('.jm-title');
+      T.ok(!!ttl && ttl.textContent.indexOf('十二节（立春→小寒）') >= 0, 'L8 标题=出生年·十二节（立春→小寒）');
+      var cols = mini ? mini.querySelectorAll('.jm-col') : [];
+      T.eq(cols.length, 12, 'L8 十二节 12 列');
+      T.eq(cols[0] ? cols[0].getAttribute('data-term') : '', '立春', 'L8 首列立春');
+      T.eq(cols[11] ? cols[11].getAttribute('data-term') : '', '小寒', 'L8 末列小寒（次年1月）');
+      var hl = cols[8]; // MONTH_TERM[8]=18=寒露
+      var stHl = ALGO.getSolarTerm(1982, 18);
+      T.eq(hl.querySelector('.jm-md').textContent, (stHl.getUTCMonth() + 1) + '/' + stHl.getUTCDate(), 'L8 寒露月日=表值');
+      T.eq(hl.querySelector('.jm-tm').textContent, '23:02', 'L8 寒露北京时间=23:02（八字锚点）');
+      var tstHl = ALGO.trueSolarTime(1982, 10, 8, 23, 2, 108.37);
+      T.eq(hl.querySelector('.jm-smd').textContent, tstHl.m + '/' + tstHl.d, 'L8 寒露真太阳月日=ALGO');
+      T.eq(hl.querySelector('.jm-stm').textContent, (tstHl.h < 10 ? '0' : '') + tstHl.h + ':' + (tstHl.mi < 10 ? '0' : '') + tstHl.mi, 'L8 寒露真太阳时间=ALGO');
+      var gzHl = ALGO.dayGanZhi(1982, 10, 8);
+      T.eq(hl.querySelector('.jm-gan').textContent, gzHl.gan, 'L8 寒露日柱天干=ALGO');
+      T.eq(hl.querySelector('.jm-zhi').textContent, gzHl.zhi, 'L8 寒露日柱地支=ALGO');
+      T.ok(gzHl.gan === '甲' && gzHl.zhi === '子', 'L8 寒露日柱=甲子（1982-10-08）');
+      var chN = ALGO.getChart({ y: 2000, m: 8, d: 16, h: 4, mi: 0, gender: 'F', lng: null });
+      var hN = document.createElement('div');
+      RENDER.renderHead(hN, chN, null);
+      var colN = hN.querySelectorAll('.jm-col');
+      T.ok(colN.length === 12 && colN[0].querySelector('.jm-stm').textContent === '—', 'L8 无出生地真太阳列显示 —');
+      var ls = document.getElementById('liveSolar');
+      T.ok(!!ls, 'L8 表单 liveSolar 存在');
+      if (ls) {
+        var cs = getComputedStyle(ls);
+        T.ok(cs.flexBasis === 'auto', 'L8 liveSolar 不再强制换行（flex-basis 复位 auto）');
+        T.ok(String(cs.order) === '0', 'L8 liveSolar order 复位 0');
+      }
+    })();
+
     return T.summary();
   }
 

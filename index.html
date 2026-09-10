@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=523">
+<link rel="stylesheet" href="css/style.css?v=524">
 </head>
 <body>
 
@@ -97,6 +97,7 @@
       <!-- v0.6.11-iter：result-main ≥1280px 两列 = 盘面左 + 时间轴右（窄屏自动堆叠，纯 CSS 控制） -->
       <!-- v0.6.12-iter：盘面列 = 盘面 + 九宫下方快捷时间按钮条（年·月·日 三组 + 回今天） -->
       <!-- v0.6.13-iter：组序调整 —— 上一年/今年/下一年 在前，上个月/本月/下个月 随后（#1） -->
+      <!-- v0.6.14-iter（#43）：① 真太阳时行内化（#1）；② 结果头口径行移除（#2）；③ 出生年十二节数据块（#3） -->
       <div class="result-main">
         <div class="chart-col">
           <div class="chart-wrap" id="chartWrap"></div>
@@ -213,10 +214,10 @@
 <!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> aiinput(AI解析) -> main -> archive（零构建 IIFE + window 命名空间）-->
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
-<script src="js/algorithm.js?v=505"></script>
-<script src="js/render.js?v=521"></script>
+<script src="js/algorithm.js?v=506"></script>
+<script src="js/render.js?v=522"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=509"></script>
+<script src="js/main.js?v=510"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

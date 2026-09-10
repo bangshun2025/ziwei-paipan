@@ -291,8 +291,9 @@
     note.push('节气口径 v0.2.0：年按立春（' + qi.year + '年）、月按节气（' + qi.monthZhi + '月）、日仍按农历');
     var dgz = dayGanZhi(eff.y, eff.m, eff.d);
     var hgz = hourGanZhi(dgz.ganIdx, sh.zhiIdx);
+    // v0.6.14-iter（#43 #3）：lng 随盘带出（结果头「十二节数据」块的真太阳两行用；null=未校正）
     return {
-      solar: { y: y, m: m, d: d }, tst: tst, effSolar: eff, note: note,
+      solar: { y: y, m: m, d: d }, tst: tst, lng: lng, effSolar: eff, note: note,
       hour: h, minute: mi, shichen: sh, timeIndex: sh.lateZi ? 12 : sh.zhiIdx, tZhi: sh.zhiIdx,
       lunar: lun, lunarDisplay: lunDisplay, mUse: mUse, lateZi: sh.lateZi,
       qiYear: qi.year, qiMonthIdx: qi.monthIdx, qiMonthZhi: qi.monthZhi,
@@ -569,7 +570,7 @@
       version: C.VERSION,
       input: input,
       pre: {
-        solar: pre.solar, effSolar: pre.effSolar, lunar: pre.lunar, lunarDisplay: pre.lunarDisplay, mUse: pre.mUse,
+        solar: pre.solar, lng: pre.lng, effSolar: pre.effSolar, lunar: pre.lunar, lunarDisplay: pre.lunarDisplay, mUse: pre.mUse,
         lateZi: pre.lateZi, timeIndex: pre.timeIndex, tZhi: pre.tZhi, note: pre.note,
         qiYear: pre.qiYear, qiMonthIdx: pre.qiMonthIdx, qiMonthZhi: pre.qiMonthZhi,
         yearGanZhi: pre.yearGanZhi, dayGanZhi: pre.dayGanZhi, hourGanZhi: pre.hourGanZhi

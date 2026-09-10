@@ -177,10 +177,53 @@
       + (luDisp.isLeap ? '（农历闰月仅显示，安星不涉闰月）' : '')
       + (tzTxt ? ' · ' + tzTxt : '')
       + '</div>';
-    var notes = '';
-    for (var i = 0; i < (pre.note || []).length; i++) notes += (notes ? '；' : '') + esc(pre.note[i]);
-    html += '<div class="note-line">口径 v0.2.0：年按立春换年、月按节气十二节、日按农历、子时统一归次日。' + (notes ? '｜' + notes : '') + '</div>';
+    // v0.6.14-iter（#43）：① 原「口径 note-line」整行移除（#2）；② 结果头下方渲染出生年「十二节数据」块（#3）
+    html += jieqiMiniHtml(pre);
     el.innerHTML = html;
+  }
+
+  // v0.6.14-iter（#43 #3）：出生年「十二节数据」块 —— 仿八字排盘 v0.26.0 当年节气数据块（12 节·立春→小寒）
+  // 每节一列、列内六行：节名 / 月日 / 北京时间 / 真太阳月日 / 真太阳时间 / 干支（干上支下竖排）
+  // 口径：年=出生年（pre.qiYear）；BJT 取节气表 UTC 字段（表即 BJT-as-UTC）；真太阳=出生地经度+均时差校正
+  //（未填出生地显示 —）；干支=交节当天（公历自然日）日柱（与八字排盘 D1 决策一致）。
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function jieqiMiniHtml(pre) {
+    if (!window.ALGO || !window.ALGO.getSolarTerm) return '';
+    var year = pre.qiYear;
+    var lng = (typeof pre.lng === 'number') ? pre.lng : null;
+    var cols = [];
+    for (var i = 0; i < C.MONTH_TERM.length; i++) {
+      var ty = year + (i === C.MONTH_TERM.length - 1 ? 1 : 0); // 末位小寒=次年 1 月上旬
+      var st = window.ALGO.getSolarTerm(ty, C.MONTH_TERM[i]);
+      var name = C.S_TERM_NAME[C.MONTH_TERM[i]] || '—';
+      if (!st) {
+        cols.push('<div class="jm-col" data-term="' + name + '"><div class="jm-name">' + name
+          + '</div><div class="jm-md">—</div><div class="jm-tm">—</div><div class="jm-smd">—</div><div class="jm-stm">—</div>'
+          + '<div class="jm-gz"><span class="jm-gan">—</span><span class="jm-zhi">—</span></div></div>');
+        continue;
+      }
+      var bm = st.getUTCMonth() + 1, bd = st.getUTCDate(), bh = st.getUTCHours(), bmi = st.getUTCMinutes();
+      var smd = '—', stm = '—';
+      if (lng !== null) {
+        var t = window.ALGO.trueSolarTime(ty, bm, bd, bh, bmi, lng);
+        smd = t.m + '/' + t.d;
+        stm = pad2(t.h) + ':' + pad2(t.mi);
+      }
+      var gz = window.ALGO.dayGanZhi(ty, bm, bd);
+      cols.push('<div class="jm-col" data-term="' + name + '">'
+        + '<div class="jm-name">' + name + '</div>'
+        + '<div class="jm-md">' + bm + '/' + bd + '</div>'
+        + '<div class="jm-tm">' + pad2(bh) + ':' + pad2(bmi) + '</div>'
+        + '<div class="jm-smd">' + smd + '</div>'
+        + '<div class="jm-stm">' + stm + '</div>'
+        + '<div class="jm-gz"><span class="jm-gan">' + (gz ? gz.gan : '—') + '</span>'
+        + '<span class="jm-zhi">' + (gz ? gz.zhi : '—') + '</span></div>'
+        + '</div>');
+    }
+    return '<div class="jieqi-mini">'
+      + '<div class="jm-title">' + year + ' 年 · 十二节（立春→小寒）</div>'
+      + '<div class="jm-wrap"><div class="jm-grid">' + cols.join('') + '</div></div>'
+      + '</div>';
   }
 
   // v0.6.8-iter：原「四化行点击提亮宫位」（bindHuaRow）已按 #2 取消
@@ -715,6 +758,7 @@
     monthPillarOf: monthPillarOf,
     cnLunar: cnLunar,
     renderHead: renderHead,
+    jieqiMiniHtml: jieqiMiniHtml, // v0.6.14-iter（#43）：节数据块（自检/CDP 用）
     // v0.6.12-iter：快捷导航对外接口（CDP 冒烟/自动化校验用）
     navQuick: quickNav,
     navGet: function () {
