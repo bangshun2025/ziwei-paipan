@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=531">
+<link rel="stylesheet" href="css/style.css?v=532">
 </head>
 <body>
 
@@ -103,21 +103,28 @@
       <!-- v0.6.21-iter（#50/#51）：① 输入区上移为版面顶栏；② 时间轴移盘面左边（左列）；③ 结果头移12宫上方；④ 十二节自结果头拆出移12宫下方；⑤ 宫位详情移盘面右上 -->
       <!-- v0.6.22-iter（#52）：① 结果头拉长为通栏一行（与输入区同宽：姓名·性别 / 新历 / 农历 / 四柱八字 / 隐私按钮）；
            ② 时间轴与12宫上方持平；③ 时间轴统一四格一行；④ 宫位详情一类一行、分组隔空行 -->
+      <!-- v0.6.23-iter（#53）：① 十二节移至时间轴下方（左列内、同宽；横向轮动轴滑动）；
+           ② 12宫放大 —— 「生日区(结果头)→12宫→快捷条」合计≈一屏高（盘面 = min(100vh−115px, 可用列宽) 方盘），右侧宫位详情相应缩窄（≥170px） -->
       <div class="panel head-wrap">
         <div class="result-head hidden" id="resultHead"></div>
         <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
       </div>
       <div class="result-main">
-        <!-- ② 时间轴（左列 = 盘面左边） -->
-        <div class="panel timeline-panel">
-          <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
-          <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+        <!-- 左列（v0.6.23-iter #53）：时间轴 + 十二节（十二节置于时间轴下方、同宽、横向轮动轴滑动） -->
+        <div class="left-col">
+          <!-- ② 时间轴（左列 = 盘面左边） -->
+          <div class="panel timeline-panel">
+            <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
+            <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
+            <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
+            <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
+            <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+          </div>
+          <!-- ④ 十二节（v0.6.14-iter #43 加入；v0.6.21-iter #50 移12宫下方；#53 移入左列 = 时间轴下方） -->
+          <div class="panel jieqi-panel" id="jieqiPanel"></div>
         </div>
 
-        <!-- 右列：盘面 + ⑤ 详情（盘面右上）→ 快捷条 → ④ 十二节（12宫下方） -->
+        <!-- 右列：盘面 + ⑤ 详情（盘面右上）→ 快捷条 -->
         <div class="right-col">
           <div class="chart-detail">
             <div class="chart-wrap" id="chartWrap"></div>
@@ -144,9 +151,6 @@
               <button type="button" class="qn-btn" data-qn="nd" title="流日：下一日">下一日</button>
             </div>
           </div>
-
-          <!-- ④ 十二节（v0.6.14-iter #43 加入；v0.6.21-iter #50：自结果头拆出，移至 12宫下方） -->
-          <div class="panel jieqi-panel" id="jieqiPanel"></div>
         </div>
       </div>
     </section>
@@ -232,7 +236,7 @@
 <script src="js/algorithm.js?v=506"></script>
 <script src="js/render.js?v=527"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=518"></script>
+<script src="js/main.js?v=519"></script>
 <script src="js/archive.js?v=503"></script>
 </body>
 </html>

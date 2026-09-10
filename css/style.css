@@ -201,9 +201,19 @@ body {
 .jieqi-panel { padding: 8px 14px 10px; margin-top: 8px; }
 .jieqi-panel .jieqi-mini { width: 100%; }
 .jm-title { font-size: 11px; color: var(--ink-soft); letter-spacing: .5px; margin-bottom: 5px; }
-.jm-wrap { overflow-x: auto; }
-.jm-grid { display: flex; min-width: 624px; }
-.jm-col { flex: 1 0 52px; text-align: center; padding: 3px 1px 4px; border-right: 1px dashed #f0e9db; }
+/* v0.6.23-iter（#53）：十二节 = 横向轮动轴 —— 左右横滑查看（触摸/触控板原生；鼠标滚轮横滑由 main.js 接管） */
+.jm-wrap {
+  overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: #d7cfc0 transparent; padding-bottom: 2px;
+}
+.jm-wrap::-webkit-scrollbar { height: 6px; }
+.jm-wrap::-webkit-scrollbar-track { background: transparent; }
+.jm-wrap::-webkit-scrollbar-thumb { background: #d7cfc0; border-radius: 3px; }
+.jm-grid { display: flex; min-width: 744px; }
+.jm-col {
+  flex: 1 0 62px; text-align: center; padding: 3px 1px 4px; border-right: 1px dashed #f0e9db;
+  scroll-snap-align: center;
+}
 .jm-col:last-child { border-right: 0; }
 .jm-name { font-size: 11.5px; font-weight: 700; color: var(--ink); line-height: 1.4; }
 .jm-md, .jm-tm { font-size: 10.5px; color: #6b645a; line-height: 1.45; }
@@ -365,6 +375,8 @@ body {
 .center-area .c-hua[data-hua="ly"] .c-hua-ck { accent-color: #e8862e; }
 .center-area .c-hua[data-hua="lr"] .c-hua-ck { accent-color: #3568d4; }
 
+/* v0.6.23-iter（#53）：左列包装（时间轴 + 十二节）—— 与右列同处 .result-main 网格 */
+.left-col { min-width: 0; }
 /* ===== 大限时间轴（热卜式年份轴：段中点年份大字 + 宫名/岁段小字）===== */
 .timeline-panel { padding: 10px 16px; margin: 6px 0 14px; }
 .timeline-title { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
@@ -519,7 +531,7 @@ body {
 /* v0.6.21-iter（#50/#51）：<1000px 单列堆叠 —— 结果头/盘面/详情/快捷条/十二节在前，时间轴殿后 */
 @media (max-width: 999px) {
   .result-main { display: flex; flex-direction: column; }
-  .timeline-panel { order: 9; }
+  .left-col { order: 9; }
 }
 
 /* ============================================================
@@ -530,10 +542,18 @@ body {
 @media (min-width: 1280px) {
   .chart-detail {
     display: grid;
-    grid-template-columns: minmax(0, 640px) minmax(210px, 1fr);
+    /* v0.6.23-iter（#53）：12宫放大 —— 盘面高 = 一屏 − (结果头55 + 头后10 + 快捷8+42)px；
+       宽侧由可用列宽封顶；右侧宫位详情相应缩窄（≥170px） */
+    grid-template-columns: minmax(0, calc(100vh - 115px)) minmax(170px, 1fr);
     gap: 10px; align-items: start;
   }
   .chart-wrap { padding: 0; }
+  /* v0.6.23-iter（#53）：方盘（宽=高=min(100vh−115px, 可用列宽)）；四行均分高（星带贴顶、神煞/宫位行贴底不变） */
+  .grid {
+    width: min(calc(100vh - 115px), 100%);
+    aspect-ratio: 1 / 1;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
 
   .timeline-panel { margin: 0; padding: 10px 12px 8px; }
   .timeline-title { font-size: 11.5px; margin-bottom: 7px; }

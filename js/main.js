@@ -533,8 +533,11 @@
       var hw = q('.head-wrap'), cw = q('.chart-wrap'), rm = q('.result-main');
       T.ok(!!hw && hw.parentNode === rp && after(hw, rm) && after(hw, cw), 'L11/#52 结果头通栏（结果区内、两列之前、盘面之前；与输入区同宽行）');
       T.ok(after(q('#resultHead'), q('.head-wrap .privacy-ck')), 'L11/#52 隐私按钮在结果头之后（通栏行尾）');
-      var jp = q('.jieqi-panel');
-      T.ok(!!jp && after(cw, jp), 'L11/#50 十二节在盘面之后（12宫下方）');
+      var jp = q('.jieqi-panel'), lc = q('.left-col'), tl2 = q('.timeline-panel');
+      // ===== v0.6.23-iter（#53）：十二节入左列（时间轴下方；宽度/横滑/盘面放大由 CDP 布局回归验证）=====
+      T.ok(!!lc && !!jp && jp.closest('.left-col') === lc && after(tl2, jp), 'L11/#53 十二节位于左列、时间轴之后（时间轴下方）');
+      T.ok(!!jp && !q('.right-col .jieqi-panel'), 'L11/#53 十二节已不在右列（自右列移出）');
+      T.ok(!!lc && lc.parentNode === rm, 'L11/#53 左列（时间轴+十二节）为结果主区直接子级');
       var dp = q('.detail-panel');
       T.ok(!!dp && after(cw, dp), 'L11/#50 宫位详情紧随盘面之后（宽屏同排、右上）');
     })();
@@ -1007,11 +1010,27 @@
       if (els.resultHead) els.resultHead.classList.remove('hidden');
       window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person,
         { ln: els.lnTimeline, lm: els.lmTimeline, ld: els.ldTimeline });
-      if (els.jieqi) window.RENDER.renderJieqi(els.jieqi, chart); // v0.6.21-iter（#50）：十二节独立块（12宫下方）
+      if (els.jieqi) window.RENDER.renderJieqi(els.jieqi, chart); // v0.6.21-iter（#50）：十二节独立块（#53 起驻左列、时间轴下方）
       // 滚到结果
       if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     els.btnCalc.addEventListener('click', function () { doCalc(); });
+
+    // v0.6.23-iter（#53）：十二节横向轮动轴 —— 鼠标悬停滚轮 = 横滑（触控板/触摸原生；到边放行让页面继续滚）
+    (function () {
+      var jp = els.jieqi;
+      if (!jp || !jp.addEventListener) return;
+      jp.addEventListener('wheel', function (e) {
+        var wrap = e.target && e.target.closest ? e.target.closest('.jm-wrap') : null;
+        if (!wrap) return;
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // 横向手势原生处理
+        var max = wrap.scrollWidth - wrap.clientWidth;
+        if (max <= 0) return;
+        if ((wrap.scrollLeft <= 0 && e.deltaY < 0) || (wrap.scrollLeft >= max && e.deltaY > 0)) return;
+        wrap.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }, { passive: false });
+    })();
 
     // 初始默认排盘示例（1982-10-18 6:30 卯时 男 · 广西南宁青秀区 · 真太阳时）
     setSel(els.fYear, 1982); setSel(els.fMonth, 10); fillDateSelects('solar'); setSel(els.fDay, 18);
