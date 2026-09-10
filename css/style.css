@@ -54,15 +54,18 @@ body {
   border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer;
 }
 .app-top .link-btn:hover { border-color: var(--blue); color: var(--blue); }
-/* v0.6.18-iter（#47 #2）：页头右上角隐私勾选框（默认勾选 = 隐私开；勾选态用红系，与「🔒 隐私」按钮呼应） */
-.app-top .privacy-ck {
+/* v0.6.20-iter（#49）：隐私勾选框 = 结果头（左下角区）右上角（原页头位置撤下；勾选态红系，与「🔒 隐私」按钮呼应） */
+.head-wrap { position: relative; }
+.result-head.hidden ~ .privacy-ck { display: none; } /* 随结果头隐藏（未排盘时） */
+.head-wrap .privacy-ck {
+  position: absolute; top: 8px; right: 10px; z-index: 5;
   display: inline-flex; align-items: center; gap: 5px;
   border: 1px solid var(--line-strong); background: #fff; border-radius: 999px;
   padding: 3px 12px; font-size: 12px; color: var(--ink-soft); cursor: pointer; user-select: none;
 }
-.app-top .privacy-ck:hover { border-color: var(--blue); }
-.app-top .privacy-ck input { width: 13px; height: 13px; margin: 0; accent-color: var(--red); cursor: pointer; }
-.app-top .privacy-ck.privacy-on { color: var(--red); border-color: var(--red); }
+.head-wrap .privacy-ck:hover { border-color: var(--blue); }
+.head-wrap .privacy-ck input { width: 13px; height: 13px; margin: 0; accent-color: var(--red); cursor: pointer; }
+.head-wrap .privacy-ck.privacy-on { color: var(--red); border-color: var(--red); }
 
 /* ===== 主容器 ===== */
 .wrap { max-width: 1180px; margin: 0 auto; padding: 14px 16px 60px; }
@@ -444,7 +447,9 @@ body {
     align-items: start;
   }
   .input-panel { grid-area: input; margin-bottom: 0; }
-  #resultHead  { grid-area: head; margin-bottom: 0; }
+  /* v0.6.20-iter（#49）：head-wrap 承接 grid 槽位（勾选框移入结果头右上角） */
+  .head-wrap   { grid-area: head; min-width: 0; }
+  #resultHead  { margin-bottom: 0; }
   #resultPanel { grid-area: result; min-width: 0; }
 
   /* 左栏输入面板更紧凑 */

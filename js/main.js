@@ -487,7 +487,9 @@
       T.ok(!!plB && plB.textContent.indexOf('匿名') >= 0, 'L10/#47 隐私开时姓名匿名化（匿名 · 男）');
       T.ok(!!hB.querySelector('.pillars') && !!hB.querySelector('.jieqi-mini'), 'L10/#47 隐私开时八字与十二节保留');
       var cpk = document.getElementById('chkPrivacy');
-      T.ok(!!cpk && cpk.type === 'checkbox' && cpk.hasAttribute('checked'), 'L10/#47 页头右上角隐私勾选框存在且 HTML 默认勾选');
+      T.ok(!!cpk && cpk.type === 'checkbox' && cpk.hasAttribute('checked'), 'L10/#47 隐私勾选框存在且 HTML 默认勾选');
+      // v0.6.20-iter（#49）：勾选框移至结果头（左下角区）右上角 —— 必须位于 .head-wrap 内（兄弟定位），且 .head-wrap 直接含 #resultHead
+      T.ok(!!cpk && !!cpk.closest('.head-wrap') && !!document.querySelector('.head-wrap > #resultHead'), 'L10/#49 勾选框位于结果头容器 .head-wrap（左下角区右上角）');
       if (window.ARCHIVE && ARCHIVE.applyPrivacy) {
         ARCHIVE.applyPrivacy(false);
         T.eq(ARCHIVE.getPrivacyMode(), false, 'L10/#47 applyPrivacy(false) 生效（公开 API）');

@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=528">
+<link rel="stylesheet" href="css/style.css?v=529">
 </head>
 <body>
 
@@ -16,8 +16,6 @@
     <h1>紫微斗数排盘<span class="ver">v0.5.0</span></h1>
     <span class="spacer"></span>
     <button type="button" class="link-btn" id="btnTestPage">运行自检 ?test=1</button>
-    <!-- v0.6.18-iter（#47）：右上角隐私勾选框（默认勾选 = 隐私开：名字匿名化 + 隐藏新历/农历生日行），与档案隐私同一状态 -->
-    <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
   </header>
 
   <main class="wrap">
@@ -90,7 +88,11 @@
     </section>
 
     <!-- ===== 结果头（四柱/农历；窄屏在盘前，横版入左栏）===== -->
-    <div class="panel result-head hidden" id="resultHead"></div>
+    <!-- v0.6.20-iter（#49）：隐私勾选框移入结果头（左下角区）右上角（head-wrap 内绝对定位；#resultHead 隐藏时同步隐藏；原页头位置撤下） -->
+    <div class="head-wrap">
+      <div class="panel result-head hidden" id="resultHead"></div>
+      <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
+    </div>
 
     <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴在盘旁 + 详情）===== -->
     <section id="resultPanel" class="hidden">
@@ -222,7 +224,7 @@
 <script src="js/algorithm.js?v=506"></script>
 <script src="js/render.js?v=525"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=515"></script>
-<script src="js/archive.js?v=502"></script>
+<script src="js/main.js?v=516"></script>
+<script src="js/archive.js?v=503"></script>
 </body>
 </html>
