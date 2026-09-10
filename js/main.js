@@ -1011,8 +1011,11 @@
       window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person,
         { ln: els.lnTimeline, lm: els.lmTimeline, ld: els.ldTimeline });
       if (els.jieqi) window.RENDER.renderJieqi(els.jieqi, chart); // v0.6.21-iter（#50）：十二节独立块（#53 起驻左列、时间轴下方）
-      // 滚到结果
-      if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 滚到结果（v0.6.24-iter #54：补偿 sticky 页头高度 —— 结果头/生日区完整可见，不被页头盖住）
+      var atEl = document.querySelector('.app-top');
+      var atH = atEl ? atEl.offsetHeight : 0;
+      var yTo = els.resultPanel.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - atH;
+      if (window.scrollTo) window.scrollTo({ top: Math.max(0, yTo), behavior: 'smooth' });
     }
     els.btnCalc.addEventListener('click', function () { doCalc(); });
 

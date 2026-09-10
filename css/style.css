@@ -381,7 +381,8 @@ body {
 .timeline-panel { padding: 10px 16px; margin: 6px 0 14px; }
 .timeline-title { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
 /* v0.6.22-iter（#52）：时间轴统一四格一行（大限/流年/流月/流日同格宽；免横向滚动） */
-.timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 4px; }
+/* v0.6.25-iter（#56）：时间轴一行 4 格 → 5 格（缩短总高，使左列底部与快捷条底线对齐） */
+.timeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-bottom: 4px; }
 .dx-item {
   flex: 1 0 64px; border-left: 1px solid var(--line-strong); background: #fff;
   padding: 3px 4px 4px; cursor: pointer; text-align: center; min-width: 0;
@@ -483,10 +484,10 @@ body {
   #resultPanel { min-width: 0; }
   .head-wrap { margin-bottom: 10px; }
 
-  /* 时间轴列：四排芯片、统一四格一行（v0.6.22-iter #52；免横向滚动） */
+  /* 时间轴列：四排芯片、统一五格一行（v0.6.25-iter #56：4 格 → 5 格） */
   .tl-row .timeline {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     overflow-x: visible; padding-bottom: 0;
   }
 
@@ -543,24 +544,40 @@ body {
   .chart-detail {
     display: grid;
     /* v0.6.23-iter（#53）：12宫放大 —— 盘面高 = 一屏 − (结果头55 + 头后10 + 快捷8+42)px；
+       v0.6.24-iter（#54）：再为 sticky 页头（48px）留位 →「页头+生日区+12宫+快捷」恰好一屏；
        宽侧由可用列宽封顶；右侧宫位详情相应缩窄（≥170px） */
-    grid-template-columns: minmax(0, calc(100vh - 115px)) minmax(170px, 1fr);
+    grid-template-columns: minmax(0, calc(100vh - 163px)) minmax(170px, 1fr);
     gap: 10px; align-items: start;
   }
   .chart-wrap { padding: 0; }
-  /* v0.6.23-iter（#53）：方盘（宽=高=min(100vh−115px, 可用列宽)）；四行均分高（星带贴顶、神煞/宫位行贴底不变） */
+  /* v0.6.23-iter（#53）：方盘（宽=高=min(100vh−163px, 可用列宽)；163 = 115 + 页头48）；
+     四行均分高（星带贴顶、神煞/宫位行贴底不变） */
   .grid {
-    width: min(calc(100vh - 115px), 100%);
+    width: min(calc(100vh - 163px), 100%);
     aspect-ratio: 1 / 1;
     grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 
-  .timeline-panel { margin: 0; padding: 10px 12px 8px; }
-  .timeline-title { font-size: 11.5px; margin-bottom: 7px; }
+  /* v0.6.25-iter（#55/#56）：左列（时间轴+十二节）底边线与右侧快捷条底边线持平 ——
+     左列随右列（盘面+快捷）同高；时间轴面板弹性吸收余量（余量均分到四行行块之间、格子不缩放），
+     十二节固定贴底。
+     左列自然高压缩到 ~706px（真实视口 1512×827 下右列仅 714px；原 800px 会低 86px、被裁 86px）：
+     压缩点 = 面板内边距 10/8→8/6、行上距 7→5、格子内边距 3/4→2/2、行高 1.3→1.2、十二节上距 8→6 / 内边距 -3 */
+  .result-main { align-items: stretch; }
+  .left-col { display: flex; flex-direction: column; }
+  .timeline-panel { flex: 1 1 auto; display: flex; flex-direction: column; }
+  .timeline-title { flex: none; }
+  .tl-row { flex: 1 1 auto; }
+  .tl-row .timeline { align-content: start; }
+  .jieqi-panel { flex: none; margin-top: 6px; padding: 7px 14px 8px; }
 
-  .tl-row { margin-top: 7px; }
+  .timeline-panel { margin: 0; padding: 8px 12px 6px; }
+  /* v0.6.25-iter（#55/#56）：面板改 flex 列后标题/首行外边距不再折叠 —— 标题下距归 0，间距由首行 margin-top 承担（合计仍 7px） */
+  .timeline-title { font-size: 11.5px; margin-bottom: 0; }
+
+  .tl-row { margin-top: 5px; }
   .tl-row:first-of-type { margin-top: 0; }
-  .tl-row .dx-item { padding: 3px 2px 4px; line-height: 1.3; border-bottom: 1px solid var(--line-strong); }
+  .tl-row .dx-item { padding: 2px 2px 2px; line-height: 1.2; border-bottom: 1px solid var(--line-strong); }
   .tl-row .dx-item .dx-year { font-size: 14px; }
   .tl-row .tl-sm .dx-year { font-size: 12px; }
   .tl-row .tl-sm .dx-name { font-size: 9.5px; }

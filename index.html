@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=532">
+<link rel="stylesheet" href="css/style.css?v=535">
 </head>
 <body>
 
@@ -105,6 +105,11 @@
            ② 时间轴与12宫上方持平；③ 时间轴统一四格一行；④ 宫位详情一类一行、分组隔空行 -->
       <!-- v0.6.23-iter（#53）：① 十二节移至时间轴下方（左列内、同宽；横向轮动轴滑动）；
            ② 12宫放大 —— 「生日区(结果头)→12宫→快捷条」合计≈一屏高（盘面 = min(100vh−115px, 可用列宽) 方盘），右侧宫位详情相应缩窄（≥170px） -->
+      <!-- v0.6.24-iter（#54）：① 排盘滚动补偿 sticky 页头（48px）—— 结果头（生日区）不再被页头盖住、完整可见；
+           ② 盘面高度改 100vh−163px（=115+页头48）——「页头+生日区+12宫+快捷」恰好一屏 -->
+      <!-- v0.6.25-iter（#55/#56）：① 时间轴四行（大限/流年/流月/流日）一行 4 格 → 5 格，总高缩短；
+           ② 左列（时间轴+十二节）底边线与右侧快捷条底边线持平（左列随右列同高，时间轴弹性吸收、十二节贴底）——一屏内全部见底；
+           ③ 左列自然高再压缩 ~706px（真实视口 1512×827 下右列仅 714px）—— 面板内边距 8/6、行上距 5、格子内边距 2/2/2、行高 1.2、十二节上距 6/内边距 7/8 -->
       <div class="panel head-wrap">
         <div class="result-head hidden" id="resultHead"></div>
         <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
@@ -236,7 +241,7 @@
 <script src="js/algorithm.js?v=506"></script>
 <script src="js/render.js?v=527"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=519"></script>
+<script src="js/main.js?v=520"></script>
 <script src="js/archive.js?v=503"></script>
 </body>
 </html>
