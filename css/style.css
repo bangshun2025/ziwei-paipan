@@ -54,11 +54,12 @@ body {
   border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer;
 }
 .app-top .link-btn:hover { border-color: var(--blue); color: var(--blue); }
-/* v0.6.20-iter（#49）：隐私勾选框 = 结果头（左下角区）右上角（原页头位置撤下；勾选态红系，与「🔒 隐私」按钮呼应） */
-.head-wrap { position: relative; }
-.result-head.hidden ~ .privacy-ck { display: none; } /* 随结果头隐藏（未排盘时） */
+/* v0.6.22-iter（#52）：结果头通栏一行（与输入区同宽）—— 头部内容 + 隐私按钮同行（按钮居行尾，同输入区「开始排盘」位） */
+.head-wrap { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin-bottom: 14px; }
+.head-wrap:has(.result-head.hidden) { display: none; } /* 未排盘时整体隐藏（兜底见下行） */
+.result-head.hidden ~ .privacy-ck { display: none; }
 .head-wrap .privacy-ck {
-  position: absolute; top: 8px; right: 10px; z-index: 5;
+  flex: none; margin-left: auto;
   display: inline-flex; align-items: center; gap: 5px;
   border: 1px solid var(--line-strong); background: #fff; border-radius: 999px;
   padding: 3px 12px; font-size: 12px; color: var(--ink-soft); cursor: pointer; user-select: none;
@@ -181,9 +182,10 @@ body {
 .err { color: var(--red); font-size: 13px; }
 
 /* ===== 盘面头部信息 ===== */
+/* v0.6.22-iter（#52）：结果头一行排列（姓名·性别 / 新历 / 农历 / 四柱 横排铺开；窄屏可换行），面框由 .head-wrap 承接 */
 .result-head {
   display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: center;
-  padding: 12px 16px; margin-bottom: 14px;
+  flex: 1; min-width: 0;
 }
 .result-head .pillars { font-size: 19px; letter-spacing: 2px; }
 .result-head .pillars .gan { color: var(--blue); }
@@ -366,7 +368,8 @@ body {
 /* ===== 大限时间轴（热卜式年份轴：段中点年份大字 + 宫名/岁段小字）===== */
 .timeline-panel { padding: 10px 16px; margin: 6px 0 14px; }
 .timeline-title { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
-.timeline { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+/* v0.6.22-iter（#52）：时间轴统一四格一行（大限/流年/流月/流日同格宽；免横向滚动） */
+.timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 4px; }
 .dx-item {
   flex: 1 0 64px; border-left: 1px solid var(--line-strong); background: #fff;
   padding: 3px 4px 4px; cursor: pointer; text-align: center; min-width: 0;
@@ -391,15 +394,21 @@ body {
 /* ===== 详情区 ===== */
 .detail-panel { padding: 14px 16px; min-height: 60px; }
 /* v0.6.2：详情标题 = 宫格底行三段式放大版（★/身 + 本命X宫(朱红) + 干支 + · + 大限X宫(玫红)） */
+/* v0.6.22-iter（#52）：详情标题两行 —— 行1：★/身 + 本命X宫（干支）；行2：大限X宫 */
 .detail-title { font-size: 15px; font-weight: 600; color: var(--blue); margin-bottom: 6px; }
+.detail-title .dt-l1 { white-space: nowrap; }
+.detail-title .dt-l2 { margin-top: 3px; }
 .detail-title .dt-soul { color: #f02000; font-size: 15px; margin-right: 3px; }
 .detail-title .dt-bm { color: #f02000; font-weight: 700; letter-spacing: .5px; }
 .detail-title .dt-tag { color: #f02000; border: 1px solid #f02000; font-size: 10px; border-radius: 3px; padding: 0 3px; margin-left: 5px; vertical-align: 2px; }
-.detail-title .dt-gz { color: #f02000; margin-left: 7px; letter-spacing: .5px; }
-.detail-title .dt-sep { color: #c4bdaa; margin: 0 8px; }
+.detail-title .dt-gz { color: #f02000; margin-left: 2px; letter-spacing: .5px; }
 .detail-title .dt-dx { color: #c02090; font-weight: 600; }
-.detail-body { display: flex; flex-wrap: wrap; gap: 6px 26px; font-size: 13.5px; }
+/* v0.6.22-iter（#52）：详情正文一类一行（.dblk 独立成行）；分组隔空行（.dg 组距）；神煞内各项不折断 */
+.detail-body { font-size: 13.5px; }
+.detail-body .dblk { display: block; line-height: 1.55; }
 .detail-body .dblk b { color: var(--ink-soft); font-weight: 400; margin-right: 6px; }
+.detail-body .dg + .dg { margin-top: 12px; }
+.detail-body .g-i { white-space: nowrap; }
 
 /* ===== 底部口径说明 ===== */
 .foot-note {
@@ -460,16 +469,14 @@ body {
   }
   .right-col { min-width: 0; }
   #resultPanel { min-width: 0; }
-  #resultHead { margin-bottom: 0; }
   .head-wrap { margin-bottom: 10px; }
 
-  /* 时间轴列：四排芯片格网换行铺满，免横向滚动 */
+  /* 时间轴列：四排芯片、统一四格一行（v0.6.22-iter #52；免横向滚动） */
   .tl-row .timeline {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     overflow-x: visible; padding-bottom: 0;
   }
-  #ldTimeline { grid-template-columns: repeat(auto-fit, minmax(31px, 1fr)); }
 
   /* 快捷条随盘面左对齐（0,2,0 覆盖基部 auto 居中） */
   .right-col .quick-nav { margin: 8px 0 0; }
@@ -497,10 +504,9 @@ body {
   .dx-item { padding: 4px 6px; }
   .dx-item .dx-year { font-size: 16px; }
   .detail-panel { padding: 10px 14px; min-height: 0; }
-  .detail-title { margin-bottom: 4px; }
+  .detail-title { margin-bottom: 6px; }
 
-  /* 左栏四柱头：纵向更舒展 */
-  #resultHead { flex-direction: column; align-items: flex-start; }
+  /* 结果头通栏一行：四柱大字，其余小字（v0.6.22-iter #52：横排） */
   #resultHead .pillars { font-size: 22px; letter-spacing: 3px; }
   #resultHead .lunar-line { font-size: 14px; }
   #resultHead .solar-line { font-size: 14px; }

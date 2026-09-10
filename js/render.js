@@ -667,37 +667,41 @@
     var dxByPalace = {};
     for (var k = 0; k < chart.daXian.length; k++) dxByPalace[chart.daXian[k].palaceIndex] = chart.daXian[k];
     var h = '';
-    // v0.6.2：详情标题对齐宫格底行三段式（★/身 + 本命X宫 + 干支 + 大限X宫），修复旧式「命宫（命宫）丁未」残缺感
+    // v0.6.22-iter（#52）：详情标题两行 —— 行1：★/身 + 本命X宫（干支）；行2：大限X宫
     var tN = palace.name.charAt(palace.name.length - 1) === '宫' ? palace.name : palace.name + '宫';
     var tSel = DX_RING.indexOf(palace.name); if (tSel < 0) tSel = 0;
-    var title = (palace.isSoul ? '<span class="dt-soul">★</span>' : '')
+    var title = '<div class="dt-l1">'
+      + (palace.isSoul ? '<span class="dt-soul">★</span>' : '')
       + '<span class="dt-bm">本命' + esc(tN) + '</span>'
       + (palace.isBody ? '<span class="dt-tag">身</span>' : '')
-      + '<span class="dt-gz">' + esc(palace.ganZhi) + '</span>'
-      + '<span class="dt-sep">·</span>'
-      + '<span class="dt-dx">' + esc(dxNameOf(palace.name, tSel)) + '</span>';
+      + '<span class="dt-gz">（' + esc(palace.ganZhi) + '）</span>'
+      + '</div>'
+      + '<div class="dt-l2"><span class="dt-dx">' + esc(dxNameOf(palace.name, tSel)) + '</span></div>';
+    // v0.6.22-iter（#52）：正文一类一行、分组隔空行（.dg = 一组）
     h += '<div class="detail-title">' + title + '</div><div class="detail-body">';
     var dx = dxByPalace[p];
-    if (dx) h += '<span class="dblk"><b>大限</b>' + dx.ganZhi + ' · ' + dx.start + '-' + dx.end + '岁</span>';
+    if (dx) h += '<div class="dg"><span class="dblk">' + dx.start + '-' + dx.end + '岁</span></div>';
     var maj = [];
     for (var i = 0; i < (palace.major || []).length; i++) {
       var m = palace.major[i];
       maj.push(m.name + (m.hua ? '（' + HUA_TXT[m.hua] + '）' : ''));
     }
-    if (maj.length) h += '<span class="dblk"><b>主星</b>' + maj.join('　') + '</span>';
+    var g23 = '';
+    if (maj.length) g23 += '<span class="dblk"><b>主星</b>' + maj.join('　') + '</span>';
     if ((palace.minor || []).length) {
       var hs2 = chart.center.huaSummary || {};
-      h += '<span class="dblk"><b>辅星</b>' + palace.minor.map(function (nm) {
+      g23 += '<span class="dblk"><b>辅星</b>' + palace.minor.map(function (nm) {
         return nm + (hs2[nm] ? '（' + HUA_TXT[hs2[nm]] + '）' : '');
       }).join('　') + '</span>';
     }
-    if ((palace.adjStars || []).length) h += '<span class="dblk"><b>杂曜</b>' + palace.adjStars.join('　') + '</span>';
+    if (g23) h += '<div class="dg">' + g23 + '</div>';
+    if ((palace.adjStars || []).length) h += '<div class="dg"><span class="dblk"><b>杂曜</b>' + palace.adjStars.join('　') + '</span></div>';
     var godTxt = [];
-    if (palace.changsheng12 && palace.changsheng12.length) godTxt.push('长生·' + palace.changsheng12[0]);
-    if (palace.boshi12 && palace.boshi12.length) godTxt.push('博士·' + palace.boshi12[0]);
-    if (palace.jiangqian12 && palace.jiangqian12.length) godTxt.push('将前·' + palace.jiangqian12[0]);
-    if (palace.suiqian12 && palace.suiqian12.length) godTxt.push('岁前·' + palace.suiqian12[0]);
-    if (godTxt.length) h += '<span class="dblk"><b>神煞</b>' + godTxt.join('　') + '</span>';
+    if (palace.changsheng12 && palace.changsheng12.length) godTxt.push('<span class="g-i">长生·' + palace.changsheng12[0] + '</span>');
+    if (palace.boshi12 && palace.boshi12.length) godTxt.push('<span class="g-i">博士·' + palace.boshi12[0] + '</span>');
+    if (palace.jiangqian12 && palace.jiangqian12.length) godTxt.push('<span class="g-i">将前·' + palace.jiangqian12[0] + '</span>');
+    if (palace.suiqian12 && palace.suiqian12.length) godTxt.push('<span class="g-i">岁前·' + palace.suiqian12[0] + '</span>');
+    if (godTxt.length) h += '<div class="dg"><span class="dblk"><b>神煞</b>' + godTxt.join('　') + '</span></div>';
     // 三方四正（三合 ±4，对宫 +6）
     var pTriA = chart.palaces[fix12(p + 8)]; // p-4
     var pTriB = chart.palaces[fix12(p + 4)];
@@ -709,7 +713,7 @@
       if (names.length) s += '(' + names.join('、') + ')';
       return s;
     }
-    h += '<span class="dblk"><b>三方四正</b>三合：' + brief(pTriA) + '、' + brief(pTriB) + '；对宫：' + brief(opp) + '</span>';
+    h += '<div class="dg"><span class="dblk"><b>三方四正</b>三合：' + brief(pTriA) + '、' + brief(pTriB) + '；对宫：' + brief(opp) + '</span></div>';
     h += '</div>';
     return h;
   }
@@ -790,6 +794,7 @@
     cnLunar: cnLunar,
     renderHead: renderHead,
     jieqiMiniHtml: jieqiMiniHtml, // v0.6.14-iter（#43）：节数据块（自检/CDP 用）
+    detailHtml: detailHtml,       // v0.6.22-iter（#52）：宫位详情结构（自检/CDP 用）
     renderJieqi: renderJieqi,     // v0.6.21-iter（#50）：十二节独立渲染到盘下方（自检/CDP 用）
     // v0.6.12-iter：快捷导航对外接口（CDP 冒烟/自动化校验用）
     navQuick: quickNav,

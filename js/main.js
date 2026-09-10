@@ -495,8 +495,25 @@
       T.ok(!!hJ.querySelector('.jieqi-mini') && hJ.querySelectorAll('.jm-col').length === 12, 'L10/#50 十二节独立块常显（12 列、与隐私无关）');
       var cpk = document.getElementById('chkPrivacy');
       T.ok(!!cpk && cpk.type === 'checkbox' && cpk.hasAttribute('checked'), 'L10/#47 隐私勾选框存在且 HTML 默认勾选');
-      // v0.6.20-iter（#49）：勾选框移至结果头右上角 —— 必须位于 .head-wrap 内（兄弟定位），且 .head-wrap 直接含 #resultHead
-      T.ok(!!cpk && !!cpk.closest('.head-wrap') && !!document.querySelector('.head-wrap > #resultHead'), 'L10/#49 勾选框位于结果头容器 .head-wrap（结果头右上角）');
+      // v0.6.22-iter（#52）：勾选框驻结果头通栏行尾（仍在 .head-wrap 内、#resultHead 之后；#resultHead 隐藏时同步隐藏）
+      T.ok(!!cpk && !!cpk.closest('.head-wrap') && !!document.querySelector('.head-wrap > #resultHead'), 'L10/#52 勾选框位于结果头容器 .head-wrap（通栏行内）');
+      // v0.6.22-iter（#52）：结果头一行序（姓名→新历→农历→四柱）＋详情分行结构
+      var pzC = hA.querySelector('.pillars');
+      T.ok(!!plA && !!sl && !!ll && !!pzC
+        && !!(plA.compareDocumentPosition(sl) & 4) && !!(sl.compareDocumentPosition(ll) & 4) && !!(ll.compareDocumentPosition(pzC) & 4),
+        'L10/#52 结果头一行序：姓名→新历→农历→四柱');
+      var piBro = -1;
+      for (var bi = 0; bi < ch47.palaces.length; bi++) if (ch47.palaces[bi].name === '兄弟') piBro = bi;
+      var hD = document.createElement('div');
+      hD.innerHTML = RENDER.detailHtml(ch47, piBro);
+      var dgs = hD.querySelectorAll('.dg');
+      T.ok(!!hD.querySelector('.dt-l1') && !!hD.querySelector('.dt-l2')
+        && hD.querySelector('.dt-l1').textContent.indexOf('（') >= 0
+        && hD.querySelector('.dt-l2').textContent.indexOf('大限') >= 0,
+        'L10/#52 详情标题两行：本命X宫（干支）/ 大限X宫');
+      T.ok(dgs.length >= 4 && dgs.length <= 5, 'L10/#52 详情分组 4-5 组（岁数/主辅/杂曜/神煞/三方四正）');
+      T.ok(dgs.length > 0 && /^\d+-\d+岁$/.test(dgs[0].textContent), 'L10/#52 详情首组=大限岁数独占一行');
+      T.eq(hD.querySelectorAll('.g-i').length, 4, 'L10/#52 神煞四项各自不断词（g-i ×4）');
       if (window.ARCHIVE && ARCHIVE.applyPrivacy) {
         ARCHIVE.applyPrivacy(false);
         T.eq(ARCHIVE.getPrivacyMode(), false, 'L10/#47 applyPrivacy(false) 生效（公开 API）');
@@ -513,8 +530,9 @@
       T.ok(after(ip, rp), 'L11/#50 输入区在结果区之前（版面最上方通栏）');
       var tl = q('.timeline-panel'), rc = q('.right-col');
       T.ok(after(tl, rc), 'L11/#51 时间轴在右列之前（左列=盘面左边）');
-      var hw = q('.head-wrap'), cw = q('.chart-wrap');
-      T.ok(!!hw && hw.parentNode === rc && after(hw, cw), 'L11/#50 结果头在右列内、盘面之前（12宫上方）');
+      var hw = q('.head-wrap'), cw = q('.chart-wrap'), rm = q('.result-main');
+      T.ok(!!hw && hw.parentNode === rp && after(hw, rm) && after(hw, cw), 'L11/#52 结果头通栏（结果区内、两列之前、盘面之前；与输入区同宽行）');
+      T.ok(after(q('#resultHead'), q('.head-wrap .privacy-ck')), 'L11/#52 隐私按钮在结果头之后（通栏行尾）');
       var jp = q('.jieqi-panel');
       T.ok(!!jp && after(cw, jp), 'L11/#50 十二节在盘面之后（12宫下方）');
       var dp = q('.detail-panel');
