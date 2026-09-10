@@ -266,9 +266,10 @@
     for (var i = 0; i < chart.daXian.length; i++) if (chart.daXian[i].palaceIndex === pi) return chart.daXian[i];
     return chart.daXian[0];
   }
-  function dxYearRange(chart, dx) { // 大限段 → 流年年份范围（虚岁 = 年份-出生年+1）
+  function dxYearRange(chart, dx) { // 大限段 → 流年十年窗口（v0.6.7-iter 与大限轴节点年对齐：节点年=出生年+start+5，窗口=节点年起 10 年）
     var by = chart.pre.solar.y;
-    return { y0: by + dx.start - 1, y1: by + dx.end - 1 };
+    var y0 = by + dx.start + 5;
+    return { y0: y0, y1: y0 + 9 };
   }
   function navClamp() {
     var n = window.ALGO.lunarMonthDays(NAV.sel.year, NAV.sel.month) || 29;
@@ -276,7 +277,7 @@
     if (NAV.sel.day < 1) NAV.sel.day = 1;
   }
 
-  // 流年轴：跟随选中大限段的 10 年（点选切换；年份/干支/虚岁）
+  // 流年轴：从选中大限的节点年起排 10 年（v0.6.7-iter：与大限轴节点年对齐；点选切换；年份/干支/虚岁）
   function renderLnAxis() {
     var el = NAV.axes.ln; if (!el) return;
     var chart = NAV.chart, by = chart.pre.solar.y;
@@ -284,7 +285,8 @@
     el.innerHTML = '';
     for (var i = 0; i < 10; i++) {
       (function (i) {
-        var age = dx.start + i, year = by + age - 1;
+        var year = by + dx.start + 5 + i; // 节点年（=出生年+start+5）起 10 年
+        var age = year - by + 1;          // 该年真实虚岁
         var gz = window.ALGO.yearGanZhi(year);
         var it = document.createElement('div');
         it.className = 'dx-item' + (NAV.sel.year === year ? ' active' : '');
