@@ -203,6 +203,9 @@ body {
 .cell.active { background: #f3f7ff; box-shadow: inset 0 0 0 2px rgba(41, 89, 164, .35); }
 /* v0.6.3：命四化提亮宫位（金色 toggle，点击中宫「命四化」行开关；与 .active 详情蓝互不干扰） */
 .cell.hua-lit { background: #fff2cf; box-shadow: inset 0 0 0 2px rgba(214, 158, 20, .55); }
+/* v0.6.4-iter：四化层高亮 —— 命四化/大限四化=金；流年/流月/流日四化=蓝（各行独立叠加不互扰） */
+.cell.dx-lit { background: #fff2cf; box-shadow: inset 0 0 0 2px rgba(214, 158, 20, .55); }
+.cell.ln-lit, .cell.ly-lit, .cell.lr-lit { background: #e6f0ff; box-shadow: inset 0 0 0 2px rgba(53, 104, 212, .45); }
 /* 宫内结构 v0.6.2：星带(主星玫粉/辅杂黑) + 神行(博士蓝) + meta行(岁前·将前·大限岁段·长生)
    + 宫位行底红两行（行1 ★/身+本命X宫+干支；行2 大限X宫）；庙旺行(.p-bright)已废弃 */
 .cell .p-stars {

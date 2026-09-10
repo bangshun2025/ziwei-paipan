@@ -141,6 +141,11 @@
     var _lz = ((new Date().getFullYear() - 1984) % 12 + 12) % 12;
     var _zl = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
     T.eq(ch1.center.liuDouZhi, _zl[(_lz + 6) % 12], 'L3 流斗 流年支+6');
+    // 流年/流月/流日四化（v0.6.4-iter，按运行时日期推算：结构断言防时间漂移）
+    T.ok(ch1.center.liuHua && ch1.center.liuHua.nian && ch1.center.liuHua.nian.stars
+      && ch1.center.liuHua.nian.stars.length === 4 && ch1.center.liuHua.nian.gz.length === 2, 'L3 流年四化 4 星+干支');
+    T.ok(!!ch1.center.liuHua.ri && ch1.center.liuHua.ri.stars.length === 4, 'L3 流日四化 4 星');
+    T.ok(!ch1.center.liuHua.yue || ch1.center.liuHua.yue.stars.length === 4, 'L3 流月四化 4 星或空');
     T.eq(ch1.center.ziweiIndex, 4, 'L3 紫微在午');
     T.eq(ch1.center.tianfuIndex, 8, 'L3 天府在戌');
     T.ok(ch1.daXian[0].name === '命宫' && ch1.daXian[0].start === 3 && ch1.daXian[0].end === 12, 'L3 大限0 3-12岁命宫');

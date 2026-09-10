@@ -479,6 +479,22 @@
     if (lcD && nowD.getTime() < lcD.getTime()) liuY--;
     var liuZhiIdx = ((liuY - 1984) % 12 + 12) % 12;
     var liuDouIdx = fix12(liuZhiIdx + pre.mUse - 1);
+
+    // 流年/流月/流日四化（中宫行，v0.6.4-iter）：按当前日期推算
+    // 流年 = 立春换年后的年干支；流月 = 今天所在节气月（五虎遁月干）；流日 = 今天日干支
+    var lnyGZ = yearGanZhi(liuY);
+    var qmToday = qiYearMonthOf(nowD.getFullYear(), nowD.getMonth() + 1, nowD.getDate(), nowD.getHours(), nowD.getMinutes());
+    var lmei = null;
+    if (qmToday) {
+      var lmGanIdx = fix10(TIGER_FIRST[yearGanZhi(qmToday.year).ganIdx] + qmToday.monthIdx);
+      lmei = { gz: GAN[lmGanIdx] + qmToday.monthZhi, stars: FOUR_HUA[lmGanIdx] };
+    }
+    var ldGZ = dayGanZhi(nowD.getFullYear(), nowD.getMonth() + 1, nowD.getDate());
+    var liuHua = {
+      nian: { gz: lnyGZ.gan + lnyGZ.zhi, stars: FOUR_HUA[lnyGZ.ganIdx] },
+      yue: lmei,
+      ri: { gz: ldGZ.gan + ldGZ.zhi, stars: FOUR_HUA[ldGZ.ganIdx] }
+    };
     // 宫干支字符串回填
     for (var i = 0; i < 12; i++) {
       var p = placed.palaces[i];
@@ -519,7 +535,8 @@
         bodyIndex: placed.bodyP, bodyZhi: ZHI[fix12(2 + placed.bodyP)],
         ziweiIndex: placed.ziweiP, tianfuIndex: placed.tianfuP,
         huaSummary: placed.huaSummary,
-        ziDouZhi: ZHI[ziDouIdx], liuDouZhi: ZHI[liuDouIdx], liuYear: liuY
+        ziDouZhi: ZHI[ziDouIdx], liuDouZhi: ZHI[liuDouIdx], liuYear: liuY,
+        liuHua: liuHua
       },
       palaces: placed.palaces,
       huaStars: huaStars,

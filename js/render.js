@@ -172,6 +172,30 @@
     el.innerHTML = html;
   }
 
+  // ===== 四化高亮工具（v0.6.4-iter）=====
+  // 四化星名集合 → 十二宫中含该星的格子列表（主星/辅星均可命中）
+  function huaCellsOf(chart, cells, stars) {
+    var set = {}, i, j, out = [];
+    for (i = 0; i < stars.length; i++) set[stars[i]] = 1;
+    for (i = 0; i < 12; i++) {
+      var pj = chart.palaces[i], hit = false;
+      for (j = 0; j < (pj.major || []).length; j++) if (set[pj.major[j].name]) hit = true;
+      for (j = 0; j < (pj.minor || []).length; j++) if (set[pj.minor[j]]) hit = true;
+      if (hit) out.push(cells[i]);
+    }
+    return out;
+  }
+  // 四化行点击 → 提亮/取消对应宫（各行 class 独立，多层可叠加不互扰）
+  function bindHuaRow(chart, cells, def) {
+    if (!def.el || !def.stars || !def.stars.length) return;
+    var t = huaCellsOf(chart, cells, def.stars);
+    def.el.addEventListener('click', function () {
+      var on = !def.el.classList.contains('on');
+      for (var i = 0; i < t.length; i++) t[i].classList.toggle(def.lit, on);
+      def.el.classList.toggle('on', on);
+    });
+  }
+
   // ===== 渲染 4x4 方盘 + 中宫 =====
   function renderGrid(root, chart) {
     var grid = document.createElement('div');
@@ -196,7 +220,17 @@
     var huaTxt = order4.length ? '【' + order4.join('') + '】' : '【--】';
     var cH = '';
     cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
-    cH += '<div class="c-pan c-hua" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    cH += '<div class="c-pan c-hua" data-hua="ming" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    // v0.6.4-iter：流年/流月/流日四化行（点击各行 → 提亮对应四化宫位；蓝系高亮）
+    var lh = cen.liuHua || {};
+    function mkLiuHuaRow(label, hd, key) {
+      if (!hd || !hd.stars) return '';
+      return '<div class="c-pan c-hua" data-hua="' + key + '" title="' + label + '四化（' + esc(hd.gz) + '）· 点击提亮/取消四化宫位">'
+        + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">【' + esc(hd.stars.join('')) + '】</span></div>';
+    }
+    cH += mkLiuHuaRow('流年', lh.nian, 'ln');
+    cH += mkLiuHuaRow('流月', lh.yue, 'ly');
+    cH += mkLiuHuaRow('流日', lh.ri, 'lr');
     cH += '<div class="c-pair"><span class="c-k">命宫在</span><span class="c-v c-v-pink">' + esc(cen.soulZhi) + '</span>'
       + '<span class="c-k">身宫在</span><span class="c-v c-v-pink">' + esc(cen.bodyZhi) + '</span></div>';
     cH += '<div class="c-pair" title="流斗随当前流年（' + esc(String(cen.liuYear || '')) + '）"><span class="c-k">子斗在</span><span class="c-v c-v-blue">' + esc(cen.ziDouZhi) + '</span>'
@@ -246,27 +280,15 @@
     }
     grid.appendChild(center);
 
-    // v0.6.3：点击「命四化」行 → 金色提亮四化星所在宫（toggle；四化星名见 order4，宫定位=major/minor 星名匹配）
-    var huaCells = [];
-    var huaNameSet = {};
-    for (var hz = 0; hz < order4.length; hz++) huaNameSet[order4[hz]] = 1;
-    if (order4.length) {
-      for (var hp2 = 0; hp2 < 12; hp2++) {
-        var pj = chart.palaces[hp2];
-        var hHit = false;
-        for (var hx = 0; hx < (pj.major || []).length; hx++) if (huaNameSet[pj.major[hx].name]) hHit = true;
-        for (var hy = 0; hy < (pj.minor || []).length; hy++) if (huaNameSet[pj.minor[hy]]) hHit = true;
-        if (hHit) huaCells.push(cells[hp2]);
-      }
-    }
-    var huaBtn = center.querySelector('.c-hua');
-    if (huaBtn && order4.length) {
-      huaBtn.addEventListener('click', function () {
-        var on = !huaBtn.classList.contains('on');
-        for (var hg = 0; hg < huaCells.length; hg++) huaCells[hg].classList.toggle('hua-lit', on);
-        huaBtn.classList.toggle('on', on);
-      });
-    }
+    // v0.6.4-iter：四化行 → 提亮星所在宫（toggle；宫定位=major/minor 星名匹配）
+    // 命四化=金（hua-lit）；流年/流月/流日=蓝（ln/ly/lr-lit），各行独立互不影响
+    var lhRows = [
+      { el: center.querySelector('[data-hua="ming"]'), stars: order4, lit: 'hua-lit' },
+      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit' },
+      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit' },
+      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit' }
+    ];
+    for (var hri = 0; hri < lhRows.length; hri++) bindHuaRow(chart, cells, lhRows[hri]);
 
     root.innerHTML = '';
     root.appendChild(grid);
@@ -352,7 +374,7 @@
     selectPalace(chart, soulDx.palaceIndex, cells, root, detailEl, state);
   }
 
-  var activeCell = null, activeDx = null;
+  var activeCell = null, activeDx = null, dxLitCells = [];
   function selectPalace(chart, pi, cells, timelineRoot, detailEl, state) {
     if (activeCell) activeCell.classList.remove('active');
     if (activeDx) activeDx.classList.remove('active');
@@ -366,6 +388,15 @@
     }
     if (detailEl) detailEl.innerHTML = detailHtml(chart, pi);
     if (state && state.onSelect) state.onSelect(pi);
+    // v0.6.4-iter：大限四化高亮 —— 选中大限宫干四化 → 星名匹配宫（每次重选先清旧；金系 dx-lit）
+    for (var dl = 0; dl < dxLitCells.length; dl++) dxLitCells[dl].classList.remove('dx-lit');
+    dxLitCells = [];
+    var dPal = chart.palaces[pi];
+    var dGanIdx = (dPal && typeof dPal.ganIdx === 'number') ? dPal.ganIdx : C.GAN_IDX[dPal.ganZhi.charAt(0)];
+    if (typeof dGanIdx === 'number' && C.FOUR_HUA[dGanIdx]) {
+      dxLitCells = huaCellsOf(chart, cells, C.FOUR_HUA[dGanIdx]);
+      for (var dl2 = 0; dl2 < dxLitCells.length; dl2++) dxLitCells[dl2].classList.add('dx-lit');
+    }
     // 大限盘宫名同步（v0.6.0）：选中宫 = 大限命宫 → 每格右下角「大限X宫」沿生年十二宫环整体偏移
     var off = DX_RING.indexOf(chart.palaces[pi].name);
     if (off < 0) off = 0;
