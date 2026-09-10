@@ -254,23 +254,31 @@ body {
 .cell .p-meta .gd-cs { color: #2b2b2b; }
 .cell .p-meta .gd-jq { color: #9a9a9a; }
 .cell .p-foot {
-  /* v0.6.2：底红两行式（原单行三段超宽 24px 被 cell 裁左端——flex-end 溢出裁在左缘）
-     行1 = ★/身 + 本命X宫 + 干支（右对齐）；行2 = 大限X宫（右对齐） */
-  display: flex; flex-direction: column; align-items: flex-end;
+  /* v0.6.2：底红两行式（原单行三段超宽 24px 被 cell 裁左端）
+     v0.6.17-iter（#46）：两行改居中 —— 行1 = ★/身 + 本命X宫 + 干支；行2 = 大限X宫，
+     大限宫名与本命宫名居中对齐（横行轴公共轴 = cell 中心；干支以负外边距补偿，见 .p-gz） */
+  display: flex; flex-direction: column; align-items: center;
   border-top: 1px solid #e4dfd2; margin-top: 3px; padding-top: 3px; padding-bottom: 2px;
 }
 .cell .p-f1 {
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 3px;
+  /* v0.6.17-iter（#46）：本命宫名行整体居中（干支负补偿使宫名字面居中对齐 cell 中心） */
+  display: flex; align-items: baseline; justify-content: center; gap: 3px;
   flex-wrap: wrap; row-gap: 0; white-space: nowrap; line-height: 1.25;
 }
 .cell .p-f2 { margin-top: 1px; line-height: 1.2; }
-/* v0.6.2：宫位行两行式 —— 行1 本命X宫(朱红粗)+干支(朱红)，行2 大限X宫(玫红)，随点击环偏移 */
+/* v0.6.2：宫位行两行式 —— 行1 本命X宫(朱红粗)+干支(朱红)，行2 大限X宫(玫红)，随点击环偏移
+   v0.6.17-iter（#46）：行2 大限宫名居中，与本命宫名（行1）居中对齐 */
 .cell .p-dx { font-size: 10px; font-weight: 600; color: #c02090; letter-spacing: .3px; line-height: 1.2; white-space: nowrap; }
 /* v0.3.0-ref 热卜整盘：★命宫/本命宫名/干支 一律朱红 */
 .cell .p-name { font-size: 13px; font-weight: 700; color: #f02000; letter-spacing: .5px; white-space: nowrap; }
-.cell .p-gz { font-size: 10.5px; color: #f02000; white-space: nowrap; }
+/* v0.6.17-iter（#46）：干支固定 2 字（10.5px×2=21px）+ 3px 间距 = 24px，以负外边距抵消，
+   使居中基准落在「本命X宫」四字本身（否则宫名会因干支占位整体左移 12px） */
+.cell .p-gz { font-size: 10.5px; color: #f02000; white-space: nowrap; margin-right: -24px; }
 .cell .soul-star { color: #f02000; font-size: 12px; line-height: 1; }
-.cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-right: 1px; }.cell .p-foot .tag.body-tag { background: none; color: #f02000; border: 1px solid #f02000; line-height: 1.3; }
+/* v0.6.17-iter（#46）：★ 与 身签 在居中轴左侧的占位以负外边距抵消（★ 12px+3px 间距；身签 ≈17px+1px 边距+3px 间距），
+   使含标宫格的「本命X宫」同样精确居中（双标并存时 -15+12+3-21+21+3 = 0，公式自洽） */
+.cell .soul-star { margin-left: -15px; }
+.cell .p-foot .tag { font-size: 9px; font-weight: 600; border-radius: 3px; padding: 0 3px; vertical-align: 1px; margin-right: 1px; }.cell .p-foot .tag.body-tag { background: none; color: #f02000; border: 1px solid #f02000; line-height: 1.3; margin-left: -21px; }
 .gd { font-style: normal; }
 .gd-cs { color: #c0392b; font-weight: 600; }   /* 长生十二神 */
 .gd-bs { color: #7d5fb8; font-weight: 600; }   /* 博士十二神 */
@@ -391,6 +399,12 @@ body {
   .cell .p-name { font-size: 12px; }
   .cell .p-dx { font-size: 9.5px; }
   .cell .p-f1, .cell .p-meta { gap: 0 3px; }
+  /* v0.6.17-iter（#46）：≤640 窄屏改用「行盒拉伸 + 干支固定独占第 2 行」方案 ——
+     两行拉伸全宽（stretch）后干支以 flex-basis:100% 折行居中（须在定宽容器内百分比才解析），
+     宫名/干支/大限宫名三行均精确居中且不越格（替代负边距补偿的近似降级版） */
+  .cell .p-foot { align-items: stretch; }
+  .cell .p-gz { margin-right: 0; flex-basis: 100%; text-align: center; }
+  .cell .p-f2 { text-align: center; }
   .center-area .c-pan, .center-area .c-pair { font-size: 11px; }
   .center-area .c-pair { gap: 10px; }
   /* v0.6.16-iter（#45 #1）：窄屏出生地保一行 —— 省/市/区弹性收窄不折行 */
@@ -430,7 +444,7 @@ body {
   /* 盘格字号（横版盘 ~135-210px/格，随视口自适应） */
   .cell { padding: 6px 7px; }
   .cell .p-name { font-size: 15px; }
-  .cell .p-gz { font-size: 11px; }
+  .cell .p-gz { font-size: 11px; margin-right: -25px; }
   .cell .p-dx { font-size: 11px; }
   .cell .p-major, .cell .p-minor, .cell .p-adj { gap: 1px 4px; }
   .cell .p-meta .p-dec, .cell .p-meta .gd { font-size: 9.5px; }

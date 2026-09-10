@@ -423,6 +423,32 @@
       }
     })();
 
+    // ===== L9 v0.6.17-iter（#46）：宫格底部两行居中 —— 大限宫名与本命宫名居中对齐 =====
+    (function () {
+      var gRoot = document.createElement('div');
+      document.body.appendChild(gRoot); // 需附着布局才能测几何（测完移除）
+      RENDER.renderAll(document.createElement('div'), gRoot, document.createElement('div'), document.createElement('div'), ch1, null, { ln: null, lm: null, ld: null });
+      var cells = gRoot.querySelectorAll('.cell');
+      var c0 = cells[0];
+      var fcs = getComputedStyle(c0.querySelector('.p-foot')).alignItems;
+      T.ok(fcs === (window.innerWidth > 640 ? 'center' : 'stretch'), 'L9/#46 宫脚横行轴对齐档位（>640 center / ≤640 stretch）');
+      T.eq(getComputedStyle(c0.querySelector('.p-f1')).justifyContent, 'center', 'L9/#46 本命宫名行居中（p-f1）');
+      var plain = null;
+      for (var i9 = 0; i9 < cells.length; i9++) {
+        if (!cells[i9].querySelector('.soul-star') && !cells[i9].querySelector('.tag.body-tag')) { plain = cells[i9]; break; }
+      }
+      T.ok(!!plain, 'L9/#46 存在普通格（无★/身标签）');
+      if (plain) {
+        var gzm9 = parseFloat(getComputedStyle(plain.querySelector('.p-gz')).marginRight);
+        T.ok(window.innerWidth > 640 ? gzm9 < 0 : gzm9 === 0, 'L9/#46 干支负补偿档位（>640 生效 / ≤640 折行免补偿）');
+        function ctr9(el) { var r9 = el.getBoundingClientRect(); return (r9.left + r9.right) / 2; }
+        var cc9 = ctr9(plain), nc9 = ctr9(plain.querySelector('.p-name')), dc9 = ctr9(plain.querySelector('.p-dx'));
+        T.ok(Math.abs(nc9 - cc9) <= 2, 'L9/#46 本命宫名中心≈格中心（±2px）');
+        T.ok(Math.abs(dc9 - nc9) <= 2, 'L9/#46 大限宫名中心≈本命宫名中心（居中对齐 ±2px）');
+      }
+      document.body.removeChild(gRoot);
+    })();
+
     return T.summary();
   }
 
