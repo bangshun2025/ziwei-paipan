@@ -372,8 +372,11 @@
       var ch82 = ALGO.getChart({ y: 1982, m: 10, d: 18, h: 6, mi: 30, gender: 'M', lng: 108.37 });
       var h82 = document.createElement('div');
       RENDER.renderHead(h82, ch82, null);
+      // v0.6.21-iter（#50/#51）：十二节自结果头拆出，改由 renderJieqi 独立渲染
+      T.eq(h82.querySelector('.jieqi-mini'), null, 'L8/#50 结果头不再含节数据块（已拆出）');
+      RENDER.renderJieqi(h82, ch82);
       var mini = h82.querySelector('.jieqi-mini');
-      T.ok(!!mini, 'L8 结果头含节数据块');
+      T.ok(!!mini, 'L8/#50 renderJieqi 独立渲染出节数据块');
       T.eq(h82.querySelector('.note-line'), null, 'L8 口径 note-line 已移除');
       var ttl = h82.querySelector('.jm-title');
       T.ok(!!ttl && ttl.textContent.indexOf('十二节（立春→小寒）') >= 0, 'L8 标题=出生年·十二节（立春→小寒）');
@@ -407,6 +410,7 @@
       var chN = ALGO.getChart({ y: 2000, m: 8, d: 16, h: 4, mi: 0, gender: 'F', lng: null });
       var hN = document.createElement('div');
       RENDER.renderHead(hN, chN, null);
+      RENDER.renderJieqi(hN, chN);
       var colN = hN.querySelectorAll('.jm-col');
       T.ok(colN.length === 12 && colN[0].querySelector('.jm-stm').textContent === '—', 'L8 无出生地真太阳列显示 —');
       T.ok(colN[0].querySelector('.jm-gan').textContent === '戊' && colN[0].querySelector('.jm-zhi').textContent === '寅', 'L8/#48 2000年立春月建=戊寅（庚辰年五虎遁）');
@@ -485,17 +489,36 @@
       T.ok(!hB.querySelector('.solar-line') && !hB.querySelector('.lunar-line'), 'L10/#47 隐私开时隐藏新历/农历两行');
       var plB = hB.querySelector('.person-line');
       T.ok(!!plB && plB.textContent.indexOf('匿名') >= 0, 'L10/#47 隐私开时姓名匿名化（匿名 · 男）');
-      T.ok(!!hB.querySelector('.pillars') && !!hB.querySelector('.jieqi-mini'), 'L10/#47 隐私开时八字与十二节保留');
+      T.ok(!!hB.querySelector('.pillars') && !hB.querySelector('.jieqi-mini'), 'L10/#47 隐私开时八字保留（十二节已移出结果头 #50）');
+      var hJ = document.createElement('div');
+      RENDER.renderJieqi(hJ, ch47);
+      T.ok(!!hJ.querySelector('.jieqi-mini') && hJ.querySelectorAll('.jm-col').length === 12, 'L10/#50 十二节独立块常显（12 列、与隐私无关）');
       var cpk = document.getElementById('chkPrivacy');
       T.ok(!!cpk && cpk.type === 'checkbox' && cpk.hasAttribute('checked'), 'L10/#47 隐私勾选框存在且 HTML 默认勾选');
-      // v0.6.20-iter（#49）：勾选框移至结果头（左下角区）右上角 —— 必须位于 .head-wrap 内（兄弟定位），且 .head-wrap 直接含 #resultHead
-      T.ok(!!cpk && !!cpk.closest('.head-wrap') && !!document.querySelector('.head-wrap > #resultHead'), 'L10/#49 勾选框位于结果头容器 .head-wrap（左下角区右上角）');
+      // v0.6.20-iter（#49）：勾选框移至结果头右上角 —— 必须位于 .head-wrap 内（兄弟定位），且 .head-wrap 直接含 #resultHead
+      T.ok(!!cpk && !!cpk.closest('.head-wrap') && !!document.querySelector('.head-wrap > #resultHead'), 'L10/#49 勾选框位于结果头容器 .head-wrap（结果头右上角）');
       if (window.ARCHIVE && ARCHIVE.applyPrivacy) {
         ARCHIVE.applyPrivacy(false);
         T.eq(ARCHIVE.getPrivacyMode(), false, 'L10/#47 applyPrivacy(false) 生效（公开 API）');
         ARCHIVE.applyPrivacy(prev47);
         T.eq(ARCHIVE.getPrivacyMode(), prev47, 'L10/#47 隐私态复原');
       }
+    })();
+
+    // ===== L11 v0.6.21-iter（#50/#51）：新版面结构（DOM 顺序断言，与视口宽度无关）=====
+    (function () {
+      var q = function (s) { return document.querySelector(s); };
+      var after = function (a, b) { return !!(a && b && (a.compareDocumentPosition(b) & 4)); };
+      var ip = q('.input-panel'), rp = q('#resultPanel');
+      T.ok(after(ip, rp), 'L11/#50 输入区在结果区之前（版面最上方通栏）');
+      var tl = q('.timeline-panel'), rc = q('.right-col');
+      T.ok(after(tl, rc), 'L11/#51 时间轴在右列之前（左列=盘面左边）');
+      var hw = q('.head-wrap'), cw = q('.chart-wrap');
+      T.ok(!!hw && hw.parentNode === rc && after(hw, cw), 'L11/#50 结果头在右列内、盘面之前（12宫上方）');
+      var jp = q('.jieqi-panel');
+      T.ok(!!jp && after(cw, jp), 'L11/#50 十二节在盘面之后（12宫下方）');
+      var dp = q('.detail-panel');
+      T.ok(!!dp && after(cw, dp), 'L11/#50 宫位详情紧随盘面之后（宽屏同排、右上）');
     })();
 
     return T.summary();
@@ -592,7 +615,7 @@
       btnCalc: $('btnCalc'), calcErr: $('calcErr'), dateErr: $('dateErr'),
       btnAi: $('btnAi'), aiMask: $('aiMask'), aiInput: $('aiInput'),
       aiPreview: $('aiPreview'), aiErr: $('aiErr'), aiApply: $('aiApply'), aiClose: $('aiClose'),
-      resultPanel: $('resultPanel'), resultHead: $('resultHead'),
+      resultPanel: $('resultPanel'), resultHead: $('resultHead'), jieqi: $('jieqiPanel'),
       chartWrap: $('chartWrap'), timeline: $('timeline'), detailBody: $('detailBody'),
       lnTimeline: $('lnTimeline'), lmTimeline: $('lmTimeline'), ldTimeline: $('ldTimeline'),
       detailPanel: $('detailPanel'),
@@ -966,6 +989,7 @@
       if (els.resultHead) els.resultHead.classList.remove('hidden');
       window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person,
         { ln: els.lnTimeline, lm: els.lmTimeline, ld: els.ldTimeline });
+      if (els.jieqi) window.RENDER.renderJieqi(els.jieqi, chart); // v0.6.21-iter（#50）：十二节独立块（12宫下方）
       // 滚到结果
       if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

@@ -198,8 +198,8 @@
       + '<span class="gan">' + esc(pre.dayGanZhi.gan) + '</span><span class="zhi">' + esc(pre.dayGanZhi.zhi) + '</span> '
       + '<span class="gan">' + esc(pre.hourGanZhi.gan) + '</span><span class="zhi">' + esc(pre.hourGanZhi.zhi) + '</span> '
       + '</div>';
-    // v0.6.14-iter（#43）：① 原「口径 note-line」整行移除（#2）；② 结果头下方渲染出生年「十二节数据」块（#3）
-    html += jieqiMiniHtml(pre);
+    // v0.6.14-iter（#43）：① 原「口径 note-line」整行移除（#2）
+    // v0.6.21-iter（#50/#51）：十二节块自结果头拆出 —— 改由 renderJieqi() 单独渲染到盘面下方 #jieqiPanel
     el.innerHTML = html;
   }
 
@@ -247,6 +247,13 @@
       + '<div class="jm-title">' + year + ' 年 · 十二节（立春→小寒）· 干支为月建</div>'
       + '<div class="jm-wrap"><div class="jm-grid">' + cols.join('') + '</div></div>'
       + '</div>';
+  }
+
+  // v0.6.21-iter（#50/#51）：十二节块独立渲染 —— 移出结果头，落到盘面下方 #jieqiPanel
+  //（与结果头解耦：隐私勾选/名字变化重渲结果头时不再连带重渲，十二节常显）
+  function renderJieqi(el, chart) {
+    if (!el || !chart || !chart.pre) return;
+    el.innerHTML = jieqiMiniHtml(chart.pre);
   }
 
   // v0.6.8-iter：原「四化行点击提亮宫位」（bindHuaRow）已按 #2 取消
@@ -783,6 +790,7 @@
     cnLunar: cnLunar,
     renderHead: renderHead,
     jieqiMiniHtml: jieqiMiniHtml, // v0.6.14-iter（#43）：节数据块（自检/CDP 用）
+    renderJieqi: renderJieqi,     // v0.6.21-iter（#50）：十二节独立渲染到盘下方（自检/CDP 用）
     // v0.6.12-iter：快捷导航对外接口（CDP 冒烟/自动化校验用）
     navQuick: quickNav,
     navGet: function () {

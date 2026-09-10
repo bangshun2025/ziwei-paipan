@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=529">
+<link rel="stylesheet" href="css/style.css?v=530">
 </head>
 <body>
 
@@ -87,14 +87,8 @@
       </div>
     </section>
 
-    <!-- ===== 结果头（四柱/农历；窄屏在盘前，横版入左栏）===== -->
-    <!-- v0.6.20-iter（#49）：隐私勾选框移入结果头（左下角区）右上角（head-wrap 内绝对定位；#resultHead 隐藏时同步隐藏；原页头位置撤下） -->
-    <div class="head-wrap">
-      <div class="panel result-head hidden" id="resultHead"></div>
-      <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
-    </div>
-
-    <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴在盘旁 + 详情）===== -->
+    <!-- ===== 结果主区（v0.6.21-iter #50/#51 新版面：输入顶栏 / 时间轴在盘面左 / 结果头在盘面上 / 十二节在盘面下 / 详情在盘面右上）===== -->
+    <!-- v0.6.20-iter（#49）：隐私勾选框随结果头（head-wrap 内绝对定位右上角；#resultHead 隐藏时同步隐藏） -->
     <section id="resultPanel" class="hidden">
       <!-- v0.6.11-iter：result-main ≥1280px 两列 = 盘面左 + 时间轴右（窄屏自动堆叠，纯 CSS 控制） -->
       <!-- v0.6.12-iter：盘面列 = 盘面 + 九宫下方快捷时间按钮条（年·月·日 三组 + 回今天） -->
@@ -105,9 +99,31 @@
       <!-- v0.6.17-iter（#46）：宫格底部两行居中 —— 大限宫名与本命宫名居中对齐（干支负边距补偿；≤640 窄屏改行盒拉伸+干支折行，同样精确居中） -->
       <!-- v0.6.18-iter（#47）：① 结果头加新历生日行（农历行上方）；② 页头右上角隐私勾选框（默认勾选=匿名+隐藏两生日行，与档案隐私同一状态）；③ 中宫行距调小 + 内容右移视觉居中 -->
       <!-- v0.6.19-iter（#48）：十二节块列干支改「月建」口径（五虎遁月干：立春起壬寅 → 小寒癸丑；复用 ALGO.liuMonthGz，与八字月柱同源），标题加注「干支为月建」 -->
+      <!-- v0.6.21-iter（#50/#51）：① 输入区上移为版面顶栏；② 时间轴移盘面左边（左列）；③ 结果头移12宫上方；④ 十二节自结果头拆出移12宫下方；⑤ 宫位详情移盘面右上 -->
       <div class="result-main">
-        <div class="chart-col">
-          <div class="chart-wrap" id="chartWrap"></div>
+        <!-- ② 时间轴（左列 = 盘面左边） -->
+        <div class="panel timeline-panel">
+          <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
+          <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+        </div>
+
+        <!-- 右列：③ 结果头（12宫上方）→ 盘面 + ⑤ 详情（盘面右上）→ 快捷条 → ④ 十二节（12宫下方） -->
+        <div class="right-col">
+          <div class="head-wrap">
+            <div class="panel result-head hidden" id="resultHead"></div>
+            <label class="privacy-ck" id="privacyCkLbl" title="隐私模式：勾选时名字脱敏显示（匿名），并隐藏新历/农历生日行"><input type="checkbox" id="chkPrivacy" checked><span id="chkPrivacyTxt">🔒 隐私</span></label>
+          </div>
+
+          <div class="chart-detail">
+            <div class="chart-wrap" id="chartWrap"></div>
+            <div class="panel detail-panel" id="detailPanel">
+              <div class="detail-title">宫位详情</div>
+              <div id="detailBody" class="detail-body">点击盘面宫位或大限分段查看详情。</div>
+            </div>
+          </div>
 
           <div class="quick-nav panel" id="quickNav">
             <div class="qn-group">
@@ -126,20 +142,10 @@
               <button type="button" class="qn-btn" data-qn="nd" title="流日：下一日">下一日</button>
             </div>
           </div>
-        </div>
 
-        <div class="panel timeline-panel">
-          <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
-          <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
-          <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+          <!-- ④ 十二节（v0.6.14-iter #43 加入；v0.6.21-iter #50：自结果头拆出，移至 12宫下方） -->
+          <div class="panel jieqi-panel" id="jieqiPanel"></div>
         </div>
-      </div>
-
-      <div class="panel detail-panel" id="detailPanel">
-        <div class="detail-title">宫位详情</div>
-        <div id="detailBody" class="detail-body">点击盘面宫位或大限分段查看详情。</div>
       </div>
     </section>
   </main>
@@ -222,9 +228,9 @@
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
 <script src="js/algorithm.js?v=506"></script>
-<script src="js/render.js?v=525"></script>
+<script src="js/render.js?v=526"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=516"></script>
+<script src="js/main.js?v=517"></script>
 <script src="js/archive.js?v=503"></script>
 </body>
 </html>
