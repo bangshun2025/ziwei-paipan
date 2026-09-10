@@ -182,7 +182,7 @@
     var dxByPalace = {};
     for (var k = 0; k < chart.daXian.length; k++) dxByPalace[chart.daXian[k].palaceIndex] = chart.daXian[k];
 
-    // 中宫（热卜式 v0.3.0-ref：大字 盘类型/命四化 + 双列 命宫身宫/命主身主）
+    // 中宫 v0.6.3：四行（盘类型/命四化/命宫身宫/命主身主），字号全统一+左对齐（样式见 .center-area）
     var cen = chart.center;
     var juTxt = '天盘' + esc(cen.juName);
     var L4 = ['禄', '权', '科', '忌'];
