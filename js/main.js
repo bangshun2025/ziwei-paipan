@@ -146,6 +146,20 @@
       && ch1.center.liuHua.nian.stars.length === 4 && ch1.center.liuHua.nian.gz.length === 2, 'L3 流年四化 4 星+干支');
     T.ok(!!ch1.center.liuHua.ri && ch1.center.liuHua.ri.stars.length === 4, 'L3 流日四化 4 星');
     T.ok(!ch1.center.liuHua.yue || ch1.center.liuHua.yue.stars.length === 4, 'L3 流月四化 4 星或空');
+    // 流运导航（v0.6.5-iter：流年/流月/流日可选；流月=农历月建五虎遁）
+    var _lg1 = ALGO.liuMonthGz(2026, 1);
+    T.eq(_lg1.gan + _lg1.zhi, '庚寅', 'L3 流月 2026正月=庚寅');
+    var _lg7 = ALGO.liuMonthGz(2026, 7);
+    T.eq(_lg7.gan + _lg7.zhi, '丙申', 'L3 流月 2026七月=丙申');
+    var _lg12 = ALGO.liuMonthGz(2026, 12);
+    T.eq(_lg12.gan + _lg12.zhi, '辛丑', 'L3 流月 2026腊月=辛丑');
+    var _lhx = ALGO.liuHuaOf({ year: 2026, month: 7, day: 29 });
+    T.eq(_lhx.nian.gz, '丙午', 'L3 流年2026=丙午');
+    T.eq(_lhx.nian.stars.join(''), CONST.FOUR_HUA[2].join(''), 'L3 流年四化=丙表值');
+    T.eq(_lhx.yue.gz, '丙申', 'L3 流月2026七月=丙申');
+    T.ok(_lhx.ri && _lhx.ri.gz.length === 2 && _lhx.ri.stars.length === 4, 'L3 流日四化结构');
+    var _md = ALGO.lunarMonthDays(2026, 7);
+    T.ok(_md === 29 || _md === 30, 'L3 农历七月天数 29/30 实=' + _md);
     T.eq(ch1.center.ziweiIndex, 4, 'L3 紫微在午');
     T.eq(ch1.center.tianfuIndex, 8, 'L3 天府在戌');
     T.ok(ch1.daXian[0].name === '命宫' && ch1.daXian[0].start === 3 && ch1.daXian[0].end === 12, 'L3 大限0 3-12岁命宫');
@@ -358,6 +372,7 @@
       aiPreview: $('aiPreview'), aiErr: $('aiErr'), aiApply: $('aiApply'), aiClose: $('aiClose'),
       resultPanel: $('resultPanel'), resultHead: $('resultHead'),
       chartWrap: $('chartWrap'), timeline: $('timeline'), detailBody: $('detailBody'),
+      lnTimeline: $('lnTimeline'), lmTimeline: $('lmTimeline'), ldTimeline: $('ldTimeline'),
       detailPanel: $('detailPanel'),
       btnTestPage: $('btnTestPage')
     };
@@ -725,7 +740,8 @@
       window.__LAST_HEAD__ = { chart: chart, person: person };
       els.resultPanel.classList.remove('hidden');
       if (els.resultHead) els.resultHead.classList.remove('hidden');
-      window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person);
+      window.RENDER.renderAll(els.resultHead, els.chartWrap, els.timeline, els.detailPanel, chart, person,
+        { ln: els.lnTimeline, lm: els.lmTimeline, ld: els.ldTimeline });
       // 滚到结果
       if (els.resultPanel.scrollIntoView) els.resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=514">
+<link rel="stylesheet" href="css/style.css?v=516">
 </head>
 <body>
 
@@ -97,8 +97,11 @@
       <div class="chart-wrap" id="chartWrap"></div>
 
       <div class="panel timeline-panel">
-        <div class="timeline-title">大限时间轴（点击高亮宫位）</div>
-        <div class="timeline" id="timeline"></div>
+        <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
+        <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
+        <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
+        <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
+        <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
       </div>
 
       <div class="panel detail-panel" id="detailPanel">
@@ -185,10 +188,10 @@
 <!-- 模块加载顺序：constants -> locdata(省市区) -> algorithm -> render -> aiinput(AI解析) -> main -> archive（零构建 IIFE + window 命名空间）-->
 <script src="js/constants.js?v=501"></script>
 <script src="js/locdata.js?v=501"></script>
-<script src="js/algorithm.js?v=503"></script>
-<script src="js/render.js?v=511"></script>
+<script src="js/algorithm.js?v=504"></script>
+<script src="js/render.js?v=513"></script>
 <script src="js/aiinput.js?v=501"></script>
-<script src="js/main.js?v=506"></script>
+<script src="js/main.js?v=507"></script>
 <script src="js/archive.js?v=501"></script>
 </body>
 </html>

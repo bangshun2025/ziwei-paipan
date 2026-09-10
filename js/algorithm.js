@@ -150,6 +150,41 @@
     var idx = fix60(diff + 10);
     return { ganIdx: idx % 10, zhiIdx: idx % 12, gan: GAN[idx % 10], zhi: ZHI[idx % 12], idx: idx };
   }
+
+  // ===== 流运时间导航（v0.6.5-iter）：流年/流月/流日可选 =====
+  // 流月 = 农历月建（正月=寅起），月干 = 五虎遁(流年干)+(m-1)；流日 = 农历日序，日柱按对应公历日推算。
+  // 口径注：流年沿用立春换年；流月按农历月建直推（黄历月建口径）。「立春后~春节前」约 10 天窗口
+  // 以新年干推腊月，属边缘从简；闰月不参与流月选择（取常规月）。
+  function liuMonthGz(year, m) { // m: 1=正月 .. 12=腊月
+    var g = yearGanZhi(year);
+    var ganIdx = fix10(TIGER_FIRST[g.ganIdx] + (m - 1));
+    var zhiIdx = fix12(2 + (m - 1));
+    return { ganIdx: ganIdx, zhiIdx: zhiIdx, gan: GAN[ganIdx], zhi: ZHI[zhiIdx] };
+  }
+  function lunarMonthDays(ly, lm) { // 农历月天数 29/30（忽略闰月）
+    var info = C.LUNAR_INFO[idxOf(ly)];
+    if (info === undefined) return 0;
+    return mLength(info, lm, false);
+  }
+  function liuHuaOf(sel) { // sel: {year, month(1-12), day(1-30)} → 流年/流月/流日四化
+    var ny = yearGanZhi(sel.year);
+    var gm = liuMonthGz(sel.year, sel.month);
+    var rs = lunarToSolar(sel.year, sel.month, sel.day, false);
+    var dgz = rs ? dayGanZhi(rs.y, rs.m, rs.d) : null;
+    return {
+      nian: { gz: ny.gan + ny.zhi, stars: FOUR_HUA[ny.ganIdx] },
+      yue: { gz: gm.gan + gm.zhi, stars: FOUR_HUA[gm.ganIdx] },
+      ri: dgz ? { gz: dgz.gan + dgz.zhi, stars: FOUR_HUA[dgz.ganIdx] } : null
+    };
+  }
+  function todayLiuSel() { // 今天默认选择：流年立春换年 + 农历月/日
+    var d = new Date();
+    var lu = solarToLunar(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    var y = d.getFullYear();
+    var lc = getSolarTerm(y, 2);
+    if (lc && d.getTime() < lc.getTime()) y--;
+    return { year: y, month: lu ? lu.lunarMonth : 1, day: lu ? lu.lunarDay : 1 };
+  }
   function hourGanZhi(dayGanIdx, t) { // 五鼠遁；t=时支序号
     var sub = { 0: 0, 5: 0, 1: 2, 6: 2, 2: 4, 7: 4, 3: 6, 8: 6, 4: 8, 9: 8 }[dayGanIdx];
     var ganIdx = fix10(sub + t);
@@ -473,28 +508,13 @@
     // 子斗 = 生年支 + 实用月序（较「太岁起正月顺数至生月」通式多走一位）
     // 流斗 = 流年支 +（实用月序 - 1）（通式：流年支宫起正月，顺数至生月）
     var ziDouIdx = fix12(pre.yearGanZhi.zhiIdx + pre.mUse);
-    var nowD = new Date();
-    var liuY = nowD.getFullYear();
-    var lcD = getSolarTerm(liuY, 2); // 立春换流年
-    if (lcD && nowD.getTime() < lcD.getTime()) liuY--;
+    var liuSelToday = todayLiuSel();
+    var liuY = liuSelToday.year; // 流年=立春换年（todayLiuSel 内统一）
     var liuZhiIdx = ((liuY - 1984) % 12 + 12) % 12;
     var liuDouIdx = fix12(liuZhiIdx + pre.mUse - 1);
 
-    // 流年/流月/流日四化（中宫行，v0.6.4-iter）：按当前日期推算
-    // 流年 = 立春换年后的年干支；流月 = 今天所在节气月（五虎遁月干）；流日 = 今天日干支
-    var lnyGZ = yearGanZhi(liuY);
-    var qmToday = qiYearMonthOf(nowD.getFullYear(), nowD.getMonth() + 1, nowD.getDate(), nowD.getHours(), nowD.getMinutes());
-    var lmei = null;
-    if (qmToday) {
-      var lmGanIdx = fix10(TIGER_FIRST[yearGanZhi(qmToday.year).ganIdx] + qmToday.monthIdx);
-      lmei = { gz: GAN[lmGanIdx] + qmToday.monthZhi, stars: FOUR_HUA[lmGanIdx] };
-    }
-    var ldGZ = dayGanZhi(nowD.getFullYear(), nowD.getMonth() + 1, nowD.getDate());
-    var liuHua = {
-      nian: { gz: lnyGZ.gan + lnyGZ.zhi, stars: FOUR_HUA[lnyGZ.ganIdx] },
-      yue: lmei,
-      ri: { gz: ldGZ.gan + ldGZ.zhi, stars: FOUR_HUA[ldGZ.ganIdx] }
-    };
+    // 流年/流月/流日四化（中宫行，v0.6.5-iter）：默认=今天（农历月建），render 层时间轴导航可切换
+    var liuHua = liuHuaOf(liuSelToday);
     // 宫干支字符串回填
     for (var i = 0; i < 12; i++) {
       var p = placed.palaces[i];
@@ -566,6 +586,7 @@
     cnyOf: cnyOf, leapMonthOf: leapMonthOf, mLength: mLength,
     yearGanZhi: yearGanZhi, dayGanZhi: dayGanZhi, hourGanZhi: hourGanZhi,
     getSolarTerm: getSolarTerm, qiYearMonthOf: qiYearMonthOf,
+    liuMonthGz: liuMonthGz, lunarMonthDays: lunarMonthDays, liuHuaOf: liuHuaOf, todayLiuSel: todayLiuSel,
     hourToShichen: hourToShichen, equationOfTime: equationOfTime, trueSolarTime: trueSolarTime,
     preprocess: preprocess, placeAll: placeAll, getChart: getChart, starPalace: starPalace
   };

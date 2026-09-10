@@ -87,7 +87,8 @@
       var ch = '';
       for (var i = 0; i < name.length; i++) ch += '<span class="s-ch">' + esc(name.charAt(i)) + '</span>';
       // v0.6.1：四化徽章贴星正下方（禄权科忌小色块，见 .star .hua），独立四化行已废弃
-      return '<span class="star ' + cls + '">' + ch + (hua ? huaEl(hua) : '') + '</span>';
+      // v0.6.5-iter：data-star 供四化层标签（限/年/月/日）定位追加
+      return '<span class="star ' + cls + '" data-star="' + esc(name) + '">' + ch + (hua ? huaEl(hua) : '') + '</span>';
     }
     function adjEl(name) {
       var ch = '';
@@ -186,14 +187,194 @@
     return out;
   }
   // 四化行点击 → 提亮/取消对应宫（各行 class 独立，多层可叠加不互扰）
+  // v0.6.5-iter 修复：命中宫在点击时实时计算（切换流年/流月/流日后 def.stars 已更新，旧实现闭包捕获导致高亮用旧四化）
   function bindHuaRow(chart, cells, def) {
-    if (!def.el || !def.stars || !def.stars.length) return;
-    var t = huaCellsOf(chart, cells, def.stars);
+    if (!def.el) return;
     def.el.addEventListener('click', function () {
+      if (!def.stars || !def.stars.length) return;
+      var t = huaCellsOf(chart, cells, def.stars);
       var on = !def.el.classList.contains('on');
       for (var i = 0; i < t.length; i++) t[i].classList.toggle(def.lit, on);
       def.el.classList.toggle('on', on);
+      // v0.6.5-iter：同步贴/清该层四化文字标签（限/年/月/日）
+      if (def.tag) starTagsApply(cells, def.stars, def.tag, def.prefix, on);
     });
+  }
+  // v0.6.5-iter：四化层文字标签 —— 在对应星旁贴「限禄/年权/月科/日忌」小标签
+  // 各层 class 独立（hx-dx/hx-ln/hx-ly/hx-lr），与生年徽章叠加显示不互扰；层级切换时先清旧再贴新
+  function starTagsApply(cells, stars, cls, prefix, on) {
+    if (!stars || !stars.length) return;
+    var L4 = ['禄', '权', '科', '忌'];
+    for (var i = 0; i < stars.length; i++) {
+      var nm = stars[i];
+      if (!nm) continue;
+      for (var p = 0; p < 12; p++) {
+        var el = cells[p].querySelector('.star[data-star="' + nm + '"]');
+        if (!el) continue;
+        var ex = el.querySelector('.' + cls);
+        if (on && !ex) {
+          var tg = document.createElement('i');
+          tg.className = 'hx-tag ' + cls;
+          tg.textContent = prefix + L4[i];
+          el.appendChild(tg);
+        } else if (!on && ex && ex.parentNode) {
+          ex.parentNode.removeChild(ex);
+        }
+      }
+    }
+  }
+
+  // v0.6.5-iter：清除某层全部四化标签（大限切换 / 选择变更时先清再贴）
+  function starTagsClear(cells, cls) {
+    if (!cells) return;
+    for (var p = 0; p < 12; p++) {
+      var ts = cells[p].querySelectorAll('.hx-tag.' + cls);
+      for (var i = ts.length - 1; i >= 0; i--) {
+        if (ts[i].parentNode) ts[i].parentNode.removeChild(ts[i]);
+      }
+    }
+  }
+
+  // ===== 流运时间导航（v0.6.5-iter）：流年/流月/流日可选，联动中宫四化行与高亮 =====
+  // 交互对齐大限轴：流年轴跟随选中大限的 10 年；流月=12 农历月建；流日=所选农历月的日序。
+  var NAV = {
+    chart: null, cells: null,
+    axes: { ln: null, lm: null, ld: null },
+    rowEls: null,            // 中宫三行（流年/流月/流日）引用
+    rows: null,              // 行 def（含 stars/lit/tag/prefix/key），供 on 态重刷
+    sel: { year: 0, month: 1, day: 1 },
+    dxPi: -1, liuHua: null
+  };
+  var LM_NAME = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
+
+  function dxOfPi(chart, pi) {
+    for (var i = 0; i < chart.daXian.length; i++) if (chart.daXian[i].palaceIndex === pi) return chart.daXian[i];
+    return chart.daXian[0];
+  }
+  function dxYearRange(chart, dx) { // 大限段 → 流年年份范围（虚岁 = 年份-出生年+1）
+    var by = chart.pre.solar.y;
+    return { y0: by + dx.start - 1, y1: by + dx.end - 1 };
+  }
+  function navClamp() {
+    var n = window.ALGO.lunarMonthDays(NAV.sel.year, NAV.sel.month) || 29;
+    if (NAV.sel.day > n) NAV.sel.day = n;
+    if (NAV.sel.day < 1) NAV.sel.day = 1;
+  }
+
+  // 流年轴：跟随选中大限段的 10 年（点选切换；年份/干支/虚岁）
+  function renderLnAxis() {
+    var el = NAV.axes.ln; if (!el) return;
+    var chart = NAV.chart, by = chart.pre.solar.y;
+    var dx = dxOfPi(chart, NAV.dxPi);
+    el.innerHTML = '';
+    for (var i = 0; i < 10; i++) {
+      (function (i) {
+        var age = dx.start + i, year = by + age - 1;
+        var gz = window.ALGO.yearGanZhi(year);
+        var it = document.createElement('div');
+        it.className = 'dx-item' + (NAV.sel.year === year ? ' active' : '');
+        it.innerHTML = '<div class="dx-year">' + year + '</div>'
+          + '<div class="dx-name">' + esc(gz.gan + gz.zhi) + '</div>'
+          + '<div class="dx-age">' + age + '岁</div>';
+        it.addEventListener('click', function () { pickYear(year); });
+        el.appendChild(it);
+      })(i);
+    }
+  }
+  // 流月轴：12 个农历月建（正月…腊月），月干五虎遁随所选流年
+  function renderLmAxis() {
+    var el = NAV.axes.lm; if (!el) return;
+    el.innerHTML = '';
+    for (var m = 1; m <= 12; m++) {
+      (function (m) {
+        var gz = window.ALGO.liuMonthGz(NAV.sel.year, m);
+        var it = document.createElement('div');
+        it.className = 'dx-item tl-sm' + (NAV.sel.month === m ? ' active' : '');
+        it.innerHTML = '<div class="dx-year">' + LM_NAME[m - 1] + '</div>'
+          + '<div class="dx-name">' + esc(gz.gan + gz.zhi) + '</div>';
+        it.addEventListener('click', function () { pickMonth(m); });
+        el.appendChild(it);
+      })(m);
+    }
+  }
+  // 流日轴：所选农历月的日序（初一到廿九/三十），日柱按对应公历日
+  function renderLdAxis() {
+    var el = NAV.axes.ld; if (!el) return;
+    var n = window.ALGO.lunarMonthDays(NAV.sel.year, NAV.sel.month) || 29;
+    el.innerHTML = '';
+    for (var d = 1; d <= n; d++) {
+      (function (d) {
+        var rs = window.ALGO.lunarToSolar(NAV.sel.year, NAV.sel.month, d, false);
+        var gzTxt = '';
+        if (rs) { var dgz = window.ALGO.dayGanZhi(rs.y, rs.m, rs.d); gzTxt = dgz.gan + dgz.zhi; }
+        var it = document.createElement('div');
+        it.className = 'dx-item tl-sm tl-day' + (NAV.sel.day === d ? ' active' : '');
+        it.innerHTML = '<div class="dx-year">' + cnDay(d) + '</div>'
+          + '<div class="dx-name">' + esc(gzTxt) + '</div>';
+        it.addEventListener('click', function () { pickDay(d); });
+        el.appendChild(it);
+      })(d);
+    }
+  }
+  function pickYear(y) { NAV.sel.year = y; navClamp(); navRebuild(); }
+  function pickMonth(m) { NAV.sel.month = m; navClamp(); navRebuild(); }
+  function pickDay(d) { NAV.sel.day = d; navRebuild(); }
+  function navRebuild() {
+    renderLnAxis(); renderLmAxis(); renderLdAxis();
+    navRefresh();
+  }
+  // 选择变化 → 重算四化 → 更新中宫行文字 + 各开启层的高亮/标签（保持 on 态自动跟随）
+  function navRefresh() {
+    if (!NAV.chart) return;
+    var lh = window.ALGO.liuHuaOf(NAV.sel);
+    NAV.liuHua = lh;
+    var texts = [['ln', '流年', lh.nian], ['ly', '流月', lh.yue], ['lr', '流日', lh.ri]];
+    for (var i = 0; i < texts.length; i++) {
+      var key = texts[i][0], label = texts[i][1], hd = texts[i][2];
+      var el = NAV.rowEls && NAV.rowEls[key];
+      if (!el) continue;
+      var vEl = el.querySelector('.c-v-red');
+      if (vEl) vEl.textContent = (hd && hd.stars) ? '【' + hd.stars.join('') + '】' : '【--】';
+      el.title = label + '四化' + (hd && hd.gz ? '（' + hd.gz + '）' : '') + ' · 点击提亮/取消四化宫位';
+    }
+    var rows = NAV.rows || [];
+    for (var r = 0; r < rows.length; r++) {
+      var def = rows[r];
+      var hd2 = lh[def.key];
+      def.stars = (hd2 && hd2.stars) ? hd2.stars : [];
+      if (def.el && def.el.classList.contains('on')) refillRow(def);
+    }
+  }
+  // 保持 on 态的行：先清该层高亮/标签，再按新四化重刷（选择变更时跟随）
+  function refillRow(def) {
+    var cells = NAV.cells;
+    for (var p = 0; p < 12; p++) cells[p].classList.remove(def.lit);
+    var t = huaCellsOf(NAV.chart, cells, def.stars);
+    for (var i = 0; i < t.length; i++) t[i].classList.add(def.lit);
+    if (def.tag) {
+      starTagsClear(cells, def.tag);
+      starTagsApply(cells, def.stars, def.tag, def.prefix, true);
+    }
+  }
+  // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
+  function onDxChange(pi) {
+    NAV.dxPi = pi;
+    var chart = NAV.chart;
+    var rng = dxYearRange(chart, dxOfPi(chart, pi));
+    if (NAV.sel.year < rng.y0 || NAV.sel.year > rng.y1) {
+      var ty = window.ALGO.todayLiuSel().year;
+      NAV.sel.year = (ty >= rng.y0 && ty <= rng.y1) ? ty : rng.y0;
+    }
+    navClamp();
+    navRebuild();
+  }
+  function navInit(chart, cells, axes) {
+    NAV.chart = chart; NAV.cells = cells;
+    NAV.axes = axes || { ln: null, lm: null, ld: null };
+    var tsel = window.ALGO.todayLiuSel();
+    NAV.sel = { year: tsel.year, month: tsel.month, day: tsel.day };
+    NAV.dxPi = -1;
+    navClamp();
   }
 
   // ===== 渲染 4x4 方盘 + 中宫 =====
@@ -282,13 +463,16 @@
 
     // v0.6.4-iter：四化行 → 提亮星所在宫（toggle；宫定位=major/minor 星名匹配）
     // 命四化=金（hua-lit）；流年/流月/流日=蓝（ln/ly/lr-lit），各行独立互不影响
+    // v0.6.5-iter：流年/流月/流日行附层标签配置（年/月/日 + class），选择变更时由 NAV 重刷
     var lhRows = [
       { el: center.querySelector('[data-hua="ming"]'), stars: order4, lit: 'hua-lit' },
-      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit' },
-      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit' },
-      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit' }
+      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit', tag: 'hx-ln', prefix: '年', key: 'nian' },
+      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit', tag: 'hx-ly', prefix: '月', key: 'yue' },
+      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit', tag: 'hx-lr', prefix: '日', key: 'ri' }
     ];
     for (var hri = 0; hri < lhRows.length; hri++) bindHuaRow(chart, cells, lhRows[hri]);
+    NAV.rowEls = { ln: lhRows[1].el, ly: lhRows[2].el, lr: lhRows[3].el };
+    NAV.rows = [lhRows[1], lhRows[2], lhRows[3]];
 
     root.innerHTML = '';
     root.appendChild(grid);
@@ -369,9 +553,14 @@
       items.push(it);
       root.appendChild(it);
     }
-    // 默认选中命宫所在大限
-    var soulDx = chart.daXian[0];
-    selectPalace(chart, soulDx.palaceIndex, cells, root, detailEl, state);
+    // v0.6.5-iter：默认选中「今天所在大限段」（时间导航初始即今天；段外流年回退第一段）
+    var initDx = chart.daXian[0];
+    var ty = window.ALGO.todayLiuSel().year;
+    for (var di2 = 0; di2 < chart.daXian.length; di2++) {
+      var rng2 = dxYearRange(chart, chart.daXian[di2]);
+      if (ty >= rng2.y0 && ty <= rng2.y1) { initDx = chart.daXian[di2]; break; }
+    }
+    selectPalace(chart, initDx.palaceIndex, cells, root, detailEl, state);
   }
 
   var activeCell = null, activeDx = null, dxLitCells = [];
@@ -389,13 +578,16 @@
     if (detailEl) detailEl.innerHTML = detailHtml(chart, pi);
     if (state && state.onSelect) state.onSelect(pi);
     // v0.6.4-iter：大限四化高亮 —— 选中大限宫干四化 → 星名匹配宫（每次重选先清旧；金系 dx-lit）
+    // v0.6.5-iter：同步「限禄/限权/限科/限忌」文字标签（贴星旁，先清旧再贴新）
     for (var dl = 0; dl < dxLitCells.length; dl++) dxLitCells[dl].classList.remove('dx-lit');
     dxLitCells = [];
+    starTagsClear(cells, 'hx-dx');
     var dPal = chart.palaces[pi];
     var dGanIdx = (dPal && typeof dPal.ganIdx === 'number') ? dPal.ganIdx : C.GAN_IDX[dPal.ganZhi.charAt(0)];
     if (typeof dGanIdx === 'number' && C.FOUR_HUA[dGanIdx]) {
       dxLitCells = huaCellsOf(chart, cells, C.FOUR_HUA[dGanIdx]);
       for (var dl2 = 0; dl2 < dxLitCells.length; dl2++) dxLitCells[dl2].classList.add('dx-lit');
+      starTagsApply(cells, C.FOUR_HUA[dGanIdx], 'hx-dx', '限', true);
     }
     // 大限盘宫名同步（v0.6.0）：选中宫 = 大限命宫 → 每格右下角「大限X宫」沿生年十二宫环整体偏移
     var off = DX_RING.indexOf(chart.palaces[pi].name);
@@ -404,6 +596,8 @@
       var dEl = cells[ci] && cells[ci].querySelector('.p-dx');
       if (dEl) dEl.textContent = dxNameOf(chart.palaces[ci].name, off);
     }
+    // v0.6.5-iter：时间导航联动（流年轴跟随重列 + 流年选择保持/回落今天）
+    if (NAV.chart === chart) onDxChange(pi);
   }
 
   // ===== 对外 =====
@@ -412,9 +606,11 @@
     monthPillarOf: monthPillarOf,
     cnLunar: cnLunar,
     renderHead: renderHead,
-    renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state) {
+    renderAll: function (headEl, gridRoot, timelineRoot, detailEl, chart, state, axes) {
       renderHead(headEl, chart, state);
       var cells = renderGrid(gridRoot, chart);
+      // v0.6.5-iter：时间导航初始化（默认=今天：大限段/流年/流月/流日）——需在 renderTimeline 前
+      navInit(chart, cells, axes);
       // v0.6.0：宫格可点 —— 点击即选中该宫（高亮/详情/大限轴联动），且该宫成为「大限命宫」，
       // 全盘右下角大限宫名沿生年十二宫环偏移（点命宫右邻父母宫 → 父母宫=大限命宫，福德宫=大限父母宫…）
       for (var pc = 0; pc < 12; pc++) (function (pi) {
@@ -423,6 +619,7 @@
         });
       })(pc);
       renderTimeline(timelineRoot, chart, cells, detailEl, state);
+      navRefresh(); // 兜底同步（selectPalace 已触发导航刷新，此处幂等保齐）
       return { cells: cells, chart: chart };
     }
   };

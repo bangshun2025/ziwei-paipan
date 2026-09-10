@@ -263,6 +263,16 @@ body {
 .hua-Q { background: var(--hua-quan); }
 .hua-K { background: var(--hua-ke); }
 .hua-J { background: var(--hua-ji); }
+/* v0.6.5-iter：四化层标签（限/年/月/日）贴星下，与生年徽章叠加显示；限金/年蓝/月紫/日青 */
+.star .hx-tag {
+  display: block; font-size: 8px; font-weight: 600; line-height: 1.1;
+  border-radius: 2px; padding: 0 1.5px; margin-top: 1px;
+  color: #fff; font-style: normal; white-space: nowrap;
+}
+.star .hx-tag.hx-dx { background: #b8860b; }
+.star .hx-tag.hx-ln { background: #3568d4; }
+.star .hx-tag.hx-ly { background: #7b5cd6; }
+.star .hx-tag.hx-lr { background: #0e8a7c; }
 
 /* 中心 2x2 合成一格（热卜式整盘：盘类型/命四化 大字 + 命宫身宫/命主身主 双列） */
 .center-area {
@@ -303,6 +313,17 @@ body {
 .dx-item.active .dx-year { color: #f02000; }
 .dx-item .dx-name { font-size: 10.5px; color: #6f6a5e; white-space: nowrap; }
 .dx-item .dx-age { font-size: 10px; color: #9a938a; white-space: nowrap; }
+/* v0.6.5-iter：时间轴四排（大限/流年/流月/流日），左侧小标 + 轴复用 .timeline/.dx-item */
+.tl-row { display: flex; align-items: stretch; gap: 8px; margin-top: 5px; }
+.tl-row:first-of-type { margin-top: 0; }
+.tl-cap { flex: none; width: 30px; font-size: 11px; color: #9a938a; padding-top: 9px; text-align: right; line-height: 1; }
+.tl-row .timeline { flex: 1; min-width: 0; }
+.tl-row .dx-item { flex: 1 0 54px; padding: 2px 3px 3px; }
+.tl-row .tl-sm .dx-year { font-size: 12px; font-weight: 600; }
+.tl-row .tl-sm .dx-name { font-size: 9.5px; }
+.tl-row .tl-day { flex: 1 1 24px; min-width: 24px; }
+.tl-row .tl-day .dx-year { font-size: 10.5px; letter-spacing: 0; }
+.tl-row .tl-day .dx-name { font-size: 9px; }
 
 /* ===== 详情区 ===== */
 .detail-panel { padding: 14px 16px; min-height: 60px; }
