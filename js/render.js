@@ -188,6 +188,66 @@
     return out;
   }
   // v0.6.8-iter：原「四化行点击提亮宫位」（bindHuaRow）已按 #2 取消
+  // ===== 三方四正高亮（v0.6.9-iter，需求 #3）=====
+  // 口径：每颗四化星所在宫 + 三合两宫 + 对宫。宫位序 p：0=寅、每+1=下一支（p=eb-2），
+  // 故三合 = p±4（+4/+8）、对宫 = p+6；同盘多星取并集去重。
+  function sfCellsOf(chart, cells, stars) {
+    if (!stars || !stars.length) return [];
+    var nameSet = {}, i, j, out = [], set = {};
+    for (i = 0; i < stars.length; i++) nameSet[stars[i]] = 1;
+    for (i = 0; i < 12; i++) {
+      var pj = chart.palaces[i], hit = false;
+      for (j = 0; j < (pj.major || []).length; j++) if (nameSet[pj.major[j].name]) hit = true;
+      for (j = 0; j < (pj.minor || []).length; j++) if (nameSet[pj.minor[j]]) hit = true;
+      if (!hit) continue;
+      var quad = [i, fix12(i + 4), fix12(i + 8), fix12(i + 6)];
+      for (j = 0; j < quad.length; j++) {
+        if (!set[quad[j]]) { set[quad[j]] = 1; out.push(cells[quad[j]]); }
+      }
+    }
+    return out;
+  }
+  // 层 key（ming/ln/ly/lr）→ 该层四化星名数组（命=生年四化 huaSummary，按禄权科忌序）
+  function starsOfLayer(key) {
+    var chart = NAV.chart;
+    if (!chart) return null;
+    if (key === 'ming') {
+      var hs = (chart.center && chart.center.huaSummary) || {};
+      var L4 = ['禄', '权', '科', '忌'], out = [], seen = {}, hk, hn;
+      for (hk = 0; hk < L4.length; hk++) {
+        for (hn in hs) {
+          if (hs[hn] === L4[hk] && !seen[hn]) { out.push(hn); seen[hn] = 1; }
+        }
+      }
+      return out;
+    }
+    var lh = NAV.liuHua || {};
+    var hd = key === 'ln' ? lh.nian : key === 'ly' ? lh.yue : lh.ri;
+    return (hd && hd.stars) || null;
+  }
+  // 高亮应用：key 空 = 全灭；单层互斥（再点同层 = 取消）；行 .on = 当前追踪层
+  function sfApply(key) {
+    var i, k, rowEls = NAV.rowEls || {};
+    for (i = 0; i < (NAV.sfCells || []).length; i++) NAV.sfCells[i].classList.remove('sf-lit');
+    NAV.sfCells = [];
+    for (k in rowEls) if (rowEls[k]) rowEls[k].classList.remove('on');
+    NAV.sfKey = null;
+    if (!key || !NAV.chart || !NAV.cells) return;
+    var stars = starsOfLayer(key);
+    if (!stars || !stars.length) return;
+    var t = sfCellsOf(NAV.chart, NAV.cells, stars);
+    for (i = 0; i < t.length; i++) t[i].classList.add('sf-lit');
+    NAV.sfCells = t;
+    NAV.sfKey = key;
+    if (rowEls[key]) rowEls[key].classList.add('on');
+  }
+  function bindSfRow(el) {
+    if (!el) return;
+    el.addEventListener('click', function () {
+      var key = el.getAttribute('data-hua');
+      sfApply(NAV.sfKey === key ? null : key);
+    });
+  }
 
   // v0.6.5-iter：四化层文字标签 —— 在对应星旁贴「限禄/年权/月科/日忌」小标签
   // 各层 class 独立（hx-dx/hx-ln/hx-ly/hx-lr），与生年徽章叠加显示不互扰；层级切换时先清旧再贴新
@@ -244,8 +304,9 @@
   var NAV = {
     chart: null, cells: null,
     axes: { ln: null, lm: null, ld: null },
-    rowEls: null,            // 中宫三行（流年/流月/流日）引用
-    rows: null,              // 行 def（含 stars/lit/tag/prefix/key），供 on 态重刷
+    rowEls: null,            // 中宫四行（命/年/月/日四化）引用
+    sfKey: null,             // v0.6.9-iter（#3）：当前三方四正追踪层（ming/ln/ly/lr）
+    sfCells: [],             // v0.6.9-iter（#3）：已点亮格引用（供取消/切换时清除）
     sel: { year: 0, month: 1, day: 1 },
     dxPi: -1, liuHua: null, dGanIdx: null   // v0.6.6-iter：dGanIdx = 当前大限宫干（供限标签全量刷新）
   };
@@ -345,6 +406,8 @@
     }
     // v0.6.6-iter：年/月/日选择变更 → 常显标签全量重贴
     tagsRefreshAll(NAV.cells, NAV.chart);
+    // v0.6.9-iter（#3）：三方四正高亮随当前追踪层重算（星位/文字变化时保持同步）
+    if (NAV.sfKey) sfApply(NAV.sfKey);
   }
   // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
   function onDxChange(pi) {
@@ -364,6 +427,7 @@
     var tsel = window.ALGO.todayLiuSel();
     NAV.sel = { year: tsel.year, month: tsel.month, day: tsel.day };
     NAV.dxPi = -1;
+    NAV.sfKey = null; NAV.sfCells = [];  // v0.6.9-iter（#3）：新盘重置三方四正高亮
     navClamp();
   }
 
@@ -460,12 +524,15 @@
     }
     grid.appendChild(center);
 
-    // v0.6.8-iter：取消四化宫位点击高亮（#2）——仅登记行元素，供 navRefresh 更新文字（干支/星名）
+    // v0.6.8-iter：取消旧「四化行点击提亮宫位」（#2）；v0.6.9-iter（#3）：行点击恢复为「三方四正」高亮
     NAV.rowEls = {
+      ming: center.querySelector('[data-hua="ming"]'),
       ln: center.querySelector('[data-hua="ln"]'),
       ly: center.querySelector('[data-hua="ly"]'),
       lr: center.querySelector('[data-hua="lr"]')
     };
+    var sfKeys = ['ming', 'ln', 'ly', 'lr'];
+    for (var sfk0 = 0; sfk0 < sfKeys.length; sfk0++) bindSfRow(NAV.rowEls[sfKeys[sfk0]]);
 
     root.innerHTML = '';
     root.appendChild(grid);
