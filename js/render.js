@@ -75,11 +75,11 @@
     return C.GAN[ganIdx] + ZHI[zhiIdx];
   }
 
-  // 主星四化角标
+  // 主星四化角标（v0.6.6-iter：统一「前+化」两字格式 —— 本禄/本权/本科/本忌）
   function huaEl(hua) {
     if (!hua) return '';
     var cls = HUA_CLS[hua];
-    return '<i class="hua hua-' + (cls || 'L') + '">' + esc(hua) + '</i>';
+    return '<i class="hua hua-' + (cls || 'L') + '">' + esc('本' + hua) + '</i>';
   }
 
     function starEl(name, minor, hua) {
@@ -97,7 +97,7 @@
     }
 
     // v0.6.2：庙旺平陷行已按界面迭代废弃（原 brightRow 输出 .p-bright），BRIGHT 表保留于 constants.js 备用
-    // 神煞区（横线上方）：行5 = 博士组(蓝)；行6 = 岁前组(灰绿) + 将前组(灰) + 大限岁段(黑) + 长生(黑)
+    // 神煞区（横线上方）v0.6.6-iter：博士组(蓝) + 岁前组(灰绿) + 将前组(灰) + 大限岁段(黑) + 长生(黑) 合并为一行
     // v0.6.1：岁前星由宫位行首上移至此处，宫位行只保留 本命宫名/干支/大限宫名
     function godLines(palace, dec) {
       var bs = (palace.boshi12 && palace.boshi12[0]) || '';
@@ -105,9 +105,10 @@
       var cs = (palace.changsheng12 && palace.changsheng12[0]) || '';
       var sq = (palace.suiqian12 && palace.suiqian12[0]) || '';
       var s = '';
-      if (bs) s += '<div class="p-god"><i class="gd gd-bs">' + esc(bs) + '</i></div>';
-      if (sq || jq || dec || cs) {
+      // v0.6.6-iter：博士组行并入神煞行（放在大限岁段一行的前面），博士星置行首
+      if (bs || sq || jq || dec || cs) {
         s += '<div class="p-meta">';
+        if (bs) s += '<i class="gd gd-bs">' + esc(bs) + '</i>';
         if (sq) s += '<i class="gd gd-sq">' + esc(sq) + '</i>';
         if (jq) s += '<i class="gd gd-jq">' + esc(jq) + '</i>';
         if (dec) s += '<span class="p-dec">' + esc(dec) + '</span>';
@@ -196,8 +197,7 @@
       var on = !def.el.classList.contains('on');
       for (var i = 0; i < t.length; i++) t[i].classList.toggle(def.lit, on);
       def.el.classList.toggle('on', on);
-      // v0.6.5-iter：同步贴/清该层四化文字标签（限/年/月/日）
-      if (def.tag) starTagsApply(cells, def.stars, def.tag, def.prefix, on);
+      // v0.6.6-iter：点击只切高亮；年/月/日/限标签已常显（见 tagsRefreshAll）
     });
   }
   // v0.6.5-iter：四化层文字标签 —— 在对应星旁贴「限禄/年权/月科/日忌」小标签
@@ -235,6 +235,21 @@
     }
   }
 
+  // v0.6.6-iter：四化层标签常显 —— 「限/年/月/日」全层贴星下（本命徽章在星内），
+  // 刷新时机：初始渲染 / 大限切换(selectPalace) / 时间轴切换(navRefresh)；点击中宫行只切高亮、不再增删标签
+  function tagsRefreshAll(cells) {
+    if (!cells) return;
+    var cl = ['hx-dx', 'hx-ln', 'hx-ly', 'hx-lr'];
+    for (var i = 0; i < cl.length; i++) starTagsClear(cells, cl[i]);
+    if (typeof NAV.dGanIdx === 'number' && C.FOUR_HUA[NAV.dGanIdx]) {
+      starTagsApply(cells, C.FOUR_HUA[NAV.dGanIdx], 'hx-dx', '限', true);
+    }
+    var lh = NAV.liuHua || {};
+    if (lh.nian && lh.nian.stars) starTagsApply(cells, lh.nian.stars, 'hx-ln', '年', true);
+    if (lh.yue && lh.yue.stars) starTagsApply(cells, lh.yue.stars, 'hx-ly', '月', true);
+    if (lh.ri && lh.ri.stars) starTagsApply(cells, lh.ri.stars, 'hx-lr', '日', true);
+  }
+
   // ===== 流运时间导航（v0.6.5-iter）：流年/流月/流日可选，联动中宫四化行与高亮 =====
   // 交互对齐大限轴：流年轴跟随选中大限的 10 年；流月=12 农历月建；流日=所选农历月的日序。
   var NAV = {
@@ -243,7 +258,7 @@
     rowEls: null,            // 中宫三行（流年/流月/流日）引用
     rows: null,              // 行 def（含 stars/lit/tag/prefix/key），供 on 态重刷
     sel: { year: 0, month: 1, day: 1 },
-    dxPi: -1, liuHua: null
+    dxPi: -1, liuHua: null, dGanIdx: null   // v0.6.6-iter：dGanIdx = 当前大限宫干（供限标签全量刷新）
   };
   var LM_NAME = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
 
@@ -328,7 +343,7 @@
     if (!NAV.chart) return;
     var lh = window.ALGO.liuHuaOf(NAV.sel);
     NAV.liuHua = lh;
-    var texts = [['ln', '流年', lh.nian], ['ly', '流月', lh.yue], ['lr', '流日', lh.ri]];
+    var texts = [['ln', '年', lh.nian], ['ly', '月', lh.yue], ['lr', '日', lh.ri]];
     for (var i = 0; i < texts.length; i++) {
       var key = texts[i][0], label = texts[i][1], hd = texts[i][2];
       var el = NAV.rowEls && NAV.rowEls[key];
@@ -344,6 +359,8 @@
       def.stars = (hd2 && hd2.stars) ? hd2.stars : [];
       if (def.el && def.el.classList.contains('on')) refillRow(def);
     }
+    // v0.6.6-iter：年/月/日选择变更 → 常显标签全量重贴
+    tagsRefreshAll(NAV.cells, NAV.chart);
   }
   // 保持 on 态的行：先清该层高亮/标签，再按新四化重刷（选择变更时跟随）
   function refillRow(def) {
@@ -351,10 +368,7 @@
     for (var p = 0; p < 12; p++) cells[p].classList.remove(def.lit);
     var t = huaCellsOf(NAV.chart, cells, def.stars);
     for (var i = 0; i < t.length; i++) t[i].classList.add(def.lit);
-    if (def.tag) {
-      starTagsClear(cells, def.tag);
-      starTagsApply(cells, def.stars, def.tag, def.prefix, true);
-    }
+    // v0.6.6-iter：标签由 tagsRefreshAll 全量重贴（常显），此处只管高亮
   }
   // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
   function onDxChange(pi) {
@@ -403,15 +417,16 @@
     cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
     cH += '<div class="c-pan c-hua" data-hua="ming" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
     // v0.6.4-iter：流年/流月/流日四化行（点击各行 → 提亮对应四化宫位；蓝系高亮）
+    // v0.6.6-iter：命名去「流」字（年四化/月四化/日四化），与盘中「年权/月禄/日忌」标签呼应
     var lh = cen.liuHua || {};
     function mkLiuHuaRow(label, hd, key) {
       if (!hd || !hd.stars) return '';
       return '<div class="c-pan c-hua" data-hua="' + key + '" title="' + label + '四化（' + esc(hd.gz) + '）· 点击提亮/取消四化宫位">'
         + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">【' + esc(hd.stars.join('')) + '】</span></div>';
     }
-    cH += mkLiuHuaRow('流年', lh.nian, 'ln');
-    cH += mkLiuHuaRow('流月', lh.yue, 'ly');
-    cH += mkLiuHuaRow('流日', lh.ri, 'lr');
+    cH += mkLiuHuaRow('年', lh.nian, 'ln');
+    cH += mkLiuHuaRow('月', lh.yue, 'ly');
+    cH += mkLiuHuaRow('日', lh.ri, 'lr');
     cH += '<div class="c-pair"><span class="c-k">命宫在</span><span class="c-v c-v-pink">' + esc(cen.soulZhi) + '</span>'
       + '<span class="c-k">身宫在</span><span class="c-v c-v-pink">' + esc(cen.bodyZhi) + '</span></div>';
     cH += '<div class="c-pair" title="流斗随当前流年（' + esc(String(cen.liuYear || '')) + '）"><span class="c-k">子斗在</span><span class="c-v c-v-blue">' + esc(cen.ziDouZhi) + '</span>'
@@ -463,12 +478,12 @@
 
     // v0.6.4-iter：四化行 → 提亮星所在宫（toggle；宫定位=major/minor 星名匹配）
     // 命四化=金（hua-lit）；流年/流月/流日=蓝（ln/ly/lr-lit），各行独立互不影响
-    // v0.6.5-iter：流年/流月/流日行附层标签配置（年/月/日 + class），选择变更时由 NAV 重刷
+    // v0.6.6-iter：层标签已改常显（tagsRefreshAll 按星名定位），def 仅留 lit/key（点击只切高亮 + 供 NAV 重刷）
     var lhRows = [
       { el: center.querySelector('[data-hua="ming"]'), stars: order4, lit: 'hua-lit' },
-      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit', tag: 'hx-ln', prefix: '年', key: 'nian' },
-      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit', tag: 'hx-ly', prefix: '月', key: 'yue' },
-      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit', tag: 'hx-lr', prefix: '日', key: 'ri' }
+      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit', key: 'nian' },
+      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit', key: 'yue' },
+      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit', key: 'ri' }
     ];
     for (var hri = 0; hri < lhRows.length; hri++) bindHuaRow(chart, cells, lhRows[hri]);
     NAV.rowEls = { ln: lhRows[1].el, ly: lhRows[2].el, lr: lhRows[3].el };
@@ -578,17 +593,17 @@
     if (detailEl) detailEl.innerHTML = detailHtml(chart, pi);
     if (state && state.onSelect) state.onSelect(pi);
     // v0.6.4-iter：大限四化高亮 —— 选中大限宫干四化 → 星名匹配宫（每次重选先清旧；金系 dx-lit）
-    // v0.6.5-iter：同步「限禄/限权/限科/限忌」文字标签（贴星旁，先清旧再贴新）
+    // v0.6.6-iter：限/年/月/日标签改常显（tagsRefreshAll 全量重贴），此处只做高亮 + 记录当前大限宫干
     for (var dl = 0; dl < dxLitCells.length; dl++) dxLitCells[dl].classList.remove('dx-lit');
     dxLitCells = [];
-    starTagsClear(cells, 'hx-dx');
     var dPal = chart.palaces[pi];
     var dGanIdx = (dPal && typeof dPal.ganIdx === 'number') ? dPal.ganIdx : C.GAN_IDX[dPal.ganZhi.charAt(0)];
+    NAV.dGanIdx = (typeof dGanIdx === 'number') ? dGanIdx : null;
     if (typeof dGanIdx === 'number' && C.FOUR_HUA[dGanIdx]) {
       dxLitCells = huaCellsOf(chart, cells, C.FOUR_HUA[dGanIdx]);
       for (var dl2 = 0; dl2 < dxLitCells.length; dl2++) dxLitCells[dl2].classList.add('dx-lit');
-      starTagsApply(cells, C.FOUR_HUA[dGanIdx], 'hx-dx', '限', true);
     }
+    tagsRefreshAll(cells); // v0.6.6-iter：限/年/月/日标签全量重贴（常显）
     // 大限盘宫名同步（v0.6.0）：选中宫 = 大限命宫 → 每格右下角「大限X宫」沿生年十二宫环整体偏移
     var off = DX_RING.indexOf(chart.palaces[pi].name);
     if (off < 0) off = 0;
