@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>紫微斗数排盘 v0.5.0</title>
-<link rel="stylesheet" href="css/style.css?v=519">
+<link rel="stylesheet" href="css/style.css?v=520">
 </head>
 <body>
 
@@ -92,16 +92,19 @@
     <!-- ===== 结果头（四柱/农历；窄屏在盘前，横版入左栏）===== -->
     <div class="panel result-head hidden" id="resultHead"></div>
 
-    <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴 + 详情）===== -->
+    <!-- ===== 结果主区（横版入右栏：盘面 + 时间轴在盘旁 + 详情）===== -->
     <section id="resultPanel" class="hidden">
-      <div class="chart-wrap" id="chartWrap"></div>
+      <!-- v0.6.11-iter：result-main ≥1280px 两列 = 盘面左 + 时间轴右（窄屏自动堆叠，纯 CSS 控制） -->
+      <div class="result-main">
+        <div class="chart-wrap" id="chartWrap"></div>
 
-      <div class="panel timeline-panel">
-        <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
-        <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
-        <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
-        <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
-        <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+        <div class="panel timeline-panel">
+          <div class="timeline-title">时间轴（点击切换：大限 / 流年 / 流月 / 流日）</div>
+          <div class="tl-row"><span class="tl-cap">大限</span><div class="timeline" id="timeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流年</span><div class="timeline" id="lnTimeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流月</span><div class="timeline" id="lmTimeline"></div></div>
+          <div class="tl-row"><span class="tl-cap">流日</span><div class="timeline" id="ldTimeline"></div></div>
+        </div>
       </div>
 
       <div class="panel detail-panel" id="detailPanel">
