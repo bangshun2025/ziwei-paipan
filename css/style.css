@@ -200,11 +200,9 @@ body {
 .cell:hover { background: #fffdf3; }
 .cell.soul { background: #fffdf9; }
 .cell.body { background: #fffefd; }
-/* v0.6.9-iter（#3）：三方四正高亮（青绿系）= 四化星本宫+三合两宫+对宫；与 .active/.dx-lit 叠加时后者胜出 */
-.cell.sf-lit { background: #ecf8f1; box-shadow: inset 0 0 0 2px rgba(22, 132, 88, .38); }
+/* v0.6.10-iter（#3）：三方四正高亮（青绿系）= 选中宫 + 三合两宫 + 对宫；选中宫本身由后置的 .active 蓝标覆盖 */
+.cell.sq-lit { background: #ecf8f1; box-shadow: inset 0 0 0 2px rgba(22, 132, 88, .38); }
 .cell.active { background: #f3f7ff; box-shadow: inset 0 0 0 2px rgba(41, 89, 164, .35); }
-/* v0.6.4-iter：大限四化高亮 = 金（随宫位/大限轴选中自动刷新）；v0.6.9-iter（#3）：行点击改为三方四正高亮（.sf-lit） */
-.cell.dx-lit { background: #fff2cf; box-shadow: inset 0 0 0 2px rgba(214, 158, 20, .55); }
 /* 宫内结构 v0.6.6-iter：星带(主星玫粉/辅杂黑) + 神煞行(博士蓝·岁前·将前·大限岁段·长生 一行合并)
    + 宫位行底红两行（行1 ★/身+本命X宫+干支；行2 大限X宫）；庙旺行(.p-bright)已废弃 */
 .cell .p-stars {
@@ -282,10 +280,7 @@ body {
 }
 /* v0.6.3：中宫四行（盘类型/命四化/命宫身宫/命主身主），全部统一字号左对齐 */
 .center-area .c-pan { display: flex; align-items: baseline; justify-content: flex-start; flex-wrap: wrap; gap: 3px 5px; font-size: 13px; }
-/* v0.6.8-iter：#2 取消旧的「点击提亮四化宫位」；v0.6.9-iter（#3）：行点击 = 该层四化星三方四正高亮（再点取消，单层互斥） */
-.center-area .c-pan.c-hua { cursor: pointer; border-radius: 4px; }
-.center-area .c-pan.c-hua:hover { background: #f2f7ff; }
-.center-area .c-pan.c-hua.on { background: #e8f1ff; box-shadow: inset 0 0 0 1px rgba(41, 89, 164, .35); }
+/* v0.6.10-iter（#3）：中宫四化行取消点击交互（行点击高亮/再点取消/单层互斥逻辑已移除，回归纯展示） */
 .center-area .c-lb { color: #2b2b2b; font-weight: 600; }
 .center-area .c-v-red { color: #f02000; font-weight: 600; }
 .center-area .c-pair {

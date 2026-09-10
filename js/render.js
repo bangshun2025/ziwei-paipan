@@ -174,80 +174,9 @@
     el.innerHTML = html;
   }
 
-  // ===== 四化高亮工具（v0.6.4-iter）=====
-  // 四化星名集合 → 十二宫中含该星的格子列表（主星/辅星均可命中）
-  function huaCellsOf(chart, cells, stars) {
-    var set = {}, i, j, out = [];
-    for (i = 0; i < stars.length; i++) set[stars[i]] = 1;
-    for (i = 0; i < 12; i++) {
-      var pj = chart.palaces[i], hit = false;
-      for (j = 0; j < (pj.major || []).length; j++) if (set[pj.major[j].name]) hit = true;
-      for (j = 0; j < (pj.minor || []).length; j++) if (set[pj.minor[j]]) hit = true;
-      if (hit) out.push(cells[i]);
-    }
-    return out;
-  }
   // v0.6.8-iter：原「四化行点击提亮宫位」（bindHuaRow）已按 #2 取消
-  // ===== 三方四正高亮（v0.6.9-iter，需求 #3）=====
-  // 口径：每颗四化星所在宫 + 三合两宫 + 对宫。宫位序 p：0=寅、每+1=下一支（p=eb-2），
-  // 故三合 = p±4（+4/+8）、对宫 = p+6；同盘多星取并集去重。
-  function sfCellsOf(chart, cells, stars) {
-    if (!stars || !stars.length) return [];
-    var nameSet = {}, i, j, out = [], set = {};
-    for (i = 0; i < stars.length; i++) nameSet[stars[i]] = 1;
-    for (i = 0; i < 12; i++) {
-      var pj = chart.palaces[i], hit = false;
-      for (j = 0; j < (pj.major || []).length; j++) if (nameSet[pj.major[j].name]) hit = true;
-      for (j = 0; j < (pj.minor || []).length; j++) if (nameSet[pj.minor[j]]) hit = true;
-      if (!hit) continue;
-      var quad = [i, fix12(i + 4), fix12(i + 8), fix12(i + 6)];
-      for (j = 0; j < quad.length; j++) {
-        if (!set[quad[j]]) { set[quad[j]] = 1; out.push(cells[quad[j]]); }
-      }
-    }
-    return out;
-  }
-  // 层 key（ming/ln/ly/lr）→ 该层四化星名数组（命=生年四化 huaSummary，按禄权科忌序）
-  function starsOfLayer(key) {
-    var chart = NAV.chart;
-    if (!chart) return null;
-    if (key === 'ming') {
-      var hs = (chart.center && chart.center.huaSummary) || {};
-      var L4 = ['禄', '权', '科', '忌'], out = [], seen = {}, hk, hn;
-      for (hk = 0; hk < L4.length; hk++) {
-        for (hn in hs) {
-          if (hs[hn] === L4[hk] && !seen[hn]) { out.push(hn); seen[hn] = 1; }
-        }
-      }
-      return out;
-    }
-    var lh = NAV.liuHua || {};
-    var hd = key === 'ln' ? lh.nian : key === 'ly' ? lh.yue : lh.ri;
-    return (hd && hd.stars) || null;
-  }
-  // 高亮应用：key 空 = 全灭；单层互斥（再点同层 = 取消）；行 .on = 当前追踪层
-  function sfApply(key) {
-    var i, k, rowEls = NAV.rowEls || {};
-    for (i = 0; i < (NAV.sfCells || []).length; i++) NAV.sfCells[i].classList.remove('sf-lit');
-    NAV.sfCells = [];
-    for (k in rowEls) if (rowEls[k]) rowEls[k].classList.remove('on');
-    NAV.sfKey = null;
-    if (!key || !NAV.chart || !NAV.cells) return;
-    var stars = starsOfLayer(key);
-    if (!stars || !stars.length) return;
-    var t = sfCellsOf(NAV.chart, NAV.cells, stars);
-    for (i = 0; i < t.length; i++) t[i].classList.add('sf-lit');
-    NAV.sfCells = t;
-    NAV.sfKey = key;
-    if (rowEls[key]) rowEls[key].classList.add('on');
-  }
-  function bindSfRow(el) {
-    if (!el) return;
-    el.addEventListener('click', function () {
-      var key = el.getAttribute('data-hua');
-      sfApply(NAV.sfKey === key ? null : key);
-    });
-  }
+  // v0.6.10-iter（#3）：四化相关宫位高亮全部取消（行点击 sf-lit、大限四化金光 dx-lit、工具 huaCellsOf）；
+  // 改为「点击任一宫位 → 高亮该宫位的三方四正」（.sq-lit，实现见 selectPalace）
 
   // v0.6.5-iter：四化层文字标签 —— 在对应星旁贴「限禄/年权/月科/日忌」小标签
   // 各层 class 独立（hx-dx/hx-ln/hx-ly/hx-lr），与生年徽章叠加显示不互扰；层级切换时先清旧再贴新
@@ -285,7 +214,7 @@
   }
 
   // v0.6.6-iter：四化层标签常显 —— 「限/年/月/日」全层贴星下（本命徽章在星内），
-  // 刷新时机：初始渲染 / 大限切换(selectPalace) / 时间轴切换(navRefresh)；点击中宫行只切高亮、不再增删标签
+  // 刷新时机：初始渲染 / 大限切换(selectPalace) / 时间轴切换(navRefresh)（v0.6.10-iter：行点击高亮取消，行仅作文字展示）
   function tagsRefreshAll(cells) {
     if (!cells) return;
     var cl = ['hx-dx', 'hx-ln', 'hx-ly', 'hx-lr'];
@@ -305,8 +234,6 @@
     chart: null, cells: null,
     axes: { ln: null, lm: null, ld: null },
     rowEls: null,            // 中宫四行（命/年/月/日四化）引用
-    sfKey: null,             // v0.6.9-iter（#3）：当前三方四正追踪层（ming/ln/ly/lr）
-    sfCells: [],             // v0.6.9-iter（#3）：已点亮格引用（供取消/切换时清除）
     sel: { year: 0, month: 1, day: 1 },
     dxPi: -1, liuHua: null, dGanIdx: null   // v0.6.6-iter：dGanIdx = 当前大限宫干（供限标签全量刷新）
   };
@@ -406,8 +333,6 @@
     }
     // v0.6.6-iter：年/月/日选择变更 → 常显标签全量重贴
     tagsRefreshAll(NAV.cells, NAV.chart);
-    // v0.6.9-iter（#3）：三方四正高亮随当前追踪层重算（星位/文字变化时保持同步）
-    if (NAV.sfKey) sfApply(NAV.sfKey);
   }
   // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
   function onDxChange(pi) {
@@ -427,7 +352,6 @@
     var tsel = window.ALGO.todayLiuSel();
     NAV.sel = { year: tsel.year, month: tsel.month, day: tsel.day };
     NAV.dxPi = -1;
-    NAV.sfKey = null; NAV.sfCells = [];  // v0.6.9-iter（#3）：新盘重置三方四正高亮
     navClamp();
   }
 
@@ -524,15 +448,13 @@
     }
     grid.appendChild(center);
 
-    // v0.6.8-iter：取消旧「四化行点击提亮宫位」（#2）；v0.6.9-iter（#3）：行点击恢复为「三方四正」高亮
+    // 中宫四行引用（navRefresh 更新年/月/日四化文字用；v0.6.10-iter（#3）：行点击高亮已取消）
     NAV.rowEls = {
       ming: center.querySelector('[data-hua="ming"]'),
       ln: center.querySelector('[data-hua="ln"]'),
       ly: center.querySelector('[data-hua="ly"]'),
       lr: center.querySelector('[data-hua="lr"]')
     };
-    var sfKeys = ['ming', 'ln', 'ly', 'lr'];
-    for (var sfk0 = 0; sfk0 < sfKeys.length; sfk0++) bindSfRow(NAV.rowEls[sfKeys[sfk0]]);
 
     root.innerHTML = '';
     root.appendChild(grid);
@@ -623,7 +545,7 @@
     selectPalace(chart, initDx.palaceIndex, cells, root, detailEl, state);
   }
 
-  var activeCell = null, activeDx = null, dxLitCells = [];
+  var activeCell = null, activeDx = null, sqCells = [];  // sqCells（v0.6.10-iter #3）：三方四正高亮格引用
   function selectPalace(chart, pi, cells, timelineRoot, detailEl, state) {
     if (activeCell) activeCell.classList.remove('active');
     if (activeDx) activeDx.classList.remove('active');
@@ -637,17 +559,18 @@
     }
     if (detailEl) detailEl.innerHTML = detailHtml(chart, pi);
     if (state && state.onSelect) state.onSelect(pi);
-    // v0.6.4-iter：大限四化高亮 —— 选中大限宫干四化 → 星名匹配宫（每次重选先清旧；金系 dx-lit）
-    // v0.6.6-iter：限/年/月/日标签改常显（tagsRefreshAll 全量重贴），此处只做高亮 + 记录当前大限宫干
-    for (var dl = 0; dl < dxLitCells.length; dl++) dxLitCells[dl].classList.remove('dx-lit');
-    dxLitCells = [];
+    // v0.6.10-iter（#3）：三方四正高亮 —— 本宫 + 三合两宫（p±4）+ 对宫（p+6）；每次重选先清旧
+    // （旧 v0.6.4-iter 大限四化金光 dx-lit 已按 #3 取消；大限宫干仍记录，供「限」标签使用）
+    for (var sq = 0; sq < sqCells.length; sq++) sqCells[sq].classList.remove('sq-lit');
+    sqCells = [];
+    var quad = [pi, fix12(pi + 4), fix12(pi + 8), fix12(pi + 6)];
+    for (var sq2 = 0; sq2 < quad.length; sq2++) {
+      var sqc = cells[quad[sq2]];
+      if (sqc) { sqc.classList.add('sq-lit'); sqCells.push(sqc); }
+    }
     var dPal = chart.palaces[pi];
     var dGanIdx = (dPal && typeof dPal.ganIdx === 'number') ? dPal.ganIdx : C.GAN_IDX[dPal.ganZhi.charAt(0)];
     NAV.dGanIdx = (typeof dGanIdx === 'number') ? dGanIdx : null;
-    if (typeof dGanIdx === 'number' && C.FOUR_HUA[dGanIdx]) {
-      dxLitCells = huaCellsOf(chart, cells, C.FOUR_HUA[dGanIdx]);
-      for (var dl2 = 0; dl2 < dxLitCells.length; dl2++) dxLitCells[dl2].classList.add('dx-lit');
-    }
     tagsRefreshAll(cells); // v0.6.6-iter：限/年/月/日标签全量重贴（常显）
     // 大限盘宫名同步（v0.6.0）：选中宫 = 大限命宫 → 每格右下角「大限X宫」沿生年十二宫环整体偏移
     var off = DX_RING.indexOf(chart.palaces[pi].name);
