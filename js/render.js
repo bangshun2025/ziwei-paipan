@@ -266,9 +266,9 @@
     for (var i = 0; i < chart.daXian.length; i++) if (chart.daXian[i].palaceIndex === pi) return chart.daXian[i];
     return chart.daXian[0];
   }
-  function dxYearRange(chart, dx) { // 大限段 → 流年十年窗口（v0.6.7-iter 与大限轴节点年对齐：节点年=出生年+start+5，窗口=节点年起 10 年）
+  function dxYearRange(chart, dx) { // 大限段 → 流年十年窗口（节点年=段起始年=出生年+虚岁start-1；窗口=该段十年）
     var by = chart.pre.solar.y;
-    var y0 = by + dx.start + 5;
+    var y0 = by + dx.start - 1;
     return { y0: y0, y1: y0 + 9 };
   }
   function navClamp() {
@@ -277,7 +277,7 @@
     if (NAV.sel.day < 1) NAV.sel.day = 1;
   }
 
-  // 流年轴：从选中大限的节点年起排 10 年（v0.6.7-iter：与大限轴节点年对齐；点选切换；年份/干支/虚岁）
+  // 流年轴：铺满选中大限的十年（年份 = 出生年+虚岁-1，段首年即大限轴节点年；点选切换；年份/干支/虚岁）
   function renderLnAxis() {
     var el = NAV.axes.ln; if (!el) return;
     var chart = NAV.chart, by = chart.pre.solar.y;
@@ -285,8 +285,8 @@
     el.innerHTML = '';
     for (var i = 0; i < 10; i++) {
       (function (i) {
-        var year = by + dx.start + 5 + i; // 节点年（=出生年+start+5）起 10 年
-        var age = year - by + 1;          // 该年真实虚岁
+        var age = dx.start + i;           // 该段虚岁：start..end
+        var year = by + age - 1;          // 年份 = 出生年+虚岁-1（段首年即节点年）
         var gz = window.ALGO.yearGanZhi(year);
         var it = document.createElement('div');
         it.className = 'dx-item' + (NAV.sel.year === year ? ' active' : '');
@@ -550,7 +550,7 @@
   }
 
   // ===== 渲染大限时间轴 =====
-  // 热卜式年份轴 v0.3.0-ref：节点 = 每大限段中点公历年（出生年 + start + 5，仿整盘基准图 1989/1999/…）
+  // 年份轴：节点 = 该大限段起始年（虚岁首年 = 出生年 + start - 1；水二局 2-11岁 → 1983 起）
   function renderTimeline(root, chart, cells, detailEl, state) {
     root.innerHTML = '';
     var by = (chart.pre && chart.pre.solar && chart.pre.solar.y) || 0;
@@ -559,8 +559,8 @@
       var dx = chart.daXian[i];
       var it = document.createElement('div');
       it.className = 'dx-item';
-      var yMid = by ? (by + dx.start + 5) : 0;
-      it.innerHTML = '<div class="dx-year">' + (yMid ? esc(String(yMid)) : '&nbsp;') + '</div>'
+      var yStart = by ? (by + dx.start - 1) : 0;
+      it.innerHTML = '<div class="dx-year">' + (yStart ? esc(String(yStart)) : '&nbsp;') + '</div>'
         + '<div class="dx-name">' + esc(dx.name) + '</div>'
         + '<div class="dx-age">' + dx.start + '-' + dx.end + '岁</div>';
       it.setAttribute('data-dx', i);
