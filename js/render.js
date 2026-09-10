@@ -187,19 +187,8 @@
     }
     return out;
   }
-  // 四化行点击 → 提亮/取消对应宫（各行 class 独立，多层可叠加不互扰）
-  // v0.6.5-iter 修复：命中宫在点击时实时计算（切换流年/流月/流日后 def.stars 已更新，旧实现闭包捕获导致高亮用旧四化）
-  function bindHuaRow(chart, cells, def) {
-    if (!def.el) return;
-    def.el.addEventListener('click', function () {
-      if (!def.stars || !def.stars.length) return;
-      var t = huaCellsOf(chart, cells, def.stars);
-      var on = !def.el.classList.contains('on');
-      for (var i = 0; i < t.length; i++) t[i].classList.toggle(def.lit, on);
-      def.el.classList.toggle('on', on);
-      // v0.6.6-iter：点击只切高亮；年/月/日/限标签已常显（见 tagsRefreshAll）
-    });
-  }
+  // v0.6.8-iter：原「四化行点击提亮宫位」（bindHuaRow）已按 #2 取消
+
   // v0.6.5-iter：四化层文字标签 —— 在对应星旁贴「限禄/年权/月科/日忌」小标签
   // 各层 class 独立（hx-dx/hx-ln/hx-ly/hx-lr），与生年徽章叠加显示不互扰；层级切换时先清旧再贴新
   function starTagsApply(cells, stars, cls, prefix, on) {
@@ -340,7 +329,7 @@
     renderLnAxis(); renderLmAxis(); renderLdAxis();
     navRefresh();
   }
-  // 选择变化 → 重算四化 → 更新中宫行文字 + 各开启层的高亮/标签（保持 on 态自动跟随）
+  // 选择变化 → 重算四化 → 更新中宫行文字（v0.6.8-iter：#2 取消点击高亮后仅更新文字）+ 常显标签全量重贴
   function navRefresh() {
     if (!NAV.chart) return;
     var lh = window.ALGO.liuHuaOf(NAV.sel);
@@ -351,26 +340,11 @@
       var el = NAV.rowEls && NAV.rowEls[key];
       if (!el) continue;
       var vEl = el.querySelector('.c-v-red');
-      if (vEl) vEl.textContent = (hd && hd.stars) ? '【' + hd.stars.join('') + '】' : '【--】';
-      el.title = label + '四化' + (hd && hd.gz ? '（' + hd.gz + '）' : '') + ' · 点击提亮/取消四化宫位';
-    }
-    var rows = NAV.rows || [];
-    for (var r = 0; r < rows.length; r++) {
-      var def = rows[r];
-      var hd2 = lh[def.key];
-      def.stars = (hd2 && hd2.stars) ? hd2.stars : [];
-      if (def.el && def.el.classList.contains('on')) refillRow(def);
+      if (vEl) vEl.textContent = huaTextOf(hd && hd.stars);
+      el.title = label + '四化' + (hd && hd.gz ? '（' + hd.gz + '）' : '');
     }
     // v0.6.6-iter：年/月/日选择变更 → 常显标签全量重贴
     tagsRefreshAll(NAV.cells, NAV.chart);
-  }
-  // 保持 on 态的行：先清该层高亮/标签，再按新四化重刷（选择变更时跟随）
-  function refillRow(def) {
-    var cells = NAV.cells;
-    for (var p = 0; p < 12; p++) cells[p].classList.remove(def.lit);
-    var t = huaCellsOf(NAV.chart, cells, def.stars);
-    for (var i = 0; i < t.length; i++) t[i].classList.add(def.lit);
-    // v0.6.6-iter：标签由 tagsRefreshAll 全量重贴（常显），此处只管高亮
   }
   // 大限切换 → 流年轴重列 + 流年选择（保持若在范围内；否则今天若在范围内取今天，否则段首年）
   function onDxChange(pi) {
@@ -391,6 +365,14 @@
     NAV.sel = { year: tsel.year, month: tsel.month, day: tsel.day };
     NAV.dxPi = -1;
     navClamp();
+  }
+
+  // v0.6.8-iter：中宫四化行文字 —— 按【星禄 星权 星科 星忌】输出（禄权科忌顺序，#1）
+  function huaTextOf(stars) {
+    if (!stars || !stars.length) return '【--】';
+    var L4 = ['禄', '权', '科', '忌'], a = [];
+    for (var i = 0; i < stars.length; i++) a.push(stars[i] + (L4[i] || ''));
+    return '【' + a.join(' ') + '】';
   }
 
   // ===== 渲染 4x4 方盘 + 中宫 =====
@@ -414,17 +396,17 @@
         if (cen.huaSummary[hn] === L4[hk] && !seenH[hn]) { order4.push(hn); seenH[hn] = 1; }
       }
     }
-    var huaTxt = order4.length ? '【' + order4.join('') + '】' : '【--】';
+    var huaTxt = huaTextOf(order4);
     var cH = '';
     cH += '<div class="c-pan"><span class="c-lb">盘类型：</span><span class="c-v c-v-red">' + juTxt + '</span></div>';
-    cH += '<div class="c-pan c-hua" data-hua="ming" title="点击提亮/取消四化宫位"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
+    cH += '<div class="c-pan c-hua" data-hua="ming"><span class="c-lb">命四化：</span><span class="c-v c-v-red">' + huaTxt + '</span></div>';
     // v0.6.4-iter：流年/流月/流日四化行（点击各行 → 提亮对应四化宫位；蓝系高亮）
     // v0.6.6-iter：命名去「流」字（年四化/月四化/日四化），与盘中「年权/月禄/日忌」标签呼应
     var lh = cen.liuHua || {};
     function mkLiuHuaRow(label, hd, key) {
       if (!hd || !hd.stars) return '';
-      return '<div class="c-pan c-hua" data-hua="' + key + '" title="' + label + '四化（' + esc(hd.gz) + '）· 点击提亮/取消四化宫位">'
-        + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">【' + esc(hd.stars.join('')) + '】</span></div>';
+      return '<div class="c-pan c-hua" data-hua="' + key + '" title="' + label + '四化（' + esc(hd.gz) + '）">'
+        + '<span class="c-lb">' + label + '四化：</span><span class="c-v c-v-red">' + esc(huaTextOf(hd.stars)) + '</span></div>';
     }
     cH += mkLiuHuaRow('年', lh.nian, 'ln');
     cH += mkLiuHuaRow('月', lh.yue, 'ly');
@@ -478,18 +460,12 @@
     }
     grid.appendChild(center);
 
-    // v0.6.4-iter：四化行 → 提亮星所在宫（toggle；宫定位=major/minor 星名匹配）
-    // 命四化=金（hua-lit）；流年/流月/流日=蓝（ln/ly/lr-lit），各行独立互不影响
-    // v0.6.6-iter：层标签已改常显（tagsRefreshAll 按星名定位），def 仅留 lit/key（点击只切高亮 + 供 NAV 重刷）
-    var lhRows = [
-      { el: center.querySelector('[data-hua="ming"]'), stars: order4, lit: 'hua-lit' },
-      { el: center.querySelector('[data-hua="ln"]'), stars: (cen.liuHua && cen.liuHua.nian && cen.liuHua.nian.stars) || [], lit: 'ln-lit', key: 'nian' },
-      { el: center.querySelector('[data-hua="ly"]'), stars: (cen.liuHua && cen.liuHua.yue && cen.liuHua.yue.stars) || [], lit: 'ly-lit', key: 'yue' },
-      { el: center.querySelector('[data-hua="lr"]'), stars: (cen.liuHua && cen.liuHua.ri && cen.liuHua.ri.stars) || [], lit: 'lr-lit', key: 'ri' }
-    ];
-    for (var hri = 0; hri < lhRows.length; hri++) bindHuaRow(chart, cells, lhRows[hri]);
-    NAV.rowEls = { ln: lhRows[1].el, ly: lhRows[2].el, lr: lhRows[3].el };
-    NAV.rows = [lhRows[1], lhRows[2], lhRows[3]];
+    // v0.6.8-iter：取消四化宫位点击高亮（#2）——仅登记行元素，供 navRefresh 更新文字（干支/星名）
+    NAV.rowEls = {
+      ln: center.querySelector('[data-hua="ln"]'),
+      ly: center.querySelector('[data-hua="ly"]'),
+      lr: center.querySelector('[data-hua="lr"]')
+    };
 
     root.innerHTML = '';
     root.appendChild(grid);

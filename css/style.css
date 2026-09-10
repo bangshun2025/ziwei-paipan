@@ -201,11 +201,8 @@ body {
 .cell.soul { background: #fffdf9; }
 .cell.body { background: #fffefd; }
 .cell.active { background: #f3f7ff; box-shadow: inset 0 0 0 2px rgba(41, 89, 164, .35); }
-/* v0.6.3：命四化提亮宫位（金色 toggle，点击中宫「命四化」行开关；与 .active 详情蓝互不干扰） */
-.cell.hua-lit { background: #fff2cf; box-shadow: inset 0 0 0 2px rgba(214, 158, 20, .55); }
-/* v0.6.4-iter：四化层高亮 —— 命四化/大限四化=金；流年/流月/流日四化=蓝（各行独立叠加不互扰） */
+/* v0.6.4-iter：大限四化高亮 = 金（随宫位/大限轴选中自动刷新；中宫行点击高亮已按 v0.6.8-iter #2 取消） */
 .cell.dx-lit { background: #fff2cf; box-shadow: inset 0 0 0 2px rgba(214, 158, 20, .55); }
-.cell.ln-lit, .cell.ly-lit, .cell.lr-lit { background: #e6f0ff; box-shadow: inset 0 0 0 2px rgba(53, 104, 212, .45); }
 /* 宫内结构 v0.6.6-iter：星带(主星玫粉/辅杂黑) + 神煞行(博士蓝·岁前·将前·大限岁段·长生 一行合并)
    + 宫位行底红两行（行1 ★/身+本命X宫+干支；行2 大限X宫）；庙旺行(.p-bright)已废弃 */
 .cell .p-stars {
@@ -283,10 +280,7 @@ body {
 }
 /* v0.6.3：中宫四行（盘类型/命四化/命宫身宫/命主身主），全部统一字号左对齐 */
 .center-area .c-pan { display: flex; align-items: baseline; justify-content: flex-start; flex-wrap: wrap; gap: 3px 5px; font-size: 13px; }
-/* v0.6.3：命四化行可点击（hover 提示 → 金色），on 态 = 宫位提亮中 */
-.center-area .c-pan.c-hua { cursor: pointer; user-select: none; }
-.center-area .c-pan.c-hua:hover .c-v-red { color: #d09000; }
-.center-area .c-pan.c-hua.on .c-v-red { color: #b8860b; text-decoration: underline; text-underline-offset: 3px; }
+/* v0.6.8-iter：中宫四化行改为静态文字（#2 取消点击高亮），无 pointer/hover/on 态 */
 .center-area .c-lb { color: #2b2b2b; font-weight: 600; }
 .center-area .c-v-red { color: #f02000; font-weight: 600; }
 .center-area .c-pair {
