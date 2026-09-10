@@ -396,6 +396,10 @@
         var cs = getComputedStyle(ls);
         T.ok(cs.flexBasis === 'auto', 'L8 liveSolar 不再强制换行（flex-basis 复位 auto）');
         T.ok(String(cs.order) === '0', 'L8 liveSolar order 复位 0');
+        // v0.6.15-iter（#44）：压缩字号保一行（「真太阳时 …（…） X时」）
+        T.eq(cs.fontSize, '11px', 'L8/#44 liveSolar 字号 11px');
+        var csl = getComputedStyle(document.querySelector('.solar-lbl'));
+        T.eq(csl.fontSize, '12.5px', 'L8/#44 太阳时标签字号 12.5px');
       }
     })();
 
@@ -701,8 +705,9 @@
       var t = ALGO.trueSolarTime(sol.y, sol.m, sol.d, state.h, state.mi, lng);
       var pad = function (n) { return (n < 10 ? '0' : '') + n; };
       var name = scNameOf(t.h, t.mi);
-      var txt = '真太阳时 ' + pad(t.h) + ':' + pad(t.mi) + '（经度+均时差 ' + (t.offsetMin >= 0 ? '+' : '') + t.offsetMin.toFixed(0) + ' 分）';
-      if (name && name !== SHICHEN[state.scIdx].name) txt += ' ≈' + name + '时段（与所选时辰不同）';
+      // v0.6.15-iter（#44 #2）：时辰常显在括号后（如「卯时」）；跨时辰时附「与所选时辰不同」提示
+      var txt = '真太阳时 ' + pad(t.h) + ':' + pad(t.mi) + '（经度+均时差 ' + (t.offsetMin >= 0 ? '+' : '') + t.offsetMin.toFixed(0) + ' 分）' + (name ? ' ' + name + '时' : '');
+      if (name && name !== SHICHEN[state.scIdx].name) txt += '（与所选时辰不同）';
       els.liveSolar.textContent = txt;
     }
     function currentSolarCached() {
