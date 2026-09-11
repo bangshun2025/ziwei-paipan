@@ -1,7 +1,7 @@
 {
   "case": "a08",
   "title": "历法下限：1800-1-1 辰时 男",
-  "source": "iztro@2.6.0 bySolar",
+  "source": "iztro@2.6.0 bySolar → v0.2.0 口径重录（2026-09-11）",
   "confidence": "high",
   "input": {
     "solarDate": "1800-1-1",
@@ -14,18 +14,18 @@
     "gender": "男",
     "solarDate": "1800-1-1",
     "lunarDate": "一七九九年腊月初七",
-    "chineseDate": "己未 丁丑 庚寅 庚辰",
+    "chineseDate": "己未 丙子 庚寅 庚辰",
     "time": "辰时",
     "timeRange": "07:00~09:00",
     "fiveElementsClass": "金四局",
-    "soulEarth": "酉",
-    "bodyEarth": "巳",
-    "soulStar": "文曲",
+    "soulEarth": "申",
+    "bodyEarth": "辰",
+    "soulStar": "廉贞",
     "bodyStar": "天相",
     "palaces": {
       "寅": {
         "stem": "丙",
-        "name": "仆役",
+        "name": "迁移",
         "major": [
           {
             "name": "紫微",
@@ -38,13 +38,16 @@
         ],
         "minor": [
           {
+            "name": "左辅"
+          },
+          {
             "name": "铃星"
           }
         ],
         "decadal": {
           "range": [
-            74,
-            83
+            64,
+            73
           ],
           "stem": "丙",
           "earth": "寅"
@@ -52,7 +55,7 @@
       },
       "卯": {
         "stem": "丁",
-        "name": "迁移",
+        "name": "疾厄",
         "major": [
           {
             "name": "太阴",
@@ -61,16 +64,13 @@
         ],
         "minor": [
           {
-            "name": "左辅"
-          },
-          {
             "name": "地劫"
           }
         ],
         "decadal": {
           "range": [
-            64,
-            73
+            54,
+            63
           ],
           "stem": "丁",
           "earth": "卯"
@@ -78,7 +78,7 @@
       },
       "辰": {
         "stem": "戊",
-        "name": "疾厄",
+        "name": "财帛",
         "major": [
           {
             "name": "贪狼",
@@ -88,8 +88,8 @@
         "minor": [],
         "decadal": {
           "range": [
-            54,
-            63
+            44,
+            53
           ],
           "stem": "戊",
           "earth": "辰"
@@ -97,7 +97,7 @@
       },
       "巳": {
         "stem": "己",
-        "name": "财帛",
+        "name": "子女",
         "major": [
           {
             "name": "巨门",
@@ -106,16 +106,16 @@
         ],
         "minor": [
           {
-            "name": "天马"
+            "name": "陀罗"
           },
           {
-            "name": "陀罗"
+            "name": "天马"
           }
         ],
         "decadal": {
           "range": [
-            44,
-            53
+            34,
+            43
           ],
           "stem": "己",
           "earth": "巳"
@@ -123,7 +123,7 @@
       },
       "午": {
         "stem": "庚",
-        "name": "子女",
+        "name": "夫妻",
         "major": [
           {
             "name": "廉贞",
@@ -136,16 +136,16 @@
         ],
         "minor": [
           {
-            "name": "文昌"
+            "name": "禄存"
           },
           {
-            "name": "禄存"
+            "name": "文昌"
           }
         ],
         "decadal": {
           "range": [
-            34,
-            43
+            24,
+            33
           ],
           "stem": "庚",
           "earth": "午"
@@ -153,7 +153,7 @@
       },
       "未": {
         "stem": "辛",
-        "name": "夫妻",
+        "name": "兄弟",
         "major": [
           {
             "name": "天梁",
@@ -162,16 +162,16 @@
         ],
         "minor": [
           {
-            "name": "地空"
+            "name": "擎羊"
           },
           {
-            "name": "擎羊"
+            "name": "地空"
           }
         ],
         "decadal": {
           "range": [
-            24,
-            33
+            14,
+            23
           ],
           "stem": "辛",
           "earth": "未"
@@ -179,7 +179,7 @@
       },
       "申": {
         "stem": "壬",
-        "name": "兄弟",
+        "name": "命宫",
         "major": [
           {
             "name": "七杀",
@@ -188,16 +188,16 @@
         ],
         "minor": [
           {
-            "name": "文曲"
+            "name": "天钺"
           },
           {
-            "name": "天钺"
+            "name": "文曲"
           }
         ],
         "decadal": {
           "range": [
-            14,
-            23
+            4,
+            13
           ],
           "stem": "壬",
           "earth": "申"
@@ -205,7 +205,7 @@
       },
       "酉": {
         "stem": "癸",
-        "name": "命宫",
+        "name": "父母",
         "major": [
           {
             "name": "天同",
@@ -215,8 +215,8 @@
         "minor": [],
         "decadal": {
           "range": [
-            4,
-            13
+            114,
+            123
           ],
           "stem": "癸",
           "earth": "酉"
@@ -224,7 +224,7 @@
       },
       "戌": {
         "stem": "甲",
-        "name": "父母",
+        "name": "福德",
         "major": [
           {
             "name": "武曲",
@@ -234,8 +234,8 @@
         "minor": [],
         "decadal": {
           "range": [
-            114,
-            123
+            104,
+            113
           ],
           "stem": "甲",
           "earth": "戌"
@@ -243,22 +243,18 @@
       },
       "亥": {
         "stem": "乙",
-        "name": "福德",
+        "name": "田宅",
         "major": [
           {
             "name": "太阳",
             "mutagen": ""
           }
         ],
-        "minor": [
-          {
-            "name": "右弼"
-          }
-        ],
+        "minor": [],
         "decadal": {
           "range": [
-            104,
-            113
+            94,
+            103
           ],
           "stem": "乙",
           "earth": "亥"
@@ -266,7 +262,7 @@
       },
       "子": {
         "stem": "丙",
-        "name": "田宅",
+        "name": "官禄",
         "major": [
           {
             "name": "破军",
@@ -276,12 +272,15 @@
         "minor": [
           {
             "name": "天魁"
+          },
+          {
+            "name": "右弼"
           }
         ],
         "decadal": {
           "range": [
-            94,
-            103
+            84,
+            93
           ],
           "stem": "丙",
           "earth": "子"
@@ -289,7 +288,7 @@
       },
       "丑": {
         "stem": "丁",
-        "name": "官禄",
+        "name": "仆役",
         "major": [
           {
             "name": "天机",
@@ -303,8 +302,8 @@
         ],
         "decadal": {
           "range": [
-            84,
-            93
+            74,
+            83
           ],
           "stem": "丁",
           "earth": "丑"
@@ -331,6 +330,8 @@
     "engine": "iztro",
     "version": "2.6.0",
     "checkedAt": "2026-09-02",
-    "method": "bySolar"
+    "method": "bySolar",
+    "reRecordedAt": "2026-09-11",
+    "reRecordRule": "v0.2.0 宪法口径（立春换年/节气月轴；ALGORITHM §2.3/§2.5）"
   }
 }

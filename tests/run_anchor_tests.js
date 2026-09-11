@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-/* 紫微斗数排盘 v0.1.0 — 锚点全字段回归脚本
- * 基准：tests/anchors/a01-a12.json（iztro@2.6.0 实测，cases.md）
+/* 紫微斗数排盘 — 锚点全字段回归脚本
+ * 基准：tests/anchors/a01-a12.json（iztro@2.6.0 实测；2026-09-11 v0.2.0 口径重录：
+ *       a04/a08 全字段重算（立春换年/节气月轴，详见 docs/ANCHOR_RERECORD_v0.2.0.md）；
+ *       a09 改边界保护期望（2200 超节气表 1000–2100 → 显式报错））
  * 方式：模拟 window 加载 js/constants.js + js/algorithm.js + js/render.js，
  *       对每个锚点构造输入调 ALGO.getChart，做全字段比对。
  * 用法：node tests/run_anchor_tests.js [a01|a02|...|all]
@@ -270,9 +272,20 @@ let ALL = { total: 0, passed: 0, failed: 0, cases: [], notes: [] };
 for (const { id, file } of anchorFiles) {
   const anchor = JSON.parse(fs.readFileSync(file, 'utf8'));
   const T = makeRunner(id);
-  let err = null;
-  try { assertAnchor(anchor, T); } catch (e) { err = e; }
-  if (err) T.check(false, 'EXCEPTION', err.message);
+  if (anchor.assert && anchor.assert.expectError) {
+    // 边界保护型锚点：期望显式抛错（如超节气表范围），而非静默算错
+    try {
+      ALGO.getChart(buildInput(anchor.input || {}));
+      T.check(false, 'expectError', `期望抛错「${anchor.assert.expectError}」但未抛错`);
+    } catch (e) {
+      T.check(String(e && e.message).indexOf(anchor.assert.expectError) !== -1, 'expectError',
+        `期望=${anchor.assert.expectError} 实得=${e && e.message}`);
+    }
+  } else {
+    let err = null;
+    try { assertAnchor(anchor, T); } catch (e) { err = e; }
+    if (err) T.check(false, 'EXCEPTION', err.message);
+  }
   const s = T.summary();
   ALL.total += s.total; ALL.passed += s.passed; ALL.failed += s.failed;
   ALL.cases.push({ id, total: s.total, passed: s.passed, failed: s.failed, fails: s.fails });
