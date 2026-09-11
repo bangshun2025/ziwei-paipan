@@ -15,7 +15,7 @@
 | 版本号位置 | index.html 头部 `<!-- vX.Y.Z -->` |
 | 发布状态 | **Git 化完成**：本地 main @ ef72c6b（v0.6.x-iter 界面迭代代码收口，第 8–56 轮 33 提交；2026-09-11 文档收口 2 提交：SYSTEM/CHANGELOG/check-release，不涉产品代码；全史 52 提交）；tag v0.5.0 停 5fa1259；origin/main 停在 4b3e05a（v0.2.1），origin 推送/正式发布待授权。**侧栏扩展已部署**：ziwei-paipan ext 0.5.0（输入模块对齐八字：小名/艺名/姓名 + AI 录入 + 隐私模式），见 docs/RELEASE_v0.5.0_输入模块对齐八字.md；迭代期文件已全量同步 ext 副本（9/9 零漂移审计），ext.yml 版本未升 |
 | 口径裁决 | D-1~D-7 已由邦顺裁决采纳默认（2026-09-02）；v0.2.0 宪法勘误（年界=立春、月=节气、晚子时归次日）见 docs/修订说明_v0.2.0 与 ALGORITHM.md（宪法已于 2026-09-11 按现行代码回写，D-4/D-5 取代标注见 §五） |
-| 质量状态 | ✅ 现行基线（2026-09-11）：自检 **204/204 × 4 档**（1512/1024/640/400）；cases 45/45；几何回归 **13 档全绿**（含真实视口 1512×827：左列底线=快捷条底线 diff=0）；ext 9/9 零漂移。遗留：锚点 65 条待按 v0.2.0 口径重录（L-02）。历史：v0.5.0 验收=94 断言 0 FAIL + CDP 8 组 PASS；基线 v0.3.0-ref 66c7f4c |
+| 质量状态 | ✅ 现行基线（2026-09-11）：自检 **204/204 × 4 档**（1512/1024/640/400）；cases 45/45；几何回归 **13 档全绿**（含真实视口 1512×827：左列底线=快捷条底线 diff=0）；ext 9/9 零漂移；L1 锚点 **1139/1139**（2026-09-11 v0.2.0 口径重录，L-02 已闭合）。历史：v0.5.0 验收=94 断言 0 FAIL + CDP 8 组 PASS；基线 v0.3.0-ref 66c7f4c |
 
 ## 三、版本历史
 
@@ -41,10 +41,10 @@
 | 渲染 | js/render.js | RENDER：十二宫方盘/中宫/大限时间轴 | ✅ 已实现 |
 | 交互 | js/main.js | APP：输入/事件/初始化/`?test=1` 断言（204 条） | ✅ 已实现 |
 | 档案 | js/archive.js | ARCHIVE：本地档案存储/CRUD/搜索/回收站（zw_arch_v1） | ✅ v0.4.0 新增 |
-| 测试 | tests/ | anchors/（12 盘 iztro 锚点 JSON）+ run_anchor_tests.js（1242）+ run_case_tests.js（45）+ cases.md + report.md | ✅ 已实现 |
-| 测评手册 | docs/TEST_全量测评手册.md | L1 锚点 1242 / L2 cases 45 / L3 自检 204 / L4 人工冒烟 分层手册（v1.0 + 2026-09-11 同步 L3 计数） | ✅ 已就位 |
+| 测试 | tests/ | anchors/（12 盘锚点 JSON，v0.2.0 口径）+ run_anchor_tests.js（1139）+ run_case_tests.js（45）+ tools/regen_anchors.js + cases.md + report.md | ✅ 已实现 |
+| 测评手册 | docs/TEST_全量测评手册.md | L1 锚点 1139 / L2 cases 45 / L3 自检 204 / L4 人工冒烟 分层手册（v1.0 + 2026-09-11 同步 L1/L3 计数） | ✅ 已就位 |
 | 发布 | scripts/ | check-release.sh（一致性校验）、publish-online.sh（tag→push→部署验证，--exec 前自动 .bak 备份） | ✅ 已就位（未执行） |
-| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1242 + cases 45 + Puppeteer 自检 204 | ✅ 已生效（2026-09-11 同步 204；push 触发 #1 通过） |
+| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1139 + cases 45 + Puppeteer 自检 204 | ✅ 已生效（2026-09-11 同步 1139/204） |
 | 复盘 | docs/RETRO_v0.1.0_复盘.md | v0.1.0 全周期复盘 + 改进项 L1-L8（供下版本 PRD 承接） | ✅ 已就位 |
 | Git 基线 | docs/GIT_v0.1.0_baseline.md | git 化现状（df05d97 已 push）+ 初始化步骤留档 + 回滚方法 | ✅ 已 git 化（2026-09-02） |
 

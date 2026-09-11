@@ -25,7 +25,7 @@
 | `js/main.js` | APP：输入/事件/初始化/`?test=1` 断言（204 条） | 新增断言校验**落宫**而非仅数量（P1 覆盖盲区教训） |
 | `js/locdata.js`·`aiinput.js`·`archive.js` | 省市区数据 / AI 录入解析 / 档案（localStorage） | 模块头注释说明职责 |
 | `css/style.css` | 全部样式（含横版两栏 @media 自适应） | — |
-| `tests/` | `anchors/a01-a12.json`（iztro 旧锚点）+ `run_anchor_tests.js`（1242）+ `run_case_tests.js`（45）+ `run_full_star_tests.js`（满盘档 6 案例）+ `cases.md` + `report.md` | 锚点是验收基准勿乱改；⚠️ 旧锚点待按 v0.2.0 口径重录（L-02） |
+| `tests/` | `anchors/a01-a12.json`（v0.2.0 口径锚点；a04/a08 已重录、a09 边界保护）+ `run_anchor_tests.js`（1139）+ `run_case_tests.js`（45）+ `run_full_star_tests.js`（满盘档 6 案例）+ `tools/regen_anchors.js`（重录工具）+ `cases.md` + `report.md` | 锚点是验收基准勿乱改；口径变更须走重录工具 + 留痕（见 `docs/ANCHOR_RERECORD_v0.2.0.md`） |
 | `scripts/` | `check-release.sh`（发布前一致性校验）+ `publish-online.sh`（Pages 发布） | — |
 | `docs/` | 版本文档体系（19 项）：`PRD/ADR/QA/RETRO/TEST 手册/GIT baseline/发布链路方案/修订说明/DEVELOPER.md` + `_TEMPLATE/` | 新功能走流水线，见 §四 |
 | `SYSTEM.md` | 项目真相源：范围/口径裁决/质量状态 | 口径以 ALGORITHM.md 为准 |
@@ -43,12 +43,12 @@ open index.html          # 浏览器直接打开，纯本地零依赖
 **② 测试（三层回归，发布质量门）**
 ```bash
 open "index.html?test=1"                      # L3 内嵌自检：204 条，页面底部显示 ALL PASS
-node tests/run_anchor_tests.js                # L1 锚点全字段回归：1242 断言（支持 [a01|...|all]）
+node tests/run_anchor_tests.js                # L1 锚点全字段回归：1139 断言（2026-09-11 v0.2.0 重录；支持 [a01|...|all]）
 node tests/run_case_tests.js                  # L2 定向用例：45 断言（闰月/晚子时/真太阳时等）
 node tests/run_full_star_tests.js             # 满盘档：6 案例（需 /tmp/refz/stars_ref.json 基准；生成见档案 gen_ref.js，ZW_STARS_REF 可换路径）
 bash scripts/check-release.sh                 # 发布前一致性：版本注释/JS 语法/结构 id/引用完整性
 ```
-> ⚠️ 现状（2026-09-11）：L3 自检 **204** + L2 cases **45** 全绿；L1 锚点存在 **65 条**差异——旧锚点为 v0.1.0 口径产物，待按 v0.2.0 重录（L-02），重录前 L1 红灯属**预期**。详细口径见 `docs/TEST_全量测评手册.md`。
+> ✅ 现状（2026-09-11）：三层全绿——L3 自检 **204**、L2 cases **45/45**、L1 锚点 **1139/1139**（已按 v0.2.0 口径重录：a04/a08 全字段重算、a09 边界保护）。详细口径见 `docs/TEST_全量测评手册.md` 与 `docs/ANCHOR_RERECORD_v0.2.0.md`。
 
 **③ 发布（GitHub Pages）**
 ```bash

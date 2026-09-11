@@ -3,6 +3,7 @@
 # 但紫微锚点/cases 为 node CLI 测试（无需浏览器），仅 ?test=1 浏览器自检用 Puppeteer。
 # 就绪说明：运行目录完成 git init 并推送 ziwei-paipan 仓库后自动生效（发布链路方案 §3.1）。
 # 2026-09-11：L3 自检断言数同步 88 → 204（v0.6.x-iter 现行口径）。
+# 2026-09-11：L1 锚点按 v0.2.0 口径重录（a04/a08/a09），断言 1242 → 1139（旧计法含 a09 满跑 104）；重录后 1139/1139 全绿。
 
 name: 回归测试
 
@@ -26,7 +27,7 @@ jobs:
       - name: check-release 一致性校验
         run: bash scripts/check-release.sh
 
-      # 2. L1 锚点全字段回归（1242 断言，iztro 基准）
+      # 2. L1 锚点全字段回归（1139 断言；iztro 基准 + 2026-09-11 v0.2.0 重录）
       - name: L1 锚点回归（run_anchor_tests.js）
         run: node tests/run_anchor_tests.js
 
@@ -59,7 +60,7 @@ jobs:
             if (r.failed > 0) console.log(r.fails.join('\n'));
             await browser.close();
             if (r.total === 204 && r.passed === 204 && r.failed === 0) {
-              console.log('✅ 全部回归测试通过（check-release + 1242 + 45 + 204）');
+              console.log('✅ 全部回归测试通过（check-release + 1139 + 45 + 204）');
               process.exit(0);
             } else {
               console.error('❌ 回归测试失败');

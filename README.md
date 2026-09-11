@@ -29,4 +29,4 @@
 
 - 浏览器直接打开 `index.html`（纯本地，零依赖）。
 - 自检：`index.html?test=1` 跑全量断言（204 条）。
-- 回归：`node tests/run_anchor_tests.js`（1242 断言；⚠️ 65 条旧口径锚点待重录，L-02）+ `node tests/run_case_tests.js`（45 断言）+ `node tests/run_full_star_tests.js`（满盘档，需基准文件）。
+- 回归：`node tests/run_anchor_tests.js`（1139 断言；2026-09-11 已按 v0.2.0 口径重录，全绿）+ `node tests/run_case_tests.js`（45 断言）+ `node tests/run_full_star_tests.js`（满盘档，需基准文件）。
