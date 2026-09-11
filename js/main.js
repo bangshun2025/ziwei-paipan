@@ -470,15 +470,22 @@
         // （参考环境 干支=2字×10.5px=21px + gap3 + margin−24 → 期望偏移 0；CI Linux 回退字体 ≠ 21px）。
         // 按布局模型计算期望偏移、字体无关：行盒按内容居中 → 宫名中心 = 格中心 − (干支盒宽+gap+margin)/2；
         // 干支折行（>640 窄格）或 ≤640 档（行盒拉伸）时偏移为 0。该式在参考环境退化为原断言（±2px）。
-        var gap9 = 0, wrapped9 = false;
+        var gap9 = 0, wrapped9 = false, row9 = plain.querySelector('.p-f1');
         if (window.innerWidth > 640) {
-          gap9 = parseFloat(getComputedStyle(plain.querySelector('.p-f1')).columnGap) || 0;
+          gap9 = parseFloat(getComputedStyle(row9).columnGap) || 0;
           wrapped9 = Math.abs(gz9el.getBoundingClientRect().top - name9.getBoundingClientRect().top) > 2;
         }
         var shift9 = (window.innerWidth > 640 && !wrapped9)
           ? -(gz9el.getBoundingClientRect().width + gap9 + gzm9) / 2 : 0;
         var d1 = (nc9 - cc9) - shift9, d2 = (dc9 - nc9) + shift9;
-        T.ok(Math.abs(d1) <= 2, 'L9/#46 本命宫名中心≈格中心（±2px；模型补偿）[Δ=' + d1.toFixed(1) + ']');
+        var diag9 = ' nc-cc=' + (nc9 - cc9).toFixed(1) + ' shift=' + shift9.toFixed(1)
+          + ' gzW=' + gz9el.getBoundingClientRect().width.toFixed(1) + ' gz=' + gz9el.textContent
+          + ' gap=' + gap9 + ' mrg=' + gzm9 + ' wrap=' + wrapped9
+          + ' nameW=' + name9.getBoundingClientRect().width.toFixed(1)
+          + ' rowW=' + row9.getBoundingClientRect().width.toFixed(1)
+          + ' cellW=' + plain.getBoundingClientRect().width.toFixed(1)
+          + ' iw=' + window.innerWidth;
+        T.ok(Math.abs(d1) <= 2, 'L9/#46 本命宫名中心≈格中心（±2px；模型补偿）[Δ=' + d1.toFixed(1) + diag9 + ']');
         T.ok(Math.abs(d2) <= 2, 'L9/#46 大限宫名中心≈本命宫名中心（居中对齐 ±2px）[Δ=' + d2.toFixed(1) + ']');
       }
       document.body.removeChild(gRoot);

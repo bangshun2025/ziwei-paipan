@@ -39,6 +39,11 @@ jobs:
       - name: 安装 Puppeteer
         run: npm install puppeteer
 
+      # 4a. 中文字体（#62）：L3 像素级断言需真实 CJK 字体度量；无字体时回退度量会造成 ±2~3px 级偏差
+      - name: 安装中文字体（fonts-noto-cjk）
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+        shell: bash
+
       - name: 启动本地服务器
         run: |
           python3 -m http.server 8765 &
