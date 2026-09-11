@@ -44,7 +44,7 @@
 | 测试 | tests/ | anchors/（12 盘锚点 JSON，v0.2.0 口径）+ run_anchor_tests.js（1139）+ run_case_tests.js（45）+ tools/regen_anchors.js + cases.md + report.md | ✅ 已实现 |
 | 测评手册 | docs/TEST_全量测评手册.md | L1 锚点 1139 / L2 cases 45 / L3 自检 204 / L4 人工冒烟 分层手册（v1.0 + 2026-09-11 同步 L1/L3 计数） | ✅ 已就位 |
 | 发布 | scripts/ | check-release.sh（一致性校验）、publish-online.sh（tag→push→部署验证，--exec 前自动 .bak 备份） | ✅ 已就位（未执行） |
-| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1139 + cases 45 + Puppeteer 自检 204 | ✅ 已生效（2026-09-11 同步 1139/204） |
+| CI | .github/workflows/test.yml | push main 自动跑 check-release + 锚点 1139 + cases 45 + Puppeteer 自检 204 | ✅ 已生效（2026-09-11 同步 1139/204；L3 视口 1512×827） |
 | 复盘 | docs/RETRO_v0.1.0_复盘.md | v0.1.0 全周期复盘 + 改进项 L1-L8（供下版本 PRD 承接） | ✅ 已就位 |
 | Git 基线 | docs/GIT_v0.1.0_baseline.md | git 化现状（df05d97 已 push）+ 初始化步骤留档 + 回滚方法 | ✅ 已 git 化（2026-09-02） |
 

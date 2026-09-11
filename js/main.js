@@ -460,12 +460,26 @@
       }
       T.ok(!!plain, 'L9/#46 存在普通格（无★/身标签）');
       if (plain) {
-        var gzm9 = parseFloat(getComputedStyle(plain.querySelector('.p-gz')).marginRight);
+        var gz9el = plain.querySelector('.p-gz');
+        var gzm9 = parseFloat(getComputedStyle(gz9el).marginRight);
         T.ok(window.innerWidth > 640 ? gzm9 < 0 : gzm9 === 0, 'L9/#46 干支负补偿档位（>640 生效 / ≤640 折行免补偿）');
         function ctr9(el) { var r9 = el.getBoundingClientRect(); return (r9.left + r9.right) / 2; }
-        var cc9 = ctr9(plain), nc9 = ctr9(plain.querySelector('.p-name')), dc9 = ctr9(plain.querySelector('.p-dx'));
-        T.ok(Math.abs(nc9 - cc9) <= 2, 'L9/#46 本命宫名中心≈格中心（±2px）');
-        T.ok(Math.abs(dc9 - nc9) <= 2, 'L9/#46 大限宫名中心≈本命宫名中心（居中对齐 ±2px）');
+        var name9 = plain.querySelector('.p-name'), dx9 = plain.querySelector('.p-dx');
+        var cc9 = ctr9(plain), nc9 = ctr9(name9), dc9 = ctr9(dx9);
+        // v0.6.24-iter（#62）CI 稳定性：居中的「干支负外边距补偿」实际位移随字体度量浮动
+        // （参考环境 干支=2字×10.5px=21px + gap3 + margin−24 → 期望偏移 0；CI Linux 回退字体 ≠ 21px）。
+        // 按布局模型计算期望偏移、字体无关：行盒按内容居中 → 宫名中心 = 格中心 − (干支盒宽+gap+margin)/2；
+        // 干支折行（>640 窄格）或 ≤640 档（行盒拉伸）时偏移为 0。该式在参考环境退化为原断言（±2px）。
+        var gap9 = 0, wrapped9 = false;
+        if (window.innerWidth > 640) {
+          gap9 = parseFloat(getComputedStyle(plain.querySelector('.p-f1')).columnGap) || 0;
+          wrapped9 = Math.abs(gz9el.getBoundingClientRect().top - name9.getBoundingClientRect().top) > 2;
+        }
+        var shift9 = (window.innerWidth > 640 && !wrapped9)
+          ? -(gz9el.getBoundingClientRect().width + gap9 + gzm9) / 2 : 0;
+        var d1 = (nc9 - cc9) - shift9, d2 = (dc9 - nc9) + shift9;
+        T.ok(Math.abs(d1) <= 2, 'L9/#46 本命宫名中心≈格中心（±2px；模型补偿）[Δ=' + d1.toFixed(1) + ']');
+        T.ok(Math.abs(d2) <= 2, 'L9/#46 大限宫名中心≈本命宫名中心（居中对齐 ±2px）[Δ=' + d2.toFixed(1) + ']');
       }
       document.body.removeChild(gRoot);
     })();

@@ -52,6 +52,7 @@ jobs:
           (async () => {
             const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
             const page = await browser.newPage();
+            await page.setViewport({ width: 1512, height: 827 }); // 2026-09-11（#62）：与文档化断点一致（1512/1024/640/400），避免默认 800×600 未验证档
             await page.goto('http://localhost:8765/index.html?test=1', { waitUntil: 'networkidle0' });
             // 等待自检完成（window.__TEST_RESULT__ 出现）
             await page.waitForFunction(() => window.__TEST_RESULT__ !== undefined, { timeout: 60000 });
